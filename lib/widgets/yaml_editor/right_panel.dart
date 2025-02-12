@@ -15,12 +15,12 @@ import "package:flutter/services.dart" as s;
 
 import '../../models/drug.dart';
 import '../../models/events/event.dart';
-import '../../models/strategy_marker.dart';
+import '../../models/markers/strategy_marker.dart';
 import '../../models/strategy_parameters.dart';
 import '../../models/therapy.dart';
 import '../../providers/data_providers.dart';
 import '../../providers/ui_providers.dart';
-import '../../models/config_marker.dart';
+import '../../models/markers/config_marker.dart';
 import '../../utils/yaml_writer.dart';
 import '../yaml_editor.dart';
 
@@ -156,7 +156,7 @@ class _YamlEditorRightPanelState extends ConsumerState<YamlEditorRightPanel> {
           startingDateConfig,
           -1,
           10,
-          100,
+          50,
           true,
           false,
           false
@@ -168,7 +168,7 @@ class _YamlEditorRightPanelState extends ConsumerState<YamlEditorRightPanel> {
           endingDateConfig,
           -1,
           10,
-          100,
+          50,
           false,
           true,
           false
@@ -180,7 +180,7 @@ class _YamlEditorRightPanelState extends ConsumerState<YamlEditorRightPanel> {
           startComparisonDateConfig,
           -1,
           10,
-          -100,
+          50,
           false,
           false,
           false
@@ -189,27 +189,24 @@ class _YamlEditorRightPanelState extends ConsumerState<YamlEditorRightPanel> {
       configMarkerList.add(endingTimeMarker);
       configMarkerList.add(startingTimeMarker);
       configMarkerList.add(compareTimeMarker);
-
-      configMarkerList.sort((markerA, markerB) => markerA.x.compareTo(markerB.x));
       ref.read(configMarkerListProvider.notifier).set(configMarkerList);
 
       // Initial strategy marker
       var initialStrategyMarker = StrategyMarker(
-          startingDate,endingDate,startingDate,
+          strategyParameters,
+          therapyMap,
+          drugMap,
+          [(startingDate,-1,0)],
+          'Initial Strategy',
+          startingDate,endingDate,
           -1,
           10,
           -50,
-          'Initial Strategy',
           false,
           false,
-          false,
-          strategyParameters,
-          therapyMap,
-          drugMap
+          false
       );
       strategyMarkerList.add(initialStrategyMarker);
-
-      strategyMarkerList.sort((markerA, markerB) => markerA.x.compareTo(markerB.x));
       ref.read(strategyMarkerListProvider.notifier).set(strategyMarkerList);
 
     } catch (e) {

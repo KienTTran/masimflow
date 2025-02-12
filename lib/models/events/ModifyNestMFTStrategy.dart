@@ -149,7 +149,7 @@ class ModifyNestedMFTStrategyState extends EventState<ModifyNestedMFTStrategy> {
                     ) : SizedBox()
                   ],
                 ),
-                widget.eventForm.EventIntFormField('strategy_id_$i', widget.changes[i].strategyId),
+                widget.eventForm.EventIntFormField('strategy_id_$i'),
               ],
             widget.eventForm.editable ? Column(
               children: [

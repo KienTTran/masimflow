@@ -11,7 +11,7 @@ import 'package:yaml/yaml.dart';
 
 import '../../providers/data_providers.dart';
 import '../../providers/ui_providers.dart';
-import '../../models/config_marker.dart';
+import '../../models/markers/config_marker.dart';
 import '../../utils/yaml_writer.dart';
 import '../yaml_editor.dart';
 

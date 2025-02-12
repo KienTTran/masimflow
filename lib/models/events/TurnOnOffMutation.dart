@@ -80,24 +80,12 @@ class TurnOffMutation extends Event {
 
   @override
   void update() {
-
-    print('entries before update:');
-    entries.forEach((entry) {
-      print('date: ${entry.date}');
-    });
-
     //update entry dates based on controllers
     for (int i = 0; i < entries.length; i++) {
       final dateKey = Utils.getFormKeyID(id, 'date_${i}');
       entries[i].date =
           DateFormat('yyyy/MM/dd').parse(controllers[dateKey]!.text);
     }
-
-    print('entries after update:');
-    entries.forEach((entry) {
-      print('date: ${entry.date}');
-    });
-
   }
 
   factory TurnOffMutation.fromYaml(Map<dynamic, dynamic> yaml) {
@@ -254,24 +242,12 @@ class TurnOnMutation extends Event {
 
   @override
   void update() {
-
-    print('entries before update:');
-    entries.forEach((entry) {
-      print('date: ${entry.date}');
-    });
-
     //update entry dates based on controllers
     for (int i = 0; i < entries.length; i++) {
       final dateKey = Utils.getFormKeyID(id, 'date_${i}');
       entries[i].date =
           DateFormat('yyyy/MM/dd').parse(controllers[dateKey]!.text);
     }
-
-    print('entries after update:');
-    entries.forEach((entry) {
-      print('date: ${entry.date}');
-    });
-
   }
 
   factory TurnOnMutation.fromYaml(Map<dynamic, dynamic> yaml) {

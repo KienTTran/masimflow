@@ -5,10 +5,26 @@ import 'package:uuid/uuid.dart';
 abstract class Config {
   final String id = const Uuid().v4();
   final String name;
-  final DateTime date;
-  final String value;
-  final List<String> yamlKeyList;
-  final Map<String, TextEditingController> controllers;
+  late DateTime date;
+  late String value;
+  late List<String> yamlKeyList;
+  late Map<String, TextEditingController> controllers;
+  void updateDate(DateTime date) {
+    this.date = date;
+  }
+  void updateValue(String value) {
+    this.value = value;
+  }
+  void update(){
+    if (controllers['date'] != null) {
+      controllers['date']?.text = DateFormat('yyyy/MM/dd').format(date);
+      updateDate(date);
+    }
+    if (controllers['value'] != null) {
+      controllers['value']?.text = value;
+      updateValue(value);
+    }
+  }
 
   Config({
     required this.name,
@@ -40,6 +56,8 @@ class StartingDateConfig extends Config {
       controllers: controllers,
     );
   }
+
+
 }
 
 class EndingDateConfig extends Config {

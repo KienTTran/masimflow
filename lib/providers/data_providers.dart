@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 
 import '../models/drug.dart';
 import '../models/events/event.dart';
-import '../models/config_marker.dart';
-import '../models/event_marker.dart';
-import '../models/strategy_marker.dart';
+import '../models/markers/config_marker.dart';
+import '../models/markers/event_marker.dart';
+import '../models/markers/strategy_marker.dart';
 import '../models/strategy_parameters.dart';
 import '../models/therapy.dart';
 

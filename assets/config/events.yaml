@@ -50,9 +50,9 @@ population_events:
     info:
       - date: 2007/3/2
         strategy_id: 2
-      - date: 2007/6/2
+      - date: 2017/6/2
         strategy_id: 3
-      - date: 2007/9/2
+      - date: 2027/9/2
         strategy_id: 4
 
   - name: single_round_MDA
@@ -119,11 +119,11 @@ population_events:
           - duration: 30
             genotype_aa_sequence: '||||YY1||TTHFIMG,x||||||FNCMYRIPRPCA|1'
             number_of_cases: 3
-            start_date: 1993/6/2
+            start_date: 2003/6/2
           - duration: 40
             genotype_aa_sequence: '||||YY1||TTHFIMG,x||||||FNCMYRIPRPCA|1'
             number_of_cases: 4
-            start_date: 1994/6/2
+            start_date: 2004/6/2
 
   - name: introduce_580Y_parasites
     info:

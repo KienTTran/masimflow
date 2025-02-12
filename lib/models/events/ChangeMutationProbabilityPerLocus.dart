@@ -86,7 +86,7 @@ class ChangeMutationProbabilityPerLocusState extends EventState<ChangeMutationPr
         children: [
           widget.eventForm.EventDateFormField('date'),
           const SizedBox(height: 12),
-          widget.eventForm.EventDoubleFormField('mutation_probability_per_locus', widget.controllerValue('mutation_probability_per_locus')),
+          widget.eventForm.EventDoubleFormField('mutation_probability_per_locus'),
         ],
       ),
     );

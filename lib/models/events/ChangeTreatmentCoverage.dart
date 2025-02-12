@@ -649,10 +649,8 @@ class ChangeTreatmentCoverageState extends EventState<ChangeTreatmentCoverage> {
                                       child: Column(
                                         children: [
                                           widget.eventForm.EventDateFormField('${widget.coverages[index].id}#date', dateID: i.toString()),
-                                          widget.eventForm.EventDoubleArrayFormField('${widget.coverages[index].id}#p_treatment_under_5_by_location',
-                                              (widget.coverages[index] as SteadyTreatmentCoverage).pTreatmentUnder5ByLocation),
-                                          widget.eventForm.EventDoubleArrayFormField('${widget.coverages[index].id}#p_treatment_over_5_by_location',
-                                              (widget.coverages[index] as SteadyTreatmentCoverage).pTreatmentOver5ByLocation),
+                                          widget.eventForm.EventDoubleArrayFormField('${widget.coverages[index].id}#p_treatment_under_5_by_location'),
+                                          widget.eventForm.EventDoubleArrayFormField('${widget.coverages[index].id}#p_treatment_over_5_by_location'),
                                         ],
                                       ),
                                     ),
@@ -663,8 +661,7 @@ class ChangeTreatmentCoverageState extends EventState<ChangeTreatmentCoverage> {
                                       child: Column(
                                         children: [
                                           widget.eventForm.EventDateFormField('${widget.coverages[index].id}#date', dateID: i.toString()),
-                                          widget.eventForm.EventDoubleFormField('${widget.coverages[index].id}#annual_inflation_rate',
-                                              (widget.coverages[index] as InflatedTreatmentCoverage).annualInflationRate),
+                                          widget.eventForm.EventDoubleFormField('${widget.coverages[index].id}#annual_inflation_rate'),
                                         ],
                                       ),
                                     ),
@@ -675,10 +672,8 @@ class ChangeTreatmentCoverageState extends EventState<ChangeTreatmentCoverage> {
                                       children: [
                                         widget.eventForm.EventDateFormFieldCustomLabel('${widget.coverages[index].id}#date', 'date from', dateID: '0'),
                                         widget.eventForm.EventDateFormFieldCustomLabel('${widget.coverages[index].id}#date', 'date to', dateID: '1'),
-                                        widget.eventForm.EventDoubleArrayFormField('${widget.coverages[index].id}#p_treatment_under_5_by_location_to',
-                                            (widget.coverages[index] as LinearTreatmentCoverage).pTreatmentUnder5ByLocationTo),
-                                        widget.eventForm.EventDoubleArrayFormField('${widget.coverages[index].id}#p_treatment_over_5_by_location_to',
-                                            (widget.coverages[index] as LinearTreatmentCoverage).pTreatmentOver5ByLocationTo),
+                                        widget.eventForm.EventDoubleArrayFormField('${widget.coverages[index].id}#p_treatment_under_5_by_location_to'),
+                                        widget.eventForm.EventDoubleArrayFormField('${widget.coverages[index].id}#p_treatment_over_5_by_location_to'),
                                       ],
                                     ),
                                   ),

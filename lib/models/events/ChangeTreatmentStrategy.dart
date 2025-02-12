@@ -156,8 +156,7 @@ class ChangeTreatmentStrategyState extends EventState<ChangeTreatmentStrategy> {
                     ),
                     SizedBox(
                       width: widget.eventForm.width * 0.9 * 0.75,
-                      child: widget.eventForm.EventIntFormField('strategy_id_$i',
-                          widget.controllers[Utils.getFormKeyID(widget.id, 'strategy_id_$i')]!.text),
+                      child: widget.eventForm.EventIntFormField('strategy_id_$i'),
                     )
                   ]
               ],

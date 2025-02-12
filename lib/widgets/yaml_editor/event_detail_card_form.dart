@@ -28,13 +28,13 @@ class EventDetailCardForm {
         controller: event.controllers[dateKey],
         onSaved: (value) {
           event.controllers[dateKey]!.text = value!;
+          event.controllers[dateKey]!.value = TextEditingValue(text: value);
         },
         validator: (value) {
-          event.controllers[dateKey]!.text = value;
           return FormUtil.validateDate(context, value);
         },
       ),
-    ) : Text('$dateKey : ${event.controllers[dateKey]!.text}');
+    ) : Text('${Utils.getControllerKeyLabel(dateKey)}: ${event.controllers[dateKey]!.text}');
   }
 
   Widget EventDateFormFieldCustomLabel(String controllerKey, String label, {String dateID = ''}){
@@ -50,13 +50,13 @@ class EventDetailCardForm {
         controller: event.controllers[dateKey],
         onSaved: (value) {
           event.controllers[dateKey]!.text = value!;
+          event.controllers[dateKey]!.value = TextEditingValue(text: value);
         },
         validator: (value) {
-          event.controllers[dateKey]!.text = value;
           return FormUtil.validateDate(context, value);
         },
       ),
-    ) : Text('$dateKey : ${event.controllers[dateKey]!.text}');
+    ) : Text('$label: ${event.controllers[dateKey]!.text}');
   }
 
   Widget EventDateFormFieldWithRemoval(String controllerKey, {String dateID = ''}){
@@ -80,16 +80,16 @@ class EventDetailCardForm {
               onSaved: (value) {
                 // print('onSaved');
                 event.controllers[dateKey]!.text = value!;
+                event.controllers[dateKey]!.value = TextEditingValue(text: value);
               },
               validator: (value) {
-                event.controllers[dateKey]!.text = value;
                 return FormUtil.validateDate(context, value);
               },
             ),
           ),
         ],
       ),
-    ) : Text('$dateKey : ${event.controllers[dateKey]!.text}');
+    ) : Text('${Utils.getControllerKeyLabel(dateKey)}: ${event.controllers[dateKey]!.text}');
   }
 
   Widget EventBoolFormField(String controllerKey, String boolText){
@@ -103,16 +103,17 @@ class EventDetailCardForm {
         label: Text(Utils.getControllerKeyLabel(controllerKey)),
         onChanged: (value) {
           event.controllers[controllerKeyWithID]!.text = value.toString();
+          event.controllers[controllerKeyWithID]!.value = TextEditingValue(text: value.toString());
         },
         onSaved: (value) {
           event.controllers[controllerKeyWithID]!.text = value.toString();
         },
         inputSublabel: Text(boolText),
       ),
-    ) : Text('$controllerKeyWithID : ${event.controllers[controllerKeyWithID]!.text}');
+    ) : Text('${Utils.getControllerKeyLabel(controllerKey)}: ${event.controllers[controllerKeyWithID]!.text}');
   }
 
-  Widget EventIntFormField(String controllerKey, dynamic value,{int lower = 0, int upper = 100}){
+  Widget EventIntFormField(String controllerKey, {int lower = 0, int upper = 100}){
     String controllerKeyWithID = Utils.getFormKeyID(event.id, controllerKey);
     return editable ? SizedBox(
       width: width*0.9,
@@ -123,16 +124,16 @@ class EventDetailCardForm {
         controller: event.controllers[controllerKeyWithID],
         onSaved: (value) {
           event.controllers[controllerKeyWithID]!.text = value!;
+          event.controllers[controllerKeyWithID]!.value = TextEditingValue(text: value);
         },
         validator: (value) {
-          event.controllers[controllerKeyWithID]!.text = value;
           return FormUtil.validateIntRange(context, lower, upper, value);
         },
       ),
-    ) : Text('$controllerKeyWithID : $value');
+    ) : Text('${Utils.getControllerKeyLabel(controllerKey)}: ${event.controllers[controllerKeyWithID]!.text}');
   }
 
-  Widget EventDoubleFormField(String controllerKey, dynamic value, {double lower = 0.0, double upper = 1.0}){
+  Widget EventDoubleFormField(String controllerKey, {double lower = 0.0, double upper = 1.0}){
     String controllerKeyWithID = Utils.getFormKeyID(event.id, controllerKey);
     return editable ? SizedBox(
       width: width*0.9,
@@ -143,16 +144,16 @@ class EventDetailCardForm {
         controller: event.controllers[controllerKeyWithID],
         onSaved: (value) {
           event.controllers[controllerKeyWithID]!.text = value!;
+          event.controllers[controllerKeyWithID]!.value = TextEditingValue(text: value);
         },
         validator: (value) {
-          event.controllers[controllerKeyWithID]!.text = value;
           return FormUtil.validateDoubleRange(context, lower, upper, value);
         },
       ),
-    ) : Text('$controllerKeyWithID : $value');
+    ) : Text('${Utils.getControllerKeyLabel(controllerKey)}: ${event.controllers[controllerKeyWithID]!.text}');
   }
 
-  Widget EventGenotypeFormField(String controllerKey, dynamic value, {double lower = 0.0, double upper = 1.0}){
+  Widget EventGenotypeFormField(String controllerKey, {double lower = 0.0, double upper = 1.0}){
     String controllerKeyWithID = Utils.getFormKeyID(event.id, controllerKey);
     return editable ? SizedBox(
       width: width*0.9,
@@ -163,16 +164,16 @@ class EventDetailCardForm {
         controller: event.controllers[controllerKeyWithID],
         onSaved: (value) {
           event.controllers[controllerKeyWithID]!.text = value!;
+          event.controllers[controllerKeyWithID]!.value = TextEditingValue(text: value);
         },
         validator: (value) {
-          event.controllers[controllerKeyWithID]!.text = value;
           return FormUtil.validateGenotype(context, value);
         },
       ),
-    ) : Text('$controllerKeyWithID : $value');
+    ) : Text('${Utils.getControllerKeyLabel(controllerKey)}: ${event.controllers[controllerKeyWithID]!.text}');
   }
 
-  Widget EventDoubleArrayFormField(String controllerKey, dynamic value){
+  Widget EventDoubleArrayFormField(String controllerKey){
     String controllerKeyWithID = Utils.getFormKeyID(event.id, controllerKey);
     return editable ? SizedBox(
       width: width*0.9,
@@ -183,13 +184,12 @@ class EventDetailCardForm {
         controller: event.controllers[controllerKeyWithID],
         onSaved: (value) {
           event.controllers[controllerKeyWithID]!.text = value!;
+          event.controllers[controllerKeyWithID]!.value = TextEditingValue(text: value);
         },
         validator: (value) {
-          event.controllers[controllerKeyWithID]!.text = value;
           return FormUtil.validateDoubleArrayRange(context, 0.0, 1.0, value);
         },
       ),
-    ) : Text('$controllerKeyWithID : $value');
+    ) : Text('${Utils.getControllerKeyLabel(controllerKey)}: ${event.controllers[controllerKeyWithID]!.text}');
   }
-
 }

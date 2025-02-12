@@ -10,10 +10,10 @@ import 'package:yaml/yaml.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import '../../models/event_marker.dart';
-import '../../models/marker.dart';
+import '../../models/markers/event_marker.dart';
+import '../../models/markers/marker.dart';
 import '../../providers/ui_providers.dart';
-import '../../models/config_marker.dart';
+import '../../models/markers/config_marker.dart';
 import '../../utils/scrollable_widget.dart';
 import '../../utils/utils.dart';
 import 'event_detail_card.dart';
@@ -58,13 +58,17 @@ class _YamlEditorBottomPanelState extends ConsumerState<YamlEditorBottomPanel> {
       marker.setEndingDate(marker.endingDate);
       if(marker is ConfigMarker){
         marker.setDate(marker.config.date);
+        marker.updateX();
       }
       if(marker is EventMarker){
-        marker.setDate(Utils.getEarliestDate(marker.event.dates()));
+        marker.setDates(marker.event.dates());
+        marker.updateXs();
       }
-      marker.updateX();
     }
-    allMarkers.sort((a, b) => a.x.compareTo(b.x));
+    allMarkers.sort((a, b) => a.getSmallestX().compareTo(b.getSmallestX()));
+    allMarkers.asMap().forEach((index, marker) {
+      marker.updateIndex(allMarkers.length,index);
+    });
 
     if(updateUI){
       allMarkers.clear();
@@ -77,11 +81,12 @@ class _YamlEditorBottomPanelState extends ConsumerState<YamlEditorBottomPanel> {
         marker.setEndingDate(marker.endingDate);
         if(marker is ConfigMarker){
           marker.setDate(marker.config.date);
+          marker.updateX();
         }
         if(marker is EventMarker){
-          marker.setDate(Utils.getEarliestDate(marker.event.dates()));
+          marker.setDates(marker.event.dates());
+          marker.updateXs();
         }
-        marker.updateX();
         // if(marker is ConfigMarker){
         //   print('configMarker ${marker.id} ${marker.config.name} ${marker.x}');
         // }
@@ -89,7 +94,10 @@ class _YamlEditorBottomPanelState extends ConsumerState<YamlEditorBottomPanel> {
         //   print('before sort eventMarker ${marker.event.id} ${marker.event.name} ${marker.event.controllers.keys} ${marker.event.dates} ${marker.x}');
         // }
       }
-      allMarkers.sort((a, b) => a.x.compareTo(b.x));
+      allMarkers.sort((a, b) => a.getSmallestX().compareTo(b.getSmallestX()));
+      allMarkers.asMap().forEach((index, marker) {
+        marker.updateIndex(allMarkers.length,index);
+      });
       // for(Marker marker in allMarkers){
       //   if(marker is EventMarker){
       //     print('after sort eventMarker ${marker.event.id} ${marker.event.name} ${marker.event.controllers.values} ${marker.x}');
@@ -187,7 +195,7 @@ class _YamlEditorBottomPanelState extends ConsumerState<YamlEditorBottomPanel> {
                   border: Border(
                     left: BorderSide(
                       color: marker.color,
-                      width: 8.0,
+                      width: 20.0,
                     ),
                   ),
                 ),
@@ -288,37 +296,56 @@ class _YamlEditorBottomPanelState extends ConsumerState<YamlEditorBottomPanel> {
                   icon: const Icon(Icons.save),
                   size: ShadButtonSize.sm,
                   onPressed: () {
-                    DateTime uDate = marker.config.controllers['date']!.text.isEmpty
-                        ? DateTime.now()
-                        : DateFormat('yyyy/MM/dd').parse(marker.config.controllers['date']!.text);
+                    DateTime uDate = DateTime.now();
+                    try{
+                      uDate = marker.config.controllers['date']!.text.isEmpty
+                          ? DateTime.now()
+                          : DateFormat('yyyy/MM/dd').parse(marker.config.controllers['date']!.text);
+                    }
+                    catch(e){
+                      showShadDialog(context: context, builder: (context){
+                        return ShadDialog(
+                          title: const Text('Invalid date format'),
+                          child: const Text('Please enter a valid date in the format yyyy/MM/dd'),
+                          actions: [
+                            ShadButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: const Text('OK'),
+                            ),
+                          ],
+                        );
+                      });
+                      marker.config.controllers['date']!.text = DateFormat('yyyy/MM/dd').format(marker.config.date);
+                      return;
+                    }
                     final startingDate = ref.read(dateMapProvider.notifier).getDate('starting_date');
                     final endingDate = ref.read(dateMapProvider.notifier).getDate('ending_date');
-                    if(!FormUtil.checkValidDate(context, uDate, startingDate!, endingDate!)){
+                    if(!FormUtil.checkValidDate(context, uDate, startingDate!, endingDate!, isStart: marker.isStart, isEnd: marker.isEnd)){
                       marker.config.controllers['date']!.text = DateFormat('yyyy/MM/dd').format(marker.config.date);
                       return;
                     }
 
                     if(formKey.currentState!.validate(focusOnInvalid: true)) {
-                      print('update ${marker.config.yamlKeyList} ${DateFormat('yyyy/MM/dd').format(uDate)}');
                       formKey.currentState!.save();
+                      marker.config.updateDate(uDate);
+                      marker.config.updateValue(marker.config.controllers['date']!.text);
                       ref.read(configYamlFileProvider.notifier).updateYamlValueByKeyList(
                           marker.config.yamlKeyList,
                           DateFormat('yyyy/MM/dd').format(uDate));
-                      marker.setDate(uDate);
                       if(marker.isStart){
                         marker.setStartingDate(uDate);
-                        print('set starting date');
                         ref.read(dateMapProvider.notifier).setDate('starting_date', uDate);
                       }
                       if(marker.isEnd){
                         marker.setEndingDate(uDate);
-                        print('set ending date');
                         ref.read(dateMapProvider.notifier).setDate('ending_date', uDate);
                       }
+                      marker.setDate(uDate);
+                      marker.updateX();
                       for(Marker m in allMarkers){
                         m.setStartingDate(marker.startingDate);
                         m.setEndingDate(marker.endingDate);
-                        m.updateX();
+                        m.updateXs();
                       }
                       ref.read(updateUIProvider.notifier).set(true);
                     }

@@ -28,7 +28,6 @@ class EventWidgetRender extends StatefulWidget {
   EventWidgetRenderState createState() => EventWidgetRenderState();
 }
 
-// FooState
 class EventWidgetRenderState<T extends EventWidgetRender> extends State<T> {
   // Override build
   @override
@@ -37,7 +36,6 @@ class EventWidgetRenderState<T extends EventWidgetRender> extends State<T> {
   }
 }
 
-// Abstract BarState
 abstract class EventState<T extends Event> extends EventWidgetRenderState<T> {
   @override
   Widget build(BuildContext context); // Force subclasses to implement build
@@ -77,6 +75,16 @@ abstract class Event extends EventWidgetRender {
     for (var key in controllers.keys) {
       if (key.contains('value')) {
         values.add(controllers[key]!.text);
+      }
+    }
+    return values;
+  }
+
+  List<dynamic> valuesByKey(String key) {
+    List<dynamic> values = [];
+    for (var cKey in controllers.keys) {
+      if (cKey.contains(key)) {
+        values.add(controllers[cKey]!.text);
       }
     }
     return values;

@@ -139,7 +139,7 @@ class IntroducePlas2ParasitesState extends EventState<IntroducePlas2Parasites> {
                   children: [
                     SizedBox(
                       width: widget.eventForm.width * 0.9 * 0.75,
-                      child: widget.eventForm.EventIntFormField('location_$i',widget.introductions[i].location),
+                      child: widget.eventForm.EventIntFormField('location_$i'),
                     ),
                     (widget.eventForm.editable && i != 0 && i == widget.dates().length - 1) ? SizedBox(
                       // width: widget.eventForm.width * 0.9 * 0.15,
@@ -156,7 +156,7 @@ class IntroducePlas2ParasitesState extends EventState<IntroducePlas2Parasites> {
                   ],
                 ),
                 widget.eventForm.EventDateFormField('date_$i'),
-                widget.eventForm.EventDoubleFormField('fraction_$i', widget.introductions[i].fraction),
+                widget.eventForm.EventDoubleFormField('fraction_$i'),
               ],
             widget.eventForm.editable ? Column(
               children: [

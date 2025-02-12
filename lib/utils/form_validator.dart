@@ -82,49 +82,77 @@ class FormUtil {
     return null;
   }
 
-  static bool checkValidDate(BuildContext context, DateTime date, DateTime start, DateTime end){
-    if(date.isBefore(start)){
-      showShadDialog(
-          context: context,
-          builder: (context){
-            return ShadDialog(
-              title: const Text('Invalid Date'),
-              actions: [
-                ShadButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('OK'),
-                )
-              ],
-              child: const Text('Date cannot be before starting date.'),
-            );
-          }
-      );
-      return false;
+  static bool checkValidDate(BuildContext context, DateTime date, DateTime start, DateTime end, {bool isStart = false, bool isEnd = false}) {
+    if(isStart){
+      if(date.isAfter(end)){
+        showShadDialog(
+            context: context,
+            builder: (context){
+              return ShadDialog(
+                title: const Text('Invalid Date'),
+                actions: [
+                  ShadButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('OK'),
+                  )
+                ],
+                child: const Text('Date cannot be after starting date. Extend ending date first.'),
+              );
+            }
+        );
+        return false;
+      }
+      return true;
     }
-    else if(date.isAfter(end)){
-      showShadDialog(
-          context: context,
-          builder: (context){
-            return ShadDialog(
-              title: const Text('Invalid Date'),
-              actions: [
-                ShadButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('OK'),
-                )
-              ],
-              child: const Text('Date cannot be after ending date.'),
-            );
-          }
-      );
-      return false;
+    else if(isEnd){
+      if(date.isBefore(start)){
+        showShadDialog(
+            context: context,
+            builder: (context){
+              return ShadDialog(
+                title: const Text('Invalid Date'),
+                actions: [
+                  ShadButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('OK'),
+                  )
+                ],
+                child: const Text('Date cannot be before ending date. Extend starting date first.'),
+              );
+            }
+        );
+        return false;
+      }
+      return true;
     }
     else{
-      return true;
+      if(date.isAfter(end) || date.isBefore(start)){
+        showShadDialog(
+            context: context,
+            builder: (context){
+              return ShadDialog(
+                title: const Text('Invalid Date'),
+                actions: [
+                  ShadButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('OK'),
+                  )
+                ],
+                child: const Text('Date cannot be before starting date or after ending date.'),
+              );
+            }
+        );
+        return false;
+      }
+      else{
+        return true;
+      }
     }
   }
 }

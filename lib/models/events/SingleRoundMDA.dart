@@ -158,8 +158,8 @@ class SingleRoundMDAState extends EventState<SingleRoundMDA> {
                     ) : SizedBox()
                   ],
                 ),
-                widget.eventForm.EventDoubleArrayFormField('fraction_population_targeted_$i', widget.mdaDetails[i].fractionPopulationTargeted),
-                widget.eventForm.EventIntFormField('days_to_complete_all_treatments_$i', widget.mdaDetails[i].daysToCompleteAllTreatments),
+                widget.eventForm.EventDoubleArrayFormField('fraction_population_targeted_$i'),
+                widget.eventForm.EventIntFormField('days_to_complete_all_treatments_$i'),
               ],
             widget.eventForm.editable ? Column(
               children: [

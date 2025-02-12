@@ -1,9 +1,53 @@
 import 'dart:math';
-import 'package:flutter/cupertino.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter/material.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:uuid/uuid.dart';
 
 class Utils {
+
+  static void drawMarker(double x, double y, double dy, double radius, String text, Paint paint, Canvas canvas, Size size, {color = Colors.black}) {
+    // canvas.drawLine(Offset(x, y - radius), Offset(x, y - dy + radius), paint);
+    // canvas.drawCircle(Offset(x, y), radius, paint);
+    // canvas.drawCircle(Offset(x, y - dy), radius, paint);
+    canvas.drawLine(Offset(x, y), Offset(x, y - dy), paint);
+    canvas.drawRect(Rect.fromCenter(center: Offset(x,y), width: radius, height: radius), paint);
+    canvas.drawRect(Rect.fromCenter(center: Offset(x,y-dy), width: radius, height: radius), paint);
+    drawText(x, y - dy, dy < 0 ? -(radius*2) : radius*4, text, canvas, size, color: color);
+  }
+
+  static void drawText(double x, double y, double dy, String text, Canvas canvas, Size size,{color = Colors.black, maxWidth = 150}) {
+    var textStyle = TextStyle(
+      color: color,
+      fontSize: 16,
+      overflow: TextOverflow.ellipsis,
+      // background: Paint()
+      //   ..color = color
+      //   ..strokeWidth = 2
+      //   ..strokeJoin = StrokeJoin.round
+      //   ..strokeCap = StrokeCap.round
+      //   ..style = PaintingStyle.fill,
+    );
+    final textSpan = TextSpan(
+      text: text,
+      style: textStyle,
+    );
+    final textPainter = TextPainter(
+      text: textSpan,
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.center,
+      maxLines: 3,
+      ellipsis: '...',
+    );
+    textPainter.layout(
+      minWidth: 0,
+      maxWidth: maxWidth,
+    );
+    // textPainter.paint(canvas,
+    //     Offset((size.width - textPainter.width) / 2,(size.height - textPainter.height) / 2));
+    textPainter.paint(canvas, Offset(x-textPainter.width/2, y - dy));
+    // textPainter.paint(canvas, Offset(x, y - dy));
+  }
+
   /// Returns a random date between [start] and [end] formatted as specified by [format].
   static String getRandomDateInRange(DateTime start, DateTime end, String format) {
     // Convert the start and end dates to milliseconds since epoch.
@@ -35,17 +79,6 @@ class Utils {
     }
     return keyParts.last.replaceAll('_', ' ');
   }
-
-  // static (String newID, Map<String,TextEditingController>) getNewFormControllers(String oldID, Map<String, TextEditingController> controllers){
-  //   String newID = Uuid().v4();
-  //   Map<String, TextEditingController> newControllers = {};
-  //   for(int i = 0; i < controllers.length; i++){
-  //     String oldControllerKey = controllers.keys.elementAt(i);
-  //     String newControllerKey = oldControllerKey.replaceAll(oldID, newID);
-  //     newControllers[newControllerKey] = TextEditingController(text: controllers[oldControllerKey]?.text);
-  //   }
-  //   return (newID,newControllers);
-  // }
 
   static (String, Map<String, TextEditingController>) getNewFormControllers(
       String oldId, Map<String, TextEditingController> oldControllers) {

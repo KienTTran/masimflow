@@ -211,7 +211,7 @@ class IntroduceParasitesPeriodicallyState extends EventState<IntroduceParasitesP
                   children: [
                     SizedBox(
                       width: widget.eventForm.width * 0.9 * 0.75,
-                      child: widget.eventForm.EventIntFormField('location_$i', widget.introductions[i].location),
+                      child: widget.eventForm.EventIntFormField('location_$i'),
                     ),
                     (widget.eventForm.editable && (i > 0)) ? SizedBox(
                       // width: widget.eventForm.width * 0.9 * 0.15,
@@ -240,7 +240,7 @@ class IntroduceParasitesPeriodicallyState extends EventState<IntroduceParasitesP
                           children: [
                             SizedBox(
                               width: widget.eventForm.width * 0.9 * 0.75,
-                              child: widget.eventForm.EventIntFormField('duration_${i}_$j', widget.introductions[i].parasiteInfo[j].duration),
+                              child: widget.eventForm.EventIntFormField('duration_${i}_$j'),
                             ),
                             (widget.eventForm.editable && (j != 0) && (j == widget.introductions[i].parasiteInfo.length - 1)) ? SizedBox(
                                 child: ShadButton.ghost(
@@ -258,8 +258,8 @@ class IntroduceParasitesPeriodicallyState extends EventState<IntroduceParasitesP
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            widget.eventForm.EventGenotypeFormField('genotype_aa_sequence_${i}_$j', widget.introductions[i].parasiteInfo[j].genotypeAaSequence),
-                            widget.eventForm.EventIntFormField('number_of_cases_${i}_$j', widget.introductions[i].parasiteInfo[j].numberOfCases),
+                            widget.eventForm.EventGenotypeFormField('genotype_aa_sequence_${i}_$j'),
+                            widget.eventForm.EventIntFormField('number_of_cases_${i}_$j'),
                             widget.eventForm.EventDateFormField('start_date_${i}_$j'),
                             (widget.eventForm.editable  && (j == widget.introductions[i].parasiteInfo.length - 1)) ? Column(
                               mainAxisAlignment: MainAxisAlignment.start,

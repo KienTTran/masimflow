@@ -139,7 +139,7 @@ class IntroduceLumefantrineMutantParasitesState extends EventState<IntroduceLume
                   children: [
                     SizedBox(
                       width: widget.eventForm.width*0.9*0.75,
-                      child: widget.eventForm.EventIntFormField('location_$i', widget.parasiteInfo[i].location),
+                      child: widget.eventForm.EventIntFormField('location_$i'),
                     ),
                     SizedBox(
                       child: (widget.eventForm.editable && i != 0 && i == widget.dates().length - 1) ? SizedBox(
@@ -164,7 +164,7 @@ class IntroduceLumefantrineMutantParasitesState extends EventState<IntroduceLume
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       widget.eventForm.EventDateFormField('date_$i'),
-                      widget.eventForm.EventDoubleFormField('fraction_$i', widget.parasiteInfo[i].fraction),
+                      widget.eventForm.EventDoubleFormField('fraction_$i'),
                     ],
                   ),
                 )

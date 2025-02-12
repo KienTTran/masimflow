@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:masimflow/models/event_marker.dart';
-import 'package:masimflow/models/strategy_marker.dart';
+import 'package:masimflow/models/markers/strategy_marker.dart';
 import 'package:masimflow/providers/data_providers.dart';
-import 'package:shadcn_ui/shadcn_ui.dart';
-import 'package:uuid/uuid.dart';
-import 'package:yaml/yaml.dart';
 
+import '../../models/markers/event_marker.dart';
 import '../../providers/ui_providers.dart';
-import '../../models/config_marker.dart';
+import '../../models/markers/config_marker.dart';
 
 class YamlEditorCenterPanel extends ConsumerStatefulWidget {
   final width;
@@ -33,33 +30,6 @@ class _YamlEditorCenterPanelState extends ConsumerState<YamlEditorCenterPanel> {
   bool isDown = false;
   double x = 0.0;
   double y = 0.0;
-
-  // util function
-  bool isInObject(ConfigMarker marker, double x, double y) {
-    return (x - marker.x).abs() < 21 && (y - marker.y).abs() < 10;
-  }
-  // event handler
-  void _down(DragStartDetails details, List<ConfigMarker> ConfigMarkerList) {
-    setState(() {
-      isDown = true;
-      x = details.localPosition.dx;
-      y = details.localPosition.dy;
-    });
-  }
-  void _up() {
-    setState(() {
-      isDown = false;
-    });
-  }
-  void _move(DragUpdateDetails details) {
-    if (isDown) {
-      setState(() {
-        x += details.delta.dx;
-        y += details.delta.dy;
-        // print('x: $x, y: $y');
-      });
-    }
-  }
 
   @override
   void initState() {
@@ -87,29 +57,18 @@ class _YamlEditorCenterPanelState extends ConsumerState<YamlEditorCenterPanel> {
       return Container();
     }
 
-    return GestureDetector(
-      onPanStart: (details) {
-        _down(details, configMarkerList);
-      },
-      onPanEnd: (details) {
-        _up();
-      },
-      onPanUpdate: (details) {
-        _move(details);
-      },
-      child: Container(
-          width: widget.width,
-          height: MediaQuery.of(context).size.height,
-          color: Colors.transparent,
-          child: CustomPaint(
-            painter: ShapePainter(
-                ConfigMarkerList: configMarkerList,
-                strategyMarkerList: strategyMarkerList,
-                EventMarkerList: eventMarkerList,
-                lowerX: lowerX,
-                upperX: upperX,
-            ),
-          ),
+    return Container(
+      width: widget.width,
+      height: MediaQuery.of(context).size.height,
+      color: Colors.transparent,
+      child: CustomPaint(
+        painter: ShapePainter(
+          ConfigMarkerList: configMarkerList,
+          strategyMarkerList: strategyMarkerList,
+          EventMarkerList: eventMarkerList,
+          lowerX: lowerX,
+          upperX: upperX,
+        ),
       ),
     );
   }
@@ -133,20 +92,20 @@ class ShapePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
 
-    final ConfigMarkerLineY = size.height / 4;
+    final ConfigMarkerLineY = size.height / 8;
 
     canvas.drawLine(
         Offset(lowerX,ConfigMarkerLineY),
         Offset(upperX,ConfigMarkerLineY),
         Paint()..color = Colors.black);
-    canvas.drawCircle(
-        Offset(lowerX,ConfigMarkerLineY),
-        10,
-        Paint()..color = Colors.red);
-    canvas.drawCircle(
-        Offset(upperX,ConfigMarkerLineY),
-        10,
-        Paint()..color = Colors.red);
+    // canvas.drawCircle(
+    //     Offset(lowerX,ConfigMarkerLineY),
+    //     10,
+    //     Paint()..color = Colors.red);
+    // canvas.drawCircle(
+    //     Offset(upperX,ConfigMarkerLineY),
+    //     10,
+    //     Paint()..color = Colors.red);
 
     for(final marker in ConfigMarkerList) {
       marker.lowerX = lowerX;
@@ -162,7 +121,7 @@ class ShapePainter extends CustomPainter {
       marker.paint(canvas, size);
     }
 
-    final strategyMarkerLineY = size.height / 2;
+    final strategyMarkerLineY = size.height * 0.75;
 
     canvas.drawLine(
         Offset(lowerX,strategyMarkerLineY),
@@ -174,6 +133,15 @@ class ShapePainter extends CustomPainter {
       marker.upperX = upperX;
       marker.defaultY = strategyMarkerLineY;
       marker.paint(canvas, size);
+    }
+
+    for(final marker in EventMarkerList) {
+      if(marker.strategyMarker.strategyIdDateXMapList.isNotEmpty){
+        marker.strategyMarker.lowerX = lowerX;
+        marker.strategyMarker.upperX = upperX;
+        marker.strategyMarker.defaultY = ConfigMarkerLineY;
+        marker.strategyMarker.paint(canvas, size);
+      }
     }
   }
 

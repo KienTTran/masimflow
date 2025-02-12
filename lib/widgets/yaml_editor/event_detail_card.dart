@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:masimflow/models/markers/strategy_marker.dart';
 import 'package:masimflow/providers/ui_providers.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import '../../models/events/event.dart';
-import '../../models/event_marker.dart';
+import '../../models/markers/event_marker.dart';
 import '../../providers/data_providers.dart';
 import '../../utils/form_validator.dart';
+import '../../utils/utils.dart';
 import 'event_detail_card_form.dart';
 
 class EventDetailCard extends ConsumerStatefulWidget {
@@ -71,7 +73,7 @@ class _EventDetailCardState extends ConsumerState<EventDetailCard> {
                   widget.isUpdate ? ShadButton(
                       onPressed: () {
 
-                        if(formKey.currentState!.validate(focusOnInvalid: false)){
+                        if(formKey.currentState!.validate(focusOnInvalid: true)){
                           // print('valid');
                         }
                         else{
@@ -113,7 +115,18 @@ class _EventDetailCardState extends ConsumerState<EventDetailCard> {
                           for(var i = 0; i < eventMarkerList.length; i++){
                             if(eventMarkerList[i].event.id == defaultEventDetail.id){
                               eventMarkerList[i].event = defaultEventDetail;
-                              eventMarkerList[i].setDate(defaultEventDetail.dates().first);
+                              eventMarkerList[i].setDates(defaultEventDetail.dates());
+                              if(eventMarkerList[i].event.name.contains('strategy')){
+                                List<DateTime> dates = eventMarkerList[i].event.dates();
+                                List<dynamic> strategyIds = eventMarkerList[i].event.valuesByKey('strategy_id');
+                                StrategyMarker newStrategyMarker = eventMarkerList[i].strategyMarker.copy();
+                                newStrategyMarker.strategyIdDateXMapList.clear();
+                                for(var i = 0; i < dates.length; i++){
+                                  newStrategyMarker.strategyIdDateXMapList.add((dates[i],int.parse(strategyIds[i]),0));
+                                }
+                                newStrategyMarker.updateX();
+                                eventMarkerList[i].strategyMarker = newStrategyMarker;
+                              }
                               break;
                             }
                           }
@@ -128,7 +141,7 @@ class _EventDetailCardState extends ConsumerState<EventDetailCard> {
                   ) : ShadButton(
                       onPressed: () {
 
-                        if(formKey.currentState!.validate(focusOnInvalid: false)){
+                        if(formKey.currentState!.validate(focusOnInvalid: true)){
                           // print('valid');
                         }
                         else{
@@ -179,12 +192,20 @@ class _EventDetailCardState extends ConsumerState<EventDetailCard> {
                               startingDate!,endingDate!,
                               -1,
                               10,
-                              -50,
-                              newEvent.name,
+                              -500,
                               false
                           );
-
-                          // print('new event ${newEvent.id} ${newEvent.controllers.keys} ${newEvent.controllers.values} ${newEvent.dates}');
+                          StrategyMarker newStrategyMarker = ref.read(strategyMarkerListProvider.notifier).get().first.copy();
+                          newStrategyMarker.strategyIdDateXMapList.clear();
+                          if(newEvent.name.contains('strategy')){
+                            List<DateTime> dates = newEvent.dates();
+                            List<dynamic> strategyIds = newEvent.valuesByKey('strategy_id');
+                            for(var i = 0; i < dates.length; i++){
+                              newStrategyMarker.strategyIdDateXMapList.add((dates[i],int.parse(strategyIds[i]),0));
+                            }
+                            newStrategyMarker.updateX();
+                          }
+                          newEventMarker.strategyMarker = newStrategyMarker;
 
                           ref.read(eventDisplayMapProvider.notifier).setEvent(newEvent.id,newEvent);
                           ref.read(eventMarkerListProvider.notifier).add(newEventMarker);
@@ -242,247 +263,6 @@ class _EventDetailCardState extends ConsumerState<EventDetailCard> {
     return Column(
       children: [event],
     );
-
-    // else if (event is ChangeTreatmentStrategy) {
-    //   return Column(
-    //     crossAxisAlignment: CrossAxisAlignment.start,
-    //     children: [
-    //       for (final strategy in defaultEventDetail.changes)
-    //         Column(
-    //           crossAxisAlignment: CrossAxisAlignment.start,
-    //           children: [
-    //             editableText(
-    //               "Date",
-    //               DateFormat('yyyy/MM/dd').format(startingDate),
-    //               editable,
-    //             ),
-    //             editableText("Strategy ID", strategy.strategyId.toString(), editable),
-    //             const Divider(),
-    //           ],
-    //         ),
-    //     ],
-    //   );
-    // } else if (event is ModifyNestedMftStrategy) {
-    //   return Column(
-    //     crossAxisAlignment: CrossAxisAlignment.start,
-    //     children: [
-    //       for (final mda in defaultEventDetail.entries)
-    //         Column(
-    //           crossAxisAlignment: CrossAxisAlignment.start,
-    //           children: [
-    //             editableText(
-    //               "Date",
-    //               DateFormat('yyyy/MM/dd').format(startingDate),
-    //               editable,
-    //             ),
-    //             editableText("Strategy ID", mda.strategyId.toString(), editable),
-    //             const Divider(),
-    //           ],
-    //         ),
-    //     ],
-    //   );
-    // } else if (event is SingleRoundMDA) {
-    //   return Column(
-    //     crossAxisAlignment: CrossAxisAlignment.start,
-    //     children: [
-    //       for (final mda in defaultEventDetail.treatments)
-    //         Column(
-    //           crossAxisAlignment: CrossAxisAlignment.start,
-    //           children: [
-    //             editableText(
-    //               "Date",
-    //               DateFormat('yyyy/MM/dd').format(startingDate),
-    //               editable,
-    //             ),
-    //             editableText("Days to Complete All Treatments",
-    //                 mda.daysToCompleteAllTreatments.toString(), editable),
-    //             editableText("Fraction Population Targeted",
-    //                 mda.fractionPopulationTargeted.toString(), editable),
-    //             const Divider(),
-    //           ],
-    //         ),
-    //     ],
-    //   );
-    // } else if (event is IntroduceParasites) {
-    //   return Column(
-    //     crossAxisAlignment: CrossAxisAlignment.start,
-    //     children: [
-    //       for (final location in defaultEventDetail.locations)
-    //         Column(
-    //           crossAxisAlignment: CrossAxisAlignment.start,
-    //           children: [
-    //             editableText("Location", location.location.toString(), editable),
-    //             for (final parasite in location.parasiteInfo)
-    //               Column(
-    //                 crossAxisAlignment: CrossAxisAlignment.start,
-    //                 children: [
-    //                   editableText(
-    //                     "Date",
-    //                     DateFormat('yyyy/MM/dd').format(startingDate),
-    //                     editable,
-    //                   ),
-    //                   editableText("Genotype", parasite.genotypeAASequence, editable),
-    //                   editableText("Number of cases", parasite.numberOfCases.toString(), editable),
-    //                   const Divider(),
-    //                 ],
-    //               ),
-    //           ],
-    //         ),
-    //     ],
-    //   );
-    // } else if (event is IntroduceParasitesPeriodically) {
-    //   return Column(
-    //     crossAxisAlignment: CrossAxisAlignment.start,
-    //     children: [
-    //       for (final location in defaultEventDetail.locations)
-    //         Column(
-    //           crossAxisAlignment: CrossAxisAlignment.start,
-    //           children: [
-    //             editableText("Location", location.location.toString(), editable),
-    //             for (final parasite in location.parasiteInfo)
-    //               Column(
-    //                 crossAxisAlignment: CrossAxisAlignment.start,
-    //                 children: [
-    //                   editableText(
-    //                     "Start Date",
-    //                     DateFormat('yyyy/MM/dd').format(startingDate),
-    //                     editable,
-    //                   ),
-    //                   editableText("Duration", parasite.duration.toString(), editable),
-    //                   editableText("Genotype", parasite.genotypeAASequence, editable),
-    //                   editableText("Number of cases", parasite.numberOfCases.toString(), editable),
-    //                   const Divider(),
-    //                 ],
-    //               ),
-    //           ],
-    //         ),
-    //     ],
-    //   );
-    // } else if (event is Introduce580YParasites) {
-    //   return Column(
-    //     crossAxisAlignment: CrossAxisAlignment.start,
-    //     children: [
-    //       for (final location in defaultEventDetail.entries)
-    //         Column(
-    //           crossAxisAlignment: CrossAxisAlignment.start,
-    //           children: [
-    //             editableText("Location", location.location.toString(), editable),
-    //             editableText(
-    //               "Date",
-    //               DateFormat('yyyy/MM/dd').format(startingDate),
-    //               editable,
-    //             ),
-    //             editableText("Fraction", location.fraction.toString(), editable),
-    //             const Divider(),
-    //           ],
-    //         ),
-    //     ],
-    //   );
-    // } else if (event is IntroduceAQMutantParasites) {
-    //   return Column(
-    //     crossAxisAlignment: CrossAxisAlignment.start,
-    //     children: [
-    //       for (final location in defaultEventDetail.entries)
-    //         Column(
-    //           crossAxisAlignment: CrossAxisAlignment.start,
-    //           children: [
-    //             editableText("Location", location.location.toString(), editable),
-    //             editableText(
-    //               "Date",
-    //               DateFormat('yyyy/MM/dd').format(startingDate),
-    //               editable,
-    //             ),
-    //             editableText("Fraction", location.fraction.toString(), editable),
-    //             const Divider(),
-    //           ],
-    //         ),
-    //     ],
-    //   );
-    // } else if (event is IntroduceLumefantrineMutantParasites) {
-    //   return Column(
-    //     crossAxisAlignment: CrossAxisAlignment.start,
-    //     children: [
-    //       for (final location in defaultEventDetail.entries)
-    //         Column(
-    //           crossAxisAlignment: CrossAxisAlignment.start,
-    //           children: [
-    //             editableText("Location", location.location.toString(), editable),
-    //             editableText(
-    //               "Date",
-    //               DateFormat('yyyy/MM/dd').format(startingDate),
-    //               editable,
-    //             ),
-    //             editableText("Fraction", location.fraction.toString(), editable),
-    //             const Divider(),
-    //           ],
-    //         ),
-    //     ],
-    //   );
-    // } else if (event is IntroduceTripleMutantToDpmParasites) {
-    //   return Column(
-    //     crossAxisAlignment: CrossAxisAlignment.start,
-    //     children: [
-    //       for (final location in defaultEventDetail.entries)
-    //         Column(
-    //           crossAxisAlignment: CrossAxisAlignment.start,
-    //           children: [
-    //             editableText("Location", location.location.toString(), editable),
-    //             editableText(
-    //               "Date",
-    //               DateFormat('yyyy/MM/dd').format(startingDate),
-    //               editable,
-    //             ),
-    //             editableText("Fraction", location.fraction.toString(), editable),
-    //             const Divider(),
-    //           ],
-    //         ),
-    //     ],
-    //   );
-    // } else if (event is IntroducePlas2Parasites) {
-    //   return Column(
-    //     crossAxisAlignment: CrossAxisAlignment.start,
-    //     children: [
-    //       for (final location in defaultEventDetail.entries)
-    //         Column(
-    //           crossAxisAlignment: CrossAxisAlignment.start,
-    //           children: [
-    //             editableText("Location", location.location.toString(), editable),
-    //             editableText(
-    //               "Date",
-    //               DateFormat('yyyy/MM/dd').format(startingDate),
-    //               editable,
-    //             ),
-    //             editableText("Fraction", location.fraction.toString(), editable),
-    //             const Divider(),
-    //           ],
-    //         ),
-    //     ],
-    //   );
-    // } else if (event is ChangeInterruptedFeedingRate) {
-    //   return Column(
-    //     crossAxisAlignment: CrossAxisAlignment.start,
-    //     children: [
-    //       for (final location in defaultEventDetail.entries)
-    //         Column(
-    //           crossAxisAlignment: CrossAxisAlignment.start,
-    //           children: [
-    //             editableText("Location", location.location.toString(), editable),
-    //             editableText(
-    //               "Date",
-    //               DateFormat('yyyy/MM/dd').format(startingDate),
-    //               editable,
-    //             ),
-    //             editableText("Interrupted Feeding Rate",
-    //                 location.interruptedFeedingRate.toString(), editable),
-    //             const Divider(),
-    //           ],
-    //         ),
-    //     ],
-    //   );
-    // }
-    // else {
-    //   return Text("Unknown event type");
-    // }
   }
 }
 
