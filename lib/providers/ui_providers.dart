@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class BoolProvider extends Notifier<bool> {
+class BoolResetProvider extends Notifier<bool> {
   @override
   bool build() {
     return false;
@@ -20,17 +20,31 @@ class BoolProvider extends Notifier<bool> {
   }
 }
 
-final yamlFileUpdatedProvider = NotifierProvider<BoolProvider, bool>(() {
+final updateUIProvider = NotifierProvider<BoolResetProvider, bool>(() {
+  return BoolResetProvider();
+});
+
+
+class BoolProvider extends Notifier<bool> {
+  @override
+  bool build() {
+    return true;
+  }
+
+  Future<void> set(bool value) async {
+    state = value;
+  }
+
+  bool get() {
+    return state;
+  }
+}
+
+final allFormsAreValidatedProvider = NotifierProvider<BoolProvider, bool>(() {
   return BoolProvider();
 });
 
-final markerSelectedProvider = NotifierProvider<BoolProvider, bool>(() {
-  return BoolProvider();
-});
 
-final updateUIProvider = NotifierProvider<BoolProvider, bool>(() {
-  return BoolProvider();
-});
 
 class DoubleMapProvider extends Notifier<Map<String,double>> {
   @override
@@ -57,4 +71,31 @@ class DoubleMapProvider extends Notifier<Map<String,double>> {
 
 final panelWidthMapProvider = NotifierProvider<DoubleMapProvider, Map<String,double>>(() {
   return DoubleMapProvider();
+});
+
+class IntListProvider extends Notifier<List<int>> {
+  @override
+  List<int> build() {
+    return [];
+  }
+
+  void add(int value) {
+    state.add(value);
+  }
+
+  void set(List<int> value) {
+    state = value;
+  }
+
+  List<int> get() {
+    return state;
+  }
+
+  void remove(int value) {
+    state.remove(value);
+  }
+}
+
+final therapyIdsProvider = NotifierProvider<IntListProvider, List<int>>(() {
+  return IntListProvider();
 });

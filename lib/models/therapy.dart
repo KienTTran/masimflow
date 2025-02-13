@@ -9,6 +9,7 @@ class Therapy {
   final List<int>? dosingDays;
   final List<int>? therapyIds;
   final List<int>? regimen;
+  late int initialIndex;
 
   Therapy({
     required this.name,

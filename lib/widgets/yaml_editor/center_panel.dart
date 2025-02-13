@@ -16,7 +16,7 @@ class YamlEditorCenterPanel extends ConsumerStatefulWidget {
   }) : super(key: key);
 
   @override
-  _YamlEditorCenterPanelState createState() => _YamlEditorCenterPanelState();
+  ConsumerState<YamlEditorCenterPanel> createState() => _YamlEditorCenterPanelState();
 }
 
 class _YamlEditorCenterPanelState extends ConsumerState<YamlEditorCenterPanel> {

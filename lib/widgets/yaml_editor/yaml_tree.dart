@@ -10,7 +10,7 @@ class YamlTree extends ConsumerStatefulWidget {
   }) : super(key: key);
 
   @override
-  _YamlTreeState createState() => _YamlTreeState();
+  ConsumerState<YamlTree> createState() => _YamlTreeState();
 }
 
 class _YamlTreeState extends ConsumerState<YamlTree> {

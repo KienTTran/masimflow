@@ -3,7 +3,7 @@ import 'package:masimflow/models/events/event.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:uuid/uuid.dart';
 import '../../utils/utils.dart';
-import '../../widgets/yaml_editor/event_detail_card_form.dart';
+import '../../widgets/yaml_editor/events/event_detail_card_form.dart';
 
 enum TreatmentCoverageType {
   SteadyTCM,
@@ -603,7 +603,7 @@ class ChangeTreatmentCoverageState extends EventState<ChangeTreatmentCoverage> {
                                                     ],
                                                     child: Column(
                                                       children: [
-                                                        Text('Please select another treatment coverage type.'),
+                                                        // Text('Please select another treatment coverage type.'),
                                                         ShadRadioGroupFormField<TreatmentCoverageType>(
                                                           id: '${widget.id}#treatment_coverage_type',
                                                           initialValue: type,
@@ -649,8 +649,8 @@ class ChangeTreatmentCoverageState extends EventState<ChangeTreatmentCoverage> {
                                       child: Column(
                                         children: [
                                           widget.eventForm.EventDateFormField('${widget.coverages[index].id}#date', dateID: i.toString()),
-                                          widget.eventForm.EventDoubleArrayFormField('${widget.coverages[index].id}#p_treatment_under_5_by_location'),
-                                          widget.eventForm.EventDoubleArrayFormField('${widget.coverages[index].id}#p_treatment_over_5_by_location'),
+                                          widget.eventForm.EventDoubleArrayFormField('${widget.coverages[index].id}#p_treatment_under_5_by_location', lower: 0.0, upper: 1.0),
+                                          widget.eventForm.EventDoubleArrayFormField('${widget.coverages[index].id}#p_treatment_over_5_by_location', lower: 0.0, upper: 1.0),
                                         ],
                                       ),
                                     ),
@@ -661,7 +661,7 @@ class ChangeTreatmentCoverageState extends EventState<ChangeTreatmentCoverage> {
                                       child: Column(
                                         children: [
                                           widget.eventForm.EventDateFormField('${widget.coverages[index].id}#date', dateID: i.toString()),
-                                          widget.eventForm.EventDoubleFormField('${widget.coverages[index].id}#annual_inflation_rate'),
+                                          widget.eventForm.EventDoubleFormField('${widget.coverages[index].id}#annual_inflation_rate', lower: 0.0, upper: 1.0),
                                         ],
                                       ),
                                     ),
@@ -672,8 +672,8 @@ class ChangeTreatmentCoverageState extends EventState<ChangeTreatmentCoverage> {
                                       children: [
                                         widget.eventForm.EventDateFormFieldCustomLabel('${widget.coverages[index].id}#date', 'date from', dateID: '0'),
                                         widget.eventForm.EventDateFormFieldCustomLabel('${widget.coverages[index].id}#date', 'date to', dateID: '1'),
-                                        widget.eventForm.EventDoubleArrayFormField('${widget.coverages[index].id}#p_treatment_under_5_by_location_to'),
-                                        widget.eventForm.EventDoubleArrayFormField('${widget.coverages[index].id}#p_treatment_over_5_by_location_to'),
+                                        widget.eventForm.EventDoubleArrayFormField('${widget.coverages[index].id}#p_treatment_under_5_by_location_to', lower: 0.0, upper: 1.0),
+                                        widget.eventForm.EventDoubleArrayFormField('${widget.coverages[index].id}#p_treatment_over_5_by_location_to', lower: 0.0, upper: 1.0),
                                       ],
                                     ),
                                   ),
@@ -689,6 +689,8 @@ class ChangeTreatmentCoverageState extends EventState<ChangeTreatmentCoverage> {
           ),
         ),
         widget.eventForm.editable ? Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const Divider(),
             ShadRadioGroupFormField<TreatmentCoverageType>(

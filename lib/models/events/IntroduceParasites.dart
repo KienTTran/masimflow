@@ -202,7 +202,7 @@ class IntroduceParasitesState extends EventState<IntroduceParasites> {
                   children: [
                     SizedBox(
                       width: widget.eventForm.width * 0.9 * 0.75,
-                      child: widget.eventForm.EventIntFormField('location_$i'),
+                      child: widget.eventForm.EventIntegerFormField('location_$i', lower: 0),
                     ),
                     (widget.eventForm.editable && i != 0 && i == widget.introductions.length - 1) ? SizedBox(
                       // width: widget.eventForm.width * 0.9 * 0.15,
@@ -252,7 +252,7 @@ class IntroduceParasitesState extends EventState<IntroduceParasites> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              widget.eventForm.EventIntFormField('number_of_cases_${i}_$j'),
+                              widget.eventForm.EventIntegerFormField('number_of_cases_${i}_$j', lower: 0),
                               widget.eventForm.EventGenotypeFormField('genotype_aa_sequence_${i}_$j'),
                               (widget.eventForm.editable  && j == widget.introductions[i].parasiteInfo.length - 1 ) ? Column(
                                 children: [

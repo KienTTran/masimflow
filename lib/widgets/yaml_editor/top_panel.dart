@@ -24,7 +24,7 @@ class YamlEditorTopPanel extends ConsumerStatefulWidget {
   }) : super(key: key);
 
   @override
-  _YamlEditorTopPanelState createState() => _YamlEditorTopPanelState();
+  ConsumerState<YamlEditorTopPanel> createState() => _YamlEditorTopPanelState();
 }
 
 class _YamlEditorTopPanelState extends ConsumerState<YamlEditorTopPanel> {

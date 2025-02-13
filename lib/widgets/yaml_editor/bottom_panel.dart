@@ -16,7 +16,7 @@ import '../../providers/ui_providers.dart';
 import '../../models/markers/config_marker.dart';
 import '../../utils/scrollable_widget.dart';
 import '../../utils/utils.dart';
-import 'event_detail_card.dart';
+import 'events/event_detail_card.dart';
 
 class YamlEditorBottomPanel extends ConsumerStatefulWidget {
   final width;
@@ -29,7 +29,7 @@ class YamlEditorBottomPanel extends ConsumerStatefulWidget {
   }) : super(key: key);
 
   @override
-  _YamlEditorBottomPanelState createState() => _YamlEditorBottomPanelState();
+  ConsumerState<YamlEditorBottomPanel> createState() => _YamlEditorBottomPanelState();
 }
 
 class _YamlEditorBottomPanelState extends ConsumerState<YamlEditorBottomPanel> {
@@ -174,7 +174,7 @@ class _YamlEditorBottomPanelState extends ConsumerState<YamlEditorBottomPanel> {
   }
 
   Widget EventCard(EventMarker marker){
-    double cardWidth = widget.width*0.15;
+    double cardWidth = widget.width*0.2;
     return ShadCard(
       width: cardWidth,
       height: 150,
@@ -249,9 +249,7 @@ class _YamlEditorBottomPanelState extends ConsumerState<YamlEditorBottomPanel> {
             ],
           ),
           Text(
-            // marker.event.controllers.keys.first.substring(
-            //     marker.event.controllers.keys.first.length - 20),
-            marker.event.name,
+            Utils.getCapitalizedWords(marker.event.name),
             // marker.event.dates().toString(),
             style: const TextStyle(
                 fontWeight: FontWeight.bold,
@@ -264,7 +262,7 @@ class _YamlEditorBottomPanelState extends ConsumerState<YamlEditorBottomPanel> {
   }
 
   Widget ConfigCard(ConfigMarker marker, {bool detail = false}){
-    double cardWidth = widget.width*0.15;
+    double cardWidth = widget.width*0.2;
     return ShadCard(
       width: cardWidth,
       height: 150,
@@ -355,7 +353,7 @@ class _YamlEditorBottomPanelState extends ConsumerState<YamlEditorBottomPanel> {
             ],
           ),
           Text(
-            marker.config.name,
+            Utils.getCapitalizedWords(marker.config.name),
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 14

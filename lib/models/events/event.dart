@@ -1,9 +1,11 @@
-import 'package:flutter/cupertino.dart';
+
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:uuid/uuid.dart';
 import 'package:yaml/yaml.dart';
-import '../../widgets/yaml_editor/event_detail_card_form.dart';
+import '../../widgets/yaml_editor/events/event_detail_card_form.dart';
 import 'ChangeInterruptedFeedingRate.dart';
 import 'ChangeMutationProbabilityPerLocus.dart';
 import 'ChangeTreatmentCoverage.dart';
@@ -20,7 +22,7 @@ import 'ModifyNestMFTStrategy.dart';
 import 'SingleRoundMDA.dart';
 import 'TurnOnOffMutation.dart';
 
-class EventWidgetRender extends StatefulWidget {
+class EventWidgetRender extends ConsumerStatefulWidget {
   // Constructor
   EventWidgetRender({Key? key}) : super(key: key);
 
@@ -28,7 +30,7 @@ class EventWidgetRender extends StatefulWidget {
   EventWidgetRenderState createState() => EventWidgetRenderState();
 }
 
-class EventWidgetRenderState<T extends EventWidgetRender> extends State<T> {
+class EventWidgetRenderState<T extends EventWidgetRender> extends ConsumerState<T> {
   // Override build
   @override
   Widget build(BuildContext context) {

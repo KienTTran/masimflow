@@ -8,6 +8,7 @@ import '../models/events/event.dart';
 import '../models/markers/config_marker.dart';
 import '../models/markers/event_marker.dart';
 import '../models/markers/strategy_marker.dart';
+import '../models/strategies/strategy.dart';
 import '../models/strategy_parameters.dart';
 import '../models/therapy.dart';
 
@@ -49,6 +50,46 @@ final eventTemplateMapProvider = NotifierProvider<EventMapProvider, Map<String,E
 
 final eventDisplayMapProvider = NotifierProvider<EventMapProvider, Map<String,Event>>(() {
   return EventMapProvider();
+});
+
+class StrategyMapProvider extends Notifier<Map<String,Strategy>> {
+
+  void set(Map<String,Strategy> data) {
+    state = data;
+  }
+
+  Map<String,Strategy> get() {
+    return state;
+  }
+
+  void setStrategy(String id, Strategy strategy) {
+    state[id] = strategy;
+  }
+
+  Strategy? getStrategy(String id) {
+    return state[id];
+  }
+
+  void clear() {
+    state.clear();
+  }
+
+  void deleteStrategyID(String id) {
+    state.remove(id);
+  }
+
+  @override
+  build() {
+    return {};
+  }
+}
+
+final strategyTemplateMapProvider = NotifierProvider<StrategyMapProvider, Map<String,Strategy>>(() {
+  return StrategyMapProvider();
+});
+
+final strategyDisplayMapProvider = NotifierProvider<StrategyMapProvider, Map<String,Strategy>>(() {
+  return StrategyMapProvider();
 });
 
 class ConfigMarkerListNotifier extends Notifier<List<ConfigMarker>> {

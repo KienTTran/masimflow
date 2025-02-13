@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:masimflow/models/events/event.dart';
 import 'package:masimflow/models/markers/marker.dart';
@@ -73,7 +73,7 @@ class EventMarker extends Marker {
     for(int i = 0; i < xs.length; i++){
       Utils.drawMarker(lowerX + xs[i]*canvasWidth, y, dy, radius,
           '${DateFormat('yyyy/MM/dd').format(event.dates()[i])}\n${event.name}',
-          painter, canvas, size, color: color);
+          painter, canvas, size, color: color, maxLines: 2);
     }
   }
 }

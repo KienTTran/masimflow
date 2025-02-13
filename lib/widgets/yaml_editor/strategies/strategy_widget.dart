@@ -1,32 +1,38 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:masimflow/providers/data_providers.dart';
-import 'package:masimflow/widgets/yaml_editor/event_detail_card.dart';
+import 'package:masimflow/providers/ui_providers.dart';
+import 'package:masimflow/widgets/yaml_editor/strategies/strategy_detail_card.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
-import '../../models/events/event.dart';
-import '../../utils/utils.dart';
+import '../../../models/strategies/strategy.dart';
+import '../../../utils/utils.dart';
 
-class EventCard extends ConsumerStatefulWidget {
+class StrategyCard extends ConsumerStatefulWidget {
   final double width;
   final double height;
-  final Event event;
+  final Strategy strategy;
 
-  const EventCard({
+  const StrategyCard({
     Key? key,
     required this.width,
     required this.height,
-    required this.event,
+    required this.strategy,
   }) : super(key: key);
 
   @override
-  _EventCardState createState() => _EventCardState();
+  ConsumerState<StrategyCard> createState() => _StrategyCardState();
 }
 
-class _EventCardState extends ConsumerState<EventCard> {
+class _StrategyCardState extends ConsumerState<StrategyCard> {
+
   @override
   Widget build(BuildContext context) {
+    var updateUI = ref.watch(updateUIProvider);
+
+    if(updateUI){
+      setState(() {});
+    }
     return ShadCard(
       width: widget.width * 0.8,
       child: Padding(
@@ -36,7 +42,7 @@ class _EventCardState extends ConsumerState<EventCard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              width: widget.width,
+              // width: widget.width,
               child:
               Row(
                 mainAxisSize: MainAxisSize.max,
@@ -44,30 +50,38 @@ class _EventCardState extends ConsumerState<EventCard> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Flexible(
-                    child: Text(
-                      widget.event.name.toString().split('_').join(' '),
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16),
-                      overflow: TextOverflow.visible,
+                    child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          Utils.getCapitalizedWords(widget.strategy.name),
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          overflow: TextOverflow.visible,
+                        ),
+                        ShadBadge.outline(
+                          child: Text(widget.strategy.type),
+                        )
+                      ],
                     ),
                   ),
-                  _buildEventActionButtons(),
+                  _buildStrategyActionButtons(),
                 ],
               ),
             ),
             const SizedBox(height: 8),
-            ShadAccordion<Event>(
+            ShadAccordion<Strategy>(
                 children: [
                   ShadAccordionItem(
-                    title: Text('Properties'),
-                    value: widget.event,
+                    title: const Text('Properties'),
+                    value: widget.strategy,
                     separator: null,
-                    child: EventDetailCard(
-                      eventID: widget.event.id,
-                      width: widget.width,
+                    child: StrategyDetailCard(
+                        strategyID: widget.strategy.id,
+                        width: widget.width,
                         height: widget.height,
-                      editable: false,
-                      popBack: (){}
+                        editable: false,
+                        popBack: (){}
                     ),
                   ),
                 ]
@@ -78,7 +92,7 @@ class _EventCardState extends ConsumerState<EventCard> {
     );
   }
 
-  Widget _buildEventActionButtons() {
+  Widget _buildStrategyActionButtons() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
@@ -89,14 +103,14 @@ class _EventCardState extends ConsumerState<EventCard> {
                   context: context,
                   builder: (context) {
                     return ShadDialog.alert(
-                      title: Text('Error'),
-                      description: Text('Please load a yaml file first'),
+                      title: const Text('Error'),
+                      description: const Text('Please load a yaml file first'),
                       actions: [
                         ShadButton(
                           onPressed: () {
                             Navigator.of(context).pop();
                           },
-                          child: Text('OK'),
+                          child: const Text('OK'),
                         ),
                       ],
                     );
@@ -107,21 +121,29 @@ class _EventCardState extends ConsumerState<EventCard> {
               showShadSheet(
                   context: context,
                   side: ShadSheetSide.right,
+                  isDismissible: false,
                   builder: (context) {
                     return ShadSheet(
                       constraints: const BoxConstraints(maxWidth: 512),
-                      // title: Text(widget.event.name.replaceAll('_', ' ')),
-                      title: Text(widget.event.id),
+                      title: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(Utils.getCapitalizedWords(widget.strategy.name),),
+                          ShadBadge.outline(
+                            child: Text(widget.strategy.type),
+                          )
+                        ],
+                      ),
+                      // title: Text(widget.strategy.id),
+                      closeIcon: const SizedBox(),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        padding: const EdgeInsets.only(bottom: 20),
                         child: Column(
                             mainAxisSize: MainAxisSize.max,
                             mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Material(
-                                  child:
-                                    EventDetailCard(
-                                        eventID: widget.event.id,
+                            children: [ Material( child: StrategyDetailCard(
+                                        strategyID: widget.strategy.id,
                                         width: 512,
                                         height: widget.height,
                                         editable: true,
@@ -137,7 +159,7 @@ class _EventCardState extends ConsumerState<EventCard> {
               );
             }
           },
-          icon: Icon(Icons.add),
+          icon: Icon(Icons.edit),
         ),
       ],
     );

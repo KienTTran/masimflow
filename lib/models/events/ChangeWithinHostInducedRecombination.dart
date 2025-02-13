@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:masimflow/widgets/yaml_editor/event_detail_card_form.dart';
+import 'package:masimflow/widgets/yaml_editor/events/event_detail_card_form.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:uuid/uuid.dart';
 import '../../utils/utils.dart';

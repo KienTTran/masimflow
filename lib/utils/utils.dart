@@ -5,17 +5,17 @@ import 'package:uuid/uuid.dart';
 
 class Utils {
 
-  static void drawMarker(double x, double y, double dy, double radius, String text, Paint paint, Canvas canvas, Size size, {color = Colors.black}) {
+  static void drawMarker(double x, double y, double dy, double radius, String text, Paint paint, Canvas canvas, Size size, {maxLines = 1, color = Colors.black}) {
     // canvas.drawLine(Offset(x, y - radius), Offset(x, y - dy + radius), paint);
     // canvas.drawCircle(Offset(x, y), radius, paint);
     // canvas.drawCircle(Offset(x, y - dy), radius, paint);
     canvas.drawLine(Offset(x, y), Offset(x, y - dy), paint);
     canvas.drawRect(Rect.fromCenter(center: Offset(x,y), width: radius, height: radius), paint);
     canvas.drawRect(Rect.fromCenter(center: Offset(x,y-dy), width: radius, height: radius), paint);
-    drawText(x, y - dy, dy < 0 ? -(radius*2) : radius*4, text, canvas, size, color: color);
+    drawText(x, y - dy, dy < 0 ? -(radius*2) : radius*4, text, canvas, size, color: color, maxLines: maxLines);
   }
 
-  static void drawText(double x, double y, double dy, String text, Canvas canvas, Size size,{color = Colors.black, maxWidth = 150}) {
+  static void drawText(double x, double y, double dy, String text, Canvas canvas, Size size,{int maxLines = 1, color = Colors.black, maxWidth = 150}) {
     var textStyle = TextStyle(
       color: color,
       fontSize: 16,
@@ -35,7 +35,7 @@ class Utils {
       text: textSpan,
       textDirection: TextDirection.ltr,
       textAlign: TextAlign.center,
-      maxLines: 3,
+      maxLines: maxLines,
       ellipsis: '...',
     );
     textPainter.layout(
@@ -75,9 +75,9 @@ class Utils {
     //find label position in key, extract from 'date' to end
     List<String> keyParts = key.split('#');
     if(keyParts.last.contains('date')){
-      return keyParts.last.replaceAll('_', '#');
+      return getCapitalizedWords(keyParts.last.replaceAll('_', '#'));
     }
-    return keyParts.last.replaceAll('_', ' ');
+    return getCapitalizedWords(keyParts.last.replaceAll('_', ' '));
   }
 
   static (String, Map<String, TextEditingController>) getNewFormControllers(
@@ -144,5 +144,57 @@ class Utils {
       value = value.replaceAll(' ', '');
     }
     return value;
+  }
+
+  static List<List<double>> extractDoubleMatrix(String input) {
+    return input
+        .replaceAll('[[', '')
+        .replaceAll(']]', '')
+        .split('], [') // Splitting by '], [' to separate locations
+        .map((row) => row
+        .split(',')
+        .map((value) => double.tryParse(value.trim()) ?? 0.0)
+        .toList())
+        .toList();
+  }
+
+  static List<double> extractDoubleList(String input) {
+    return input
+        .replaceAll('[', '')
+        .replaceAll(']', '')
+        .split(',')
+        .map((value) => double.tryParse(value.trim()) ?? 0.0)
+        .toList();
+  }
+
+
+  static List<List<int>> extractIntegerMatrix(String input) {
+    return input
+        .replaceAll('[[', '')
+        .replaceAll(']]', '')
+        .split('], [') // Splitting by '], [' to separate locations
+        .map((row) => row
+        .split(',')
+        .map((value) => int.tryParse(value.trim()) ?? 0)
+        .toList())
+        .toList();
+  }
+
+  static List<int> extractIntegerList(String input) {
+    return input
+        .replaceAll('[', '')
+        .replaceAll(']', '')
+        .split(',')
+        .map((value) => int.tryParse(value.trim()) ?? 0)
+        .toList();
+  }
+
+  static String getCapitalizedString(String input){
+    return input[0].toUpperCase() + input.substring(1);
+  }
+
+  static String getCapitalizedWords(String input){
+    return input.split(' ').map((word) => getCapitalizedString(word)).join(' ')
+        .replaceAll('_', ' ').replaceAll('#', ' ');
   }
 }

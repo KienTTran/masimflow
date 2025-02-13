@@ -7,7 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:masimflow/models/config.dart';
-import 'package:masimflow/widgets/yaml_editor/event_widget.dart';
+import 'package:masimflow/widgets/yaml_editor/strategies/new_strategy_widget.dart';
+import 'package:masimflow/widgets/yaml_editor/strategies/strategy_widget.dart';
 import 'package:searchable_listview/searchable_listview.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:yaml/yaml.dart';
@@ -16,6 +17,7 @@ import "package:flutter/services.dart" as s;
 import '../../models/drug.dart';
 import '../../models/events/event.dart';
 import '../../models/markers/strategy_marker.dart';
+import '../../models/strategies/strategy.dart';
 import '../../models/strategy_parameters.dart';
 import '../../models/therapy.dart';
 import '../../providers/data_providers.dart';
@@ -23,6 +25,7 @@ import '../../providers/ui_providers.dart';
 import '../../models/markers/config_marker.dart';
 import '../../utils/yaml_writer.dart';
 import '../yaml_editor.dart';
+import 'events/event_widget.dart';
 
 class YamlEditorRightPanel extends ConsumerStatefulWidget {
   final width;
@@ -33,7 +36,7 @@ class YamlEditorRightPanel extends ConsumerStatefulWidget {
   }) : super(key: key);
 
   @override
-  _YamlEditorRightPanelState createState() => _YamlEditorRightPanelState();
+  ConsumerState<YamlEditorRightPanel> createState() => _YamlEditorRightPanelState();
 }
 
 class _YamlEditorRightPanelState extends ConsumerState<YamlEditorRightPanel> {
@@ -70,7 +73,7 @@ class _YamlEditorRightPanelState extends ConsumerState<YamlEditorRightPanel> {
       });
     }
     catch (e) {
-      print('Error parsing yaml data: $e');
+      print('Error parsing Event yaml data: $e');
     }
   }
 
@@ -85,42 +88,50 @@ class _YamlEditorRightPanelState extends ConsumerState<YamlEditorRightPanel> {
       drugMap = DrugParser.parseFromString(yamlFile['drug_parameters']['drug_db'].toString());
       ref.read(drugMapProvider.notifier).set(drugMap);
       // print(drugMap);
+      ref.read(drugMapProvider.notifier).set(drugMap);
     }
     catch (e) {
-      print('Error parsing yaml data: $e');
+      print('Error parsing Drug yaml data: $e');
     }
   }
 
   void parseTherapyData(YamlMap yamlFile){
     therapyMap.clear();
-
     if(yamlFile.isEmpty) {
       return;
     }
 
     try{
       therapyMap = TherapyParser.parseFromString(yamlFile['therapy_parameters']['therapy_db'].toString());
+      therapyMap.forEach((key, value) {
+        therapyMap[key]!.initialIndex = key;
+      });
       ref.read(therapyMapProvider.notifier).set(therapyMap);
-      print(therapyMap);
+      // print(therapyMap);
     }
     catch (e) {
-      print('Error parsing yaml data: $e');
+      print('Error parsing Therapy yaml data: $e');
     }
   }
 
   void parseStrategyData(YamlMap yamlFile){
-
     if(yamlFile.isEmpty) {
       return;
     }
+    ref.read(strategyTemplateMapProvider.notifier).clear();
 
     try {
       strategyParameters = StrategyParameters.fromYaml(yamlFile);
-      // ref.read(strategyMapProvider.notifier).set(strategyMap);
-      print(strategyParameters.toString());
+      ref.read(strategyParametersProvider.notifier).set(strategyParameters);
+      for(final strategyKey in strategyParameters.strategyDb.keys){
+        strategyParameters.strategies.elementAt(strategyKey).initialIndex = strategyKey;
+        ref.read(strategyTemplateMapProvider.notifier)
+            .setStrategy(strategyParameters.strategies.elementAt(strategyKey).id,
+            strategyParameters.strategies.elementAt(strategyKey));
+      }
     }
     catch (e) {
-      print('Error parsing yaml data: $e');
+      print('Error parsing Strategy yaml data: $e');
     }
   }
 
@@ -156,7 +167,7 @@ class _YamlEditorRightPanelState extends ConsumerState<YamlEditorRightPanel> {
           startingDateConfig,
           -1,
           10,
-          50,
+          25,
           true,
           false,
           false
@@ -168,7 +179,7 @@ class _YamlEditorRightPanelState extends ConsumerState<YamlEditorRightPanel> {
           endingDateConfig,
           -1,
           10,
-          50,
+          25,
           false,
           true,
           false
@@ -180,7 +191,7 @@ class _YamlEditorRightPanelState extends ConsumerState<YamlEditorRightPanel> {
           startComparisonDateConfig,
           -1,
           10,
-          50,
+          25,
           false,
           false,
           false
@@ -210,7 +221,7 @@ class _YamlEditorRightPanelState extends ConsumerState<YamlEditorRightPanel> {
       ref.read(strategyMarkerListProvider.notifier).set(strategyMarkerList);
 
     } catch (e) {
-      print('Error parsing yaml data: $e');
+      print('Error parsing Config yaml data: $e');
     }
   }
 
@@ -244,16 +255,13 @@ class _YamlEditorRightPanelState extends ConsumerState<YamlEditorRightPanel> {
       parseYamlData(yamlFile,centerPanelWidth * 0.8);
     }
     catch (e) {
-      print('Error parsing yaml data: $e');
+      print('Error parsing Config Template yaml data: $e');
     }
   }
 
   @override
   void initState() {
     super.initState();
-    setState(() {
-      loadEventConfigData();
-    });
     ref.read(panelWidthMapProvider.notifier).setValue('right',widget.width);
   }
 
@@ -281,6 +289,7 @@ class _YamlEditorRightPanelState extends ConsumerState<YamlEditorRightPanel> {
                   children: [
                     ShadButton(
                       onPressed: () async {
+                        loadEventConfigData();
                         loadConfigTemplateData();
                       },
                       icon: const Icon(Icons.file_open_sharp),
@@ -383,7 +392,13 @@ class _YamlEditorRightPanelState extends ConsumerState<YamlEditorRightPanel> {
                               filter: (value){
                                 return eventList.where((element) => element.name.contains(value)).toList();
                               },
+                              displaySearchIcon: false,
                               emptyWidget:  Container(),
+                              inputDecoration: const InputDecoration(
+                                labelText: "Search Events",
+                                fillColor: Colors.white,
+                                suffixIcon: Icon(Icons.search),
+                              ),
                               itemBuilder: (Event event){
                                 return Padding(
                                   padding: const EdgeInsets.only(top: 16),
@@ -395,16 +410,57 @@ class _YamlEditorRightPanelState extends ConsumerState<YamlEditorRightPanel> {
                               }
                           ),
                         ),
-                      ) : Padding(
-                        padding: const EdgeInsets.all(8.0),
+                      ) : const Padding(
+                        padding: EdgeInsets.all(8.0),
                         child: Text('Events'),
                       ),
-                      child: Flexible(child: Text('Events', overflow: TextOverflow.ellipsis,))
+                      child: const Flexible(child: Text('Events', overflow: TextOverflow.ellipsis,))
                     ),
                     ShadTab(
+                        value: 'strategies',
+                        onPressed: (){
+                          setState(() {
+                            currentTab = 'strategies';
+                          });
+                        },
+                        content: ref.read(strategyParametersProvider.notifier).get().strategyDb.isNotEmpty ? Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: SizedBox(
+                            height: MediaQuery.of(context).size.height*0.7,
+                            child: SearchableList(
+                                initialList: ref.read(strategyParametersProvider.notifier).get().strategies,
+                                filter: (value){
+                                  return ref.read(strategyParametersProvider.notifier).get().strategies
+                                      .where((element) => element.name.contains(value)).toList();
+                                },
+                                displaySearchIcon: false,
+                                emptyWidget:  Container(),
+                                inputDecoration: const InputDecoration(
+                                  labelText: "Search Strategies",
+                                  fillColor: Colors.white,
+                                  suffixIcon: Icon(Icons.search),
+                                ),
+                                itemBuilder: (Strategy strategy){
+                                  return Padding(
+                                    padding: const EdgeInsets.only(top: 16),
+                                    child: StrategyCard(
+                                        width: widget.width*0.8,
+                                        height: MediaQuery.of(context).size.height*0.7,
+                                        strategy: strategy),
+                                  );
+                                }
+                            ),
+                          ),
+                        ) : const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text('Strategies'),
+                        ),
+                        child: const Flexible(child: Text('Strategies', overflow: TextOverflow.ellipsis,))
+                    ),
+                    const ShadTab(
                         value: 'setting',
                         content: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: EdgeInsets.all(8.0),
                           child: SizedBox(),
                         ),
                         child: Text('Settings', overflow: TextOverflow.ellipsis,),

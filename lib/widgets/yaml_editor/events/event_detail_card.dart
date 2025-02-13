@@ -3,11 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:masimflow/models/markers/strategy_marker.dart';
 import 'package:masimflow/providers/ui_providers.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
-import '../../models/events/event.dart';
-import '../../models/markers/event_marker.dart';
-import '../../providers/data_providers.dart';
-import '../../utils/form_validator.dart';
-import '../../utils/utils.dart';
+import '../../../models/events/event.dart';
+import '../../../models/markers/event_marker.dart';
+import '../../../providers/data_providers.dart';
+import '../../../utils/form_validator.dart';
 import 'event_detail_card_form.dart';
 
 class EventDetailCard extends ConsumerStatefulWidget {
@@ -29,7 +28,7 @@ class EventDetailCard extends ConsumerStatefulWidget {
   });
 
   @override
-  _EventDetailCardState createState() => _EventDetailCardState();
+  ConsumerState<EventDetailCard> createState() => _EventDetailCardState();
 }
 
 /// This widget wraps the _builddefaultEventDetails function. It accepts an event and a flag [editable].
@@ -85,6 +84,12 @@ class _EventDetailCardState extends ConsumerState<EventDetailCard> {
                         final endingDate  = ref.read(dateMapProvider.notifier).get()['ending_date'];
 
                         defaultEventDetail.update();
+                        if(widget.isUpdate){
+                          ref.read(eventDisplayMapProvider.notifier).setEvent(defaultEventDetail.id, defaultEventDetail);
+                        }
+                        else{
+                          ref.read(eventTemplateMapProvider.notifier).setEvent(defaultEventDetail.id, defaultEventDetail);
+                        }
 
                         // print('EventDetailCard Add: ${defaultEventDetail.dates()}');
 
@@ -153,6 +158,12 @@ class _EventDetailCardState extends ConsumerState<EventDetailCard> {
                         final endingDate  = ref.read(dateMapProvider.notifier).get()['ending_date'];
 
                         defaultEventDetail.update();
+                        if(widget.isUpdate){
+                          ref.read(eventDisplayMapProvider.notifier).setEvent(defaultEventDetail.id, defaultEventDetail);
+                        }
+                        else{
+                          ref.read(eventTemplateMapProvider.notifier).setEvent(defaultEventDetail.id, defaultEventDetail);
+                        }
 
                         // print('EventDetailCard Add: ${defaultEventDetail.dates()}');
 
@@ -236,7 +247,12 @@ class _EventDetailCardState extends ConsumerState<EventDetailCard> {
                   ) : SizedBox(),
                   ShadButton(
                       onPressed: () {
-                        widget.popBack();
+                        if(formKey.currentState!.saveAndValidate()){
+                          widget.popBack();
+                        }
+                        else{
+                          return;
+                        }
                       },
                       child: Text('Cancel')
                   ),
@@ -258,7 +274,11 @@ class _EventDetailCardState extends ConsumerState<EventDetailCard> {
     startingDate ??= DateTime.now();
     endingDate ??= DateTime.now();
 
-    event.eventForm = EventDetailCardForm(context, event, editable, widget.width);
+    event.eventForm = EventDetailCardForm(context, event, editable, widget.width, () {
+      setState(() {
+        defaultEventDetail.update();
+      });
+    });
 
     return Column(
       children: [event],

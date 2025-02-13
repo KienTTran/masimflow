@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:masimflow/models/strategy_parameters.dart';
+import 'package:masimflow/providers/data_providers.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:uuid/uuid.dart';
 import '../../utils/utils.dart';
@@ -156,7 +158,9 @@ class ChangeTreatmentStrategyState extends EventState<ChangeTreatmentStrategy> {
                     ),
                     SizedBox(
                       width: widget.eventForm.width * 0.9 * 0.75,
-                      child: widget.eventForm.EventIntFormField('strategy_id_$i'),
+                      child: widget.eventForm.EventSingleStrategyFormField(
+                          ref.read(strategyParametersProvider.notifier).get(),
+                          'strategy_id_$i'),
                     )
                   ]
               ],

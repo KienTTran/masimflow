@@ -139,7 +139,7 @@ class IntroduceAQMutantParasitesState extends EventState<IntroduceAQMutantParasi
                   children: [
                     SizedBox(
                       width: widget.eventForm.width*0.9*0.75,
-                      child: widget.eventForm.EventIntFormField('location_$i'),
+                      child: widget.eventForm.EventIntegerFormField('location_$i', lower: 0),
                     ),
                     SizedBox(
                       child: (widget.eventForm.editable && i != 0 && i == widget.dates().length - 1) ? SizedBox(
@@ -164,7 +164,7 @@ class IntroduceAQMutantParasitesState extends EventState<IntroduceAQMutantParasi
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       widget.eventForm.EventDateFormField('date_$i'),
-                      widget.eventForm.EventDoubleFormField('fraction_$i'),
+                      widget.eventForm.EventDoubleFormField('fraction_$i', lower: 0.0, upper: 1.0),
                     ],
                   ),
                 )

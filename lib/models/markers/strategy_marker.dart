@@ -1,16 +1,17 @@
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:masimflow/models/markers/marker.dart';
-import 'package:masimflow/models/strategy.dart';
+import 'package:masimflow/models/strategies/strategy.dart';
 import 'package:masimflow/models/strategy_parameters.dart';
 import 'package:masimflow/models/therapy.dart';
-import 'package:shadcn_ui/shadcn_ui.dart';
-import 'package:uuid/uuid.dart';
-
 import '../../utils/utils.dart';
 import '../drug.dart';
+import '../strategies/AdaptiveCyclingStrategy.dart';
+import '../strategies/CyclingStrategy.dart';
+import '../strategies/MFTRebalancingStrategy.dart';
+import '../strategies/MFTStrategy.dart';
+import '../strategies/NestedMFTMultiLocationStrategy.dart';
+import '../strategies/NestedMFTStrategy.dart';
+import '../strategies/SFTStrategy.dart';
 
 class StrategyMarker extends Marker {
   final bool isStart;
@@ -128,7 +129,7 @@ class StrategyMarker extends Marker {
     }
     Utils.drawText(x, y - dy, dy < 0 ? -(radius*2) : radius*4,
         '$strategyName\n${therapyNames.toString()}',
-        canvas,size, maxWidth: 300);
+        canvas,size, maxWidth: 300, maxLines: 5);
   }
 
   StrategyMarker copy(){

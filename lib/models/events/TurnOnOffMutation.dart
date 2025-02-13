@@ -4,7 +4,7 @@ import 'package:masimflow/providers/ui_providers.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:uuid/uuid.dart';
 import '../../utils/utils.dart';
-import '../../widgets/yaml_editor/event_detail_card_form.dart';
+import '../../widgets/yaml_editor/events/event_detail_card_form.dart';
 import 'event.dart';
 
 /// Helper model for a single TurnOffMutation entry.

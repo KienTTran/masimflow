@@ -1,4 +1,4 @@
-import 'package:masimflow/models/strategy.dart';
+import 'package:masimflow/models/strategies/strategy.dart';
 import 'package:yaml/yaml.dart';
 
 /// Parses the given YAML string and returns a StrategyParameters instance.
@@ -29,7 +29,12 @@ class StrategyParameters {
     (strategyParams['strategy_db'] as YamlMap).forEach((key, value) {
       // Convert the key (which might be a string) to int.
       int intKey = int.parse(key.toString());
-      strategyDb[intKey] = Strategy.fromYaml(value);
+      try {
+        strategyDb[intKey] = Strategy.fromYaml(value);
+      }
+      catch (e) {
+        print('Error parsing strategy with key $intKey: $e');
+      }
     });
 
     return StrategyParameters(
@@ -39,6 +44,10 @@ class StrategyParameters {
       massDrugAdministration:
       MassDrugAdministration.fromYaml(strategyParams['mass_drug_administration']),
     );
+  }
+
+  List<Strategy> get strategies {
+    return strategyDb.values.toList();
   }
 
   @override

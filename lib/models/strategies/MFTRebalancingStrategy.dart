@@ -1,0 +1,136 @@
+import 'package:flutter/material.dart';
+import 'package:masimflow/models/strategies/strategy.dart';
+import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:uuid/uuid.dart';
+import 'package:yaml/yaml.dart';
+import '../../utils/utils.dart';
+
+class MFTRebalancingStrategy extends Strategy {
+  late List<int> therapyIds;
+  late List<double> distribution;
+  late int delayUntilActualTrigger;
+  late int updateDurationAfterRebalancing;
+
+  MFTRebalancingStrategy({
+    required String id,
+    required String name,
+    required this.therapyIds,
+    required this.distribution,
+    required this.delayUntilActualTrigger,
+    required this.updateDurationAfterRebalancing,
+    required Map<String, TextEditingController> controllers,
+  }) : super(id: id, name: name, type: 'MFTRebalancing', controllers: controllers);
+
+  factory MFTRebalancingStrategy.fromYaml(dynamic yaml) {
+    if (yaml is! Map) {
+      throw ArgumentError('Invalid YAML format for MFTRebalancingStrategy');
+    }
+    if (yaml['name'] == null ||
+        yaml['therapy_ids'] == null ||
+        yaml['distribution'] == null ||
+        yaml['delay_until_actual_trigger'] == null ||
+        yaml['update_duration_after_rebalancing'] == null) {
+      throw ArgumentError('Missing required fields in YAML for MFTRebalancingStrategy');
+    }
+    if (yaml['therapy_ids'] is! YamlList || yaml['distribution'] is! YamlList) {
+      throw ArgumentError('Invalid format for therapy_ids or distribution in YAML for MFTRebalancingStrategy');
+    }
+    if (yaml['delay_until_actual_trigger'] is! int) {
+      throw ArgumentError('Invalid delay_until_actual_trigger format in YAML for MFTRebalancingStrategy');
+    }
+    if (yaml['update_duration_after_rebalancing'] is! int) {
+      throw ArgumentError('Invalid update_duration_after_rebalancing format in YAML for MFTRebalancingStrategy');
+    }
+    if (yaml['distribution'].length != yaml['therapy_ids'].length) {
+      throw ArgumentError('Distribution length must match therapy_ids length in YAML for MFTRebalancingStrategy');
+    }
+
+    String id = Uuid().v4();
+    Map<String, TextEditingController> controllers = {};
+    controllers[Utils.getFormKeyID(id, 'name')] = TextEditingController(text: yaml['name'].toString());
+    controllers[Utils.getFormKeyID(id, 'therapy_ids')] = TextEditingController(text: yaml['therapy_ids'].toString());
+    controllers[Utils.getFormKeyID(id, 'distribution')] = TextEditingController(text: yaml['distribution'].toString());
+    controllers[Utils.getFormKeyID(id, 'delay_until_actual_trigger')] = TextEditingController(text: yaml['delay_until_actual_trigger'].toString());
+    controllers[Utils.getFormKeyID(id, 'update_duration_after_rebalancing')] = TextEditingController(text: yaml['update_duration_after_rebalancing'].toString());
+
+    return MFTRebalancingStrategy(
+      id: id,
+      name: yaml['name'],
+      therapyIds: List<int>.from((yaml['therapy_ids'] as YamlList).toList()),
+      distribution: List<double>.from(
+          (yaml['distribution'] as YamlList).map((v) => (v as num).toDouble())),
+      delayUntilActualTrigger: yaml['delay_until_actual_trigger'],
+      updateDurationAfterRebalancing: yaml['update_duration_after_rebalancing'],
+      controllers: controllers,
+    );
+  }
+
+  @override
+  String string() {
+    return 'MFTRebalancingStrategy(name: $name, therapyIds: $therapyIds, distribution: $distribution, delayUntilActualTrigger: $delayUntilActualTrigger, updateDurationAfterRebalancing: $updateDurationAfterRebalancing)';
+  }
+
+  @override
+  MFTRebalancingStrategyState createState() => MFTRebalancingStrategyState();
+
+  @override
+  Strategy copy() {
+    // TODO: implement copy
+    throw UnimplementedError();
+  }
+
+  @override
+  void update() {
+    name = controllers[Utils.getFormKeyID(id, 'name')]!.text;
+    therapyIds = controllers[Utils.getFormKeyID(id, 'therapy_ids')]!.text
+        .replaceAll('[', '').replaceAll(']', '')
+        .split(',')
+        .map((e) => int.parse(e.trim()))
+        .toList();
+    distribution = controllers[Utils.getFormKeyID(id, 'distribution')]!.text
+        .replaceAll('[', '').replaceAll(']', '')
+        .split(',')
+        .map((e) => double.parse(e.trim()))
+        .toList();
+    delayUntilActualTrigger = int.parse(controllers[Utils.getFormKeyID(id, 'delay_until_actual_trigger')]!.text);
+    updateDurationAfterRebalancing = int.parse(controllers[Utils.getFormKeyID(id, 'update_duration_after_rebalancing')]!.text);
+    print('Updated MFTRebalancingStrategy: $name, therapyIds: $therapyIds, distribution: $distribution, delayUntilActualTrigger: $delayUntilActualTrigger, updateDurationAfterRebalancing: $updateDurationAfterRebalancing');
+  }
+
+  @override
+  Map<String, dynamic> toYamlMap() {
+    return {
+      'name': name,
+      'type': type,
+      'therapy_ids': therapyIds,
+      'distribution': distribution,
+      'delay_until_actual_trigger': delayUntilActualTrigger,
+      'update_duration_after_rebalancing': updateDurationAfterRebalancing,
+    };
+  }
+}
+
+class MFTRebalancingStrategyState extends StrategyState<MFTRebalancingStrategy> {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: widget.strategyForm.width * 0.9,
+      child: ShadForm(
+        key: widget.formKey,
+        autovalidateMode: ShadAutovalidateMode.always,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Divider(),
+            widget.strategyForm.StrategyStringFormField('name'),
+            widget.strategyForm.StrategyIntegerArrayFormField('therapy_ids', lower: 0),
+            widget.strategyForm.StrategyDoubleArrayFormField('distribution', typeKey: 'therapy_ids', lower: 0.0, upper: 1.0),
+            widget.strategyForm.StrategyIntegerFormField('delay_until_actual_trigger', lower: 0),
+            widget.strategyForm.StrategyIntegerFormField('update_duration_after_rebalancing', lower: 0),
+          ],
+        ),
+      ),
+    );
+  }
+}

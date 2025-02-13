@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:masimflow/providers/data_providers.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:uuid/uuid.dart';
 import '../../utils/utils.dart';
@@ -149,7 +150,9 @@ class ModifyNestedMFTStrategyState extends EventState<ModifyNestedMFTStrategy> {
                     ) : SizedBox()
                   ],
                 ),
-                widget.eventForm.EventIntFormField('strategy_id_$i'),
+                widget.eventForm.EventSingleStrategyFormField(
+                    ref.read(strategyParametersProvider.notifier).get(),
+                    'strategy_id_$i'),
               ],
             widget.eventForm.editable ? Column(
               children: [
