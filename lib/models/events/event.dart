@@ -48,7 +48,8 @@ abstract class Event extends EventWidgetRender {
   final String name;
   final Map<String, TextEditingController> controllers;
   GlobalKey<ShadFormState> formKey = GlobalKey<ShadFormState>();
-  late EventDetailCardForm eventForm;
+  late double formWidth;
+  bool formEditable = false;
 
   Event({
     required this.id,

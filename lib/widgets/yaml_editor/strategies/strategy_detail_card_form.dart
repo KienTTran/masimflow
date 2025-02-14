@@ -1,131 +1,188 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:masimflow/models/strategies/strategy.dart';
 import 'package:masimflow/models/strategy_parameters.dart';
 import 'package:masimflow/models/therapy.dart';
-import 'package:masimflow/providers/ui_providers.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
-
+import '../../../models/strategies/strategy.dart';
 import '../../../utils/form_validator.dart';
 import '../../../utils/utils.dart';
 
-class StrategyDetailCardForm {
-  BuildContext context;
-  Strategy strategy;
-  bool editable;
-  double width;
+enum StrategyDetailCardFormType{
+  integer,
+  double,
+  string,
+  integerArray,
+  doubleArray,
+  doubleMatrix,
+  singleTherapy,
+  multipleTherapy,
+  multipleStrategy,
+}
 
-  StrategyDetailCardForm(this.context, this.strategy, this.editable, this.width);
+class StrategyDetailCardForm extends ConsumerStatefulWidget {
+  final StrategyDetailCardFormType type;
+  final String controllerKey;
+  final Strategy strategy;
+  bool editable = false;
+  final double width;
+  double? lower = -1.0;
+  double? upper = -1.0;
+  String? typeKey = '';
+  Map<int,Therapy>? therapyMap;
+  StrategyParameters? strategyParameters;
 
+  StrategyDetailCardForm({
+    required this.type,
+    required this.controllerKey,
+    required this.strategy,
+    required this.editable,
+    required this.width,
+    this.typeKey,
+    this.lower,
+    this.upper,
+    this.therapyMap,
+    this.strategyParameters,
+  });
+
+  @override
+  ConsumerState<ConsumerStatefulWidget> createState() => StrategyDetailCardFormState();
+}
+
+class StrategyDetailCardFormState extends ConsumerState<StrategyDetailCardForm> {
+  
+  @override
+  Widget build(BuildContext context) {
+    switch(widget.type) {
+      case StrategyDetailCardFormType.integer:
+        return StrategyIntegerFormField(widget.controllerKey, lower: int.parse(widget.lower.toString()), upper: int.parse(widget.upper.toString()));
+      case StrategyDetailCardFormType.double:
+        return StrategyDoubleFormField(widget.controllerKey, lower: widget.lower!, upper: widget.upper!);
+      case StrategyDetailCardFormType.string:
+        return StrategyStringFormField(widget.controllerKey);
+      case StrategyDetailCardFormType.integerArray:
+        return StrategyIntegerArrayFormField(widget.controllerKey, lower: int.parse(widget.lower.toString()), upper: int.parse(widget.upper.toString()));
+      case StrategyDetailCardFormType.doubleArray:
+        return StrategyDoubleArrayFormField(widget.controllerKey, typeKey: widget.typeKey!, lower: widget.lower!, upper: widget.upper!);
+      case StrategyDetailCardFormType.doubleMatrix:
+        return StrategyDoubleMatrixFormField(widget.controllerKey, lower: widget.lower!, upper: widget.upper!);
+      case StrategyDetailCardFormType.singleTherapy:
+        return StrategySingleTherapyFormField(widget.therapyMap!, widget.controllerKey);
+      case StrategyDetailCardFormType.multipleTherapy:
+        return StrategyMultipleTherapyFormField(widget.therapyMap!, widget.controllerKey);
+      case StrategyDetailCardFormType.multipleStrategy:
+        return StrategyMultipleStrategyFormField(widget.strategyParameters!,widget.controllerKey);
+    }
+  }
+  
   Widget StrategyIntegerFormField(String controllerKey, {int lower = -1, int upper = -1}){
-    String controllerKeyWithID = Utils.getFormKeyID(strategy.id, controllerKey);
-    return editable ? SizedBox(
-      width: width*0.9,
+    String controllerKeyWithID = Utils.getFormKeyID(widget.strategy.id, controllerKey);
+    return widget.editable ? SizedBox(
+      width: widget.width*0.9,
       child: ShadInputFormField(
         id: controllerKeyWithID,
         label: Text(Utils.getControllerKeyLabel(controllerKey)),
-        initialValue: strategy.controllers[controllerKeyWithID]!.text,
-        controller: strategy.controllers[controllerKeyWithID],
+        initialValue: widget.strategy.controllers[controllerKeyWithID]!.text,
+        controller: widget.strategy.controllers[controllerKeyWithID],
         onSaved: (value) {
-          strategy.controllers[controllerKeyWithID]!.text = value!;
-          strategy.controllers[controllerKeyWithID]!.value = TextEditingValue(text: value);
+          widget.strategy.controllers[controllerKeyWithID]!.text = value!;
+          widget.strategy.controllers[controllerKeyWithID]!.value = TextEditingValue(text: value);
         },
         validator: (value) {
           return FormUtil.validateIntRange(context, value, lower: lower, upper: upper);
         },
       ),
-    ) : Text('${Utils.getControllerKeyLabel(controllerKey)}: ${strategy.controllers[controllerKeyWithID]!.text}');
+    ) : Text('${Utils.getControllerKeyLabel(controllerKey)}: ${widget.strategy.controllers[controllerKeyWithID]!.text}');
   }
 
   Widget StrategyIntegerArrayFormField(String controllerKey, {int lower = -1, int upper = -1}){
-    String controllerKeyWithID = Utils.getFormKeyID(strategy.id, controllerKey);
-    return editable ? SizedBox(
-      width: width*0.9,
+    String controllerKeyWithID = Utils.getFormKeyID(widget.strategy.id, controllerKey);
+    return widget.editable ? SizedBox(
+      width: widget.width*0.9,
       child: ShadInputFormField(
         id: controllerKeyWithID,
         label: Text(Utils.getControllerKeyLabel(controllerKey)),
-        initialValue: strategy.controllers[controllerKeyWithID]!.text,
-        controller: strategy.controllers[controllerKeyWithID],
+        initialValue: widget.strategy.controllers[controllerKeyWithID]!.text,
+        controller: widget.strategy.controllers[controllerKeyWithID],
         onSaved: (value) {
-          strategy.controllers[controllerKeyWithID]!.text = value!;
-          strategy.controllers[controllerKeyWithID]!.value = TextEditingValue(text: value);
+          widget.strategy.controllers[controllerKeyWithID]!.text = value!;
+          widget.strategy.controllers[controllerKeyWithID]!.value = TextEditingValue(text: value);
         },
         validator: (value) {
           return FormUtil.validateIntArrayRange(context,value, lower: lower, upper: upper);
         },
       ),
-    ) : Text('${Utils.getControllerKeyLabel(controllerKey)}: ${strategy.controllers[controllerKeyWithID]!.text}');
+    ) : Text('${Utils.getControllerKeyLabel(controllerKey)}: ${widget.strategy.controllers[controllerKeyWithID]!.text}');
   }
 
   Widget StrategyDoubleArrayFormField(String controllerKey, {String typeKey = '', double lower = -1.0, double upper = -1.0}){
-    String controllerKeyWithID = Utils.getFormKeyID(strategy.id, controllerKey);
-    return editable ? SizedBox(
-      width: width*0.9,
+    String controllerKeyWithID = Utils.getFormKeyID(widget.strategy.id, controllerKey);
+    return widget.editable ? SizedBox(
+      width: widget.width*0.9,
       child: ShadInputFormField(
         id: controllerKeyWithID,
         label: Text(Utils.getControllerKeyLabel(controllerKey)),
-        initialValue: strategy.controllers[controllerKeyWithID]!.text,
-        controller: strategy.controllers[controllerKeyWithID],
+        initialValue: widget.strategy.controllers[controllerKeyWithID]!.text,
+        controller: widget.strategy.controllers[controllerKeyWithID],
         onSaved: (value) {
-          strategy.controllers[controllerKeyWithID]!.text = value!;
-          strategy.controllers[controllerKeyWithID]!.value = TextEditingValue(text: value);
+          widget.strategy.controllers[controllerKeyWithID]!.text = value!;
+          widget.strategy.controllers[controllerKeyWithID]!.value = TextEditingValue(text: value);
         },
         validator: (value) {
           return FormUtil.validateDoubleArrayRange(context, value,
-          lower: lower, upper: upper,
-          length: typeKey.isNotEmpty ? (strategy.controllers[Utils.getFormKeyID(strategy.id, typeKey)]!.text.split(',').length) : 0);
+              lower: lower, upper: upper,
+              length: typeKey.isNotEmpty ? (widget.strategy.controllers[Utils.getFormKeyID(widget.strategy.id, typeKey)]!.text.split(',').length) : 0);
         },
       ),
-    ) : Text('${Utils.getControllerKeyLabel(controllerKey)}: ${strategy.controllers[controllerKeyWithID]!.text}');
+    ) : Text('${Utils.getControllerKeyLabel(controllerKey)}: ${widget.strategy.controllers[controllerKeyWithID]!.text}');
   }
 
   Widget StrategyDoubleFormField(String controllerKey, {double lower = -1.0, double upper = -1.0}){
-    String controllerKeyWithID = Utils.getFormKeyID(strategy.id, controllerKey);
-    return editable ? SizedBox(
-      width: width*0.9,
+    String controllerKeyWithID = Utils.getFormKeyID(widget.strategy.id, controllerKey);
+    return widget.editable ? SizedBox(
+      width: widget.width*0.9,
       child: ShadInputFormField(
         id: controllerKeyWithID,
         label: Text(Utils.getControllerKeyLabel(controllerKey)),
-        initialValue: strategy.controllers[controllerKeyWithID]!.text,
-        controller: strategy.controllers[controllerKeyWithID],
+        initialValue: widget.strategy.controllers[controllerKeyWithID]!.text,
+        controller: widget.strategy.controllers[controllerKeyWithID],
         onSaved: (value) {
-          strategy.controllers[controllerKeyWithID]!.text = value!;
-          strategy.controllers[controllerKeyWithID]!.value = TextEditingValue(text: value);
+          widget.strategy.controllers[controllerKeyWithID]!.text = value!;
+          widget.strategy.controllers[controllerKeyWithID]!.value = TextEditingValue(text: value);
         },
         validator: (value) {
           return FormUtil.validateDoubleRange(context, value, lower: lower, upper: upper);
         },
       ),
-    ) : Text('${Utils.getControllerKeyLabel(controllerKey)}: ${strategy.controllers[controllerKeyWithID]!.text}');
+    ) : Text('${Utils.getControllerKeyLabel(controllerKey)}: ${widget.strategy.controllers[controllerKeyWithID]!.text}');
   }
 
   Widget StrategyStringFormField(String controllerKey){
-    String controllerKeyWithID = Utils.getFormKeyID(strategy.id, controllerKey);
-    return editable ? SizedBox(
-      width: width*0.9,
+    String controllerKeyWithID = Utils.getFormKeyID(widget.strategy.id, controllerKey);
+    return widget.editable ? SizedBox(
+      width: widget.width*0.9,
       child: ShadInputFormField(
         id: controllerKeyWithID,
         label: Text(Utils.getControllerKeyLabel(controllerKey)),
-        initialValue: strategy.controllers[controllerKeyWithID]!.text,
-        controller: strategy.controllers[controllerKeyWithID],
+        initialValue: widget.strategy.controllers[controllerKeyWithID]!.text,
+        controller: widget.strategy.controllers[controllerKeyWithID],
         onSaved: (value) {
-          strategy.controllers[controllerKeyWithID]!.text = value!;
-          strategy.controllers[controllerKeyWithID]!.value = TextEditingValue(text: value);
+          widget.strategy.controllers[controllerKeyWithID]!.text = value!;
+          widget.strategy.controllers[controllerKeyWithID]!.value = TextEditingValue(text: value);
         },
         validator: (value) {
           return FormUtil.validateString(context, value);
         },
       ),
-    ) : Text('${Utils.getControllerKeyLabel(controllerKey)}: ${strategy.controllers[controllerKeyWithID]!.text}');
+    ) : Text('${Utils.getControllerKeyLabel(controllerKey)}: ${widget.strategy.controllers[controllerKeyWithID]!.text}');
   }
 
-  Widget StrategySingleTherapyFormField(WidgetRef ref,Map<int,Therapy> therapyMap,String controllerKey){
-    String controllerKeyWithID = Utils.getFormKeyID(strategy.id, controllerKey);
+  Widget StrategySingleTherapyFormField(Map<int,Therapy> therapyMap,String controllerKey){
+    String controllerKeyWithID = Utils.getFormKeyID(widget.strategy.id, controllerKey);
     List<int> selectedTherapyIndex = [];
     List<Therapy> selectedTherapies = [];
     try{
-      selectedTherapyIndex = strategy.controllers[controllerKeyWithID]!.text
+      selectedTherapyIndex = widget.strategy.controllers[controllerKeyWithID]!.text
           .replaceAll('[', '').replaceAll(']', '')
           .split(',')
           .map((e) => int.parse(e))
@@ -138,8 +195,8 @@ class StrategyDetailCardForm {
       selectedTherapies.add(therapyMap[selectedTherapyIndex[i]]!);
     }
     ShadPopoverController controller = ShadPopoverController();
-    return editable ? SizedBox(
-      width: width*0.9,
+    return widget.editable ? SizedBox(
+      width: widget.width*0.9,
       child: ConstrainedBox(
         constraints: const BoxConstraints(minWidth: 340),
         child: Column(
@@ -151,11 +208,11 @@ class StrategyDetailCardForm {
               id: controllerKeyWithID,
               label: Text(Utils.getControllerKeyLabel(controllerKey)),
               initialValue: selectedTherapies.toString(),
-              enabled: false,
-              controller: strategy.controllers[controllerKeyWithID],
+              readOnly: true,
+              controller: widget.strategy.controllers[controllerKeyWithID],
               onSaved: (value) {
-                strategy.controllers[controllerKeyWithID]!.text = value!;
-                strategy.controllers[controllerKeyWithID]!.value = TextEditingValue(text: value);
+                widget.strategy.controllers[controllerKeyWithID]!.text = value!;
+                widget.strategy.controllers[controllerKeyWithID]!.value = TextEditingValue(text: value);
               },
               validator: (value) {
                 return FormUtil.validateIntArrayRange(context, value, lower: 0, upper: therapyMap.length - 1);
@@ -170,8 +227,8 @@ class StrategyDetailCardForm {
                 for (var i = 0; i < selectedTherapyIndex.length; i++) {
                   selectedTherapies.add(therapyMap[selectedTherapyIndex[i]]!);
                 }
-                strategy.controllers[controllerKeyWithID]!.text = selectedTherapyIndex.toString();
-                strategy.controllers[controllerKeyWithID]!.value = TextEditingValue(text: selectedTherapyIndex.toString());
+                widget.strategy.controllers[controllerKeyWithID]!.text = selectedTherapyIndex.toString();
+                widget.strategy.controllers[controllerKeyWithID]!.value = TextEditingValue(text: selectedTherapyIndex.toString());
               },
               initialValue: selectedTherapies.map((therapy) => therapy.name).toList().first,
               allowDeselection: true,
@@ -189,31 +246,30 @@ class StrategyDetailCardForm {
                   ),
                 ),
                 ...therapyMap.values.map((therapy){
-                    return ShadOption(
-                      value: therapy.name,
-                      child: Text('${therapy.initialIndex}: ${therapy.name}'),
-                    );
-                  }
+                  return ShadOption(
+                    value: therapy.name,
+                    child: Text('${therapy.initialIndex}: ${therapy.name}'),
+                  );
+                }
                 ),
               ],
               selectedOptionBuilder: (context, value) {
-                  return Text(value);
+                return Text(value);
               },
 
             ),
           ],
         ),
       ),
-    ) : Text('${Utils.getControllerKeyLabel(controllerKey)}: ${strategy.controllers[controllerKeyWithID]!.text}');
+    ) : Text('${Utils.getControllerKeyLabel(controllerKey)}: ${widget.strategy.controllers[controllerKeyWithID]!.text}');
   }
 
-
-  Widget StrategyMultipleTherapyFormField(WidgetRef ref,Map<int,Therapy> therapyMap,String controllerKey){
-    String controllerKeyWithID = Utils.getFormKeyID(strategy.id, controllerKey);
+  Widget StrategyMultipleTherapyFormField(Map<int,Therapy> therapyMap,String controllerKey){
+    String controllerKeyWithID = Utils.getFormKeyID(widget.strategy.id, controllerKey);
     List<int> selectedTherapyIndex = [];
     List<Therapy> selectedTherapies = [];
     try{
-      selectedTherapyIndex = strategy.controllers[controllerKeyWithID]!.text
+      selectedTherapyIndex = widget.strategy.controllers[controllerKeyWithID]!.text
           .replaceAll('[', '').replaceAll(']', '')
           .split(',')
           .map((e) => int.parse(e))
@@ -226,8 +282,8 @@ class StrategyDetailCardForm {
       selectedTherapies.add(therapyMap[selectedTherapyIndex[i]]!);
     }
     ShadPopoverController controller = ShadPopoverController();
-    return editable ? SizedBox(
-      width: width*0.9,
+    return widget.editable ? SizedBox(
+      width: widget.width*0.9,
       child: ConstrainedBox(
         constraints: const BoxConstraints(minWidth: 340),
         child: Column(
@@ -239,11 +295,11 @@ class StrategyDetailCardForm {
               id: controllerKeyWithID,
               label: Text(Utils.getControllerKeyLabel(controllerKey)),
               initialValue: selectedTherapies.toString(),
-              enabled: false,
-              controller: strategy.controllers[controllerKeyWithID],
+              readOnly: true,
+              controller: widget.strategy.controllers[controllerKeyWithID],
               onSaved: (value) {
-                strategy.controllers[controllerKeyWithID]!.text = value!;
-                strategy.controllers[controllerKeyWithID]!.value = TextEditingValue(text: value);
+                widget.strategy.controllers[controllerKeyWithID]!.text = value!;
+                widget.strategy.controllers[controllerKeyWithID]!.value = TextEditingValue(text: value);
               },
               validator: (value) {
                 return FormUtil.validateIntArrayRange(context, value, lower: 0, upper: therapyMap.length - 1);
@@ -261,8 +317,8 @@ class StrategyDetailCardForm {
                 for (var i = 0; i < selectedTherapyIndex.length; i++) {
                   selectedTherapies.add(therapyMap[selectedTherapyIndex[i]]!);
                 }
-                strategy.controllers[controllerKeyWithID]!.text = selectedTherapyIndex.toString();
-                strategy.controllers[controllerKeyWithID]!.value = TextEditingValue(text: selectedTherapyIndex.toString());
+                widget.strategy.controllers[controllerKeyWithID]!.text = selectedTherapyIndex.toString();
+                widget.strategy.controllers[controllerKeyWithID]!.value = TextEditingValue(text: selectedTherapyIndex.toString());
               },
               initialValues: selectedTherapies.map((therapy) => therapy.name).toList(),
               allowDeselection: true,
@@ -295,16 +351,15 @@ class StrategyDetailCardForm {
           ],
         ),
       ),
-    ) : Text('${Utils.getControllerKeyLabel(controllerKey)}: ${strategy.controllers[controllerKeyWithID]!.text}');
+    ) : Text('${Utils.getControllerKeyLabel(controllerKey)}: ${widget.strategy.controllers[controllerKeyWithID]!.text}');
   }
 
-
-  Widget StrategyMultipleStrategyFormField(WidgetRef ref,StrategyParameters strategyParameter,String controllerKey){
-    String controllerKeyWithID = Utils.getFormKeyID(strategy.id, controllerKey);
+  Widget StrategyMultipleStrategyFormField(StrategyParameters strategyParameter,String controllerKey){
+    String controllerKeyWithID = Utils.getFormKeyID(widget.strategy.id, controllerKey);
     List<int> selectedStrategyIndex = [];
     List<Strategy> selectedStrategies = [];
     try{
-      selectedStrategyIndex = strategy.controllers[controllerKeyWithID]!.text
+      selectedStrategyIndex = widget.strategy.controllers[controllerKeyWithID]!.text
           .replaceAll('[', '').replaceAll(']', '')
           .split(',')
           .map((e) => int.parse(e))
@@ -317,8 +372,8 @@ class StrategyDetailCardForm {
       selectedStrategies.add(strategyParameter.strategyDb[selectedStrategyIndex[i]]!);
     }
     ShadPopoverController controller = ShadPopoverController();
-    return editable ? SizedBox(
-      width: width*0.9,
+    return widget.editable ? SizedBox(
+      width: widget.width*0.9,
       child: ConstrainedBox(
         constraints: const BoxConstraints(minWidth: 340),
         child: Column(
@@ -330,11 +385,11 @@ class StrategyDetailCardForm {
               id: controllerKeyWithID,
               label: Text(Utils.getControllerKeyLabel(controllerKey)),
               initialValue: selectedStrategies.toString(),
-              enabled: false,
-              controller: strategy.controllers[controllerKeyWithID],
+              readOnly: true,
+              controller: widget.strategy.controllers[controllerKeyWithID],
               onSaved: (value) {
-                strategy.controllers[controllerKeyWithID]!.text = value!;
-                strategy.controllers[controllerKeyWithID]!.value = TextEditingValue(text: value);
+                widget.strategy.controllers[controllerKeyWithID]!.text = value!;
+                widget.strategy.controllers[controllerKeyWithID]!.value = TextEditingValue(text: value);
               },
               validator: (value) {
                 return FormUtil.validateIntArrayRange(context, value, lower: 0, upper: strategyParameter.strategyDb.length - 1);
@@ -352,8 +407,8 @@ class StrategyDetailCardForm {
                 for (var i = 0; i < selectedStrategyIndex.length; i++) {
                   selectedStrategies.add(strategyParameter.strategyDb[selectedStrategyIndex[i]]!);
                 }
-                strategy.controllers[controllerKeyWithID]!.text = selectedStrategyIndex.toString();
-                strategy.controllers[controllerKeyWithID]!.value = TextEditingValue(text: selectedStrategyIndex.toString());
+                widget.strategy.controllers[controllerKeyWithID]!.text = selectedStrategyIndex.toString();
+                widget.strategy.controllers[controllerKeyWithID]!.value = TextEditingValue(text: selectedStrategyIndex.toString());
               },
               initialValues: selectedStrategies.map((therapy) => therapy.name).toList(),
               allowDeselection: true,
@@ -386,14 +441,14 @@ class StrategyDetailCardForm {
           ],
         ),
       ),
-    ) : Text('${Utils.getControllerKeyLabel(controllerKey)}: ${strategy.controllers[controllerKeyWithID]!.text}');
+    ) : Text('${Utils.getControllerKeyLabel(controllerKey)}: ${widget.strategy.controllers[controllerKeyWithID]!.text}');
   }
 
   Widget StrategyDoubleMatrixFormField(String controllerKey, {double lower = -1.0, double upper = -1.0}){
-    String controllerKeyWithID = Utils.getFormKeyID(strategy.id, controllerKey);
-    return editable
+    String controllerKeyWithID = Utils.getFormKeyID(widget.strategy.id, controllerKey);
+    return widget.editable
         ? SizedBox(
-      width: width * 0.9,
+      width: widget.width * 0.9,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -401,52 +456,22 @@ class StrategyDetailCardForm {
             // width: 60,
             child: ShadInputFormField(
               id: controllerKeyWithID,
-              initialValue: strategy.controllers[controllerKeyWithID]!.text,
-              controller: strategy.controllers[controllerKeyWithID],
+              initialValue: widget.strategy.controllers[controllerKeyWithID]!.text,
+              controller: widget.strategy.controllers[controllerKeyWithID],
               onSaved: (value) {
                 // doublesByLocations[locationIndex][valueIndex] = double.tryParse(value) ?? 0.0;
-                // strategy.controllers['$controllerKeyWithID-$locationIndex-$valueIndex']!.text = value;
-                // strategy.controllers['$controllerKeyWithID-$locationIndex-$valueIndex']!.value = TextEditingValue(text: value);
+                // widget.strategy.controllers['$controllerKeyWithID-$locationIndex-$valueIndex']!.text = value;
+                // widget.strategy.controllers['$controllerKeyWithID-$locationIndex-$valueIndex']!.value = TextEditingValue(text: value);
               },
               // validator: (value) {
               //   return FormUtil.validateDoubleRange(context, value, lower: lower, upper: upper);
               // },
             ),
           ),
-          // Table(
-          //   border: TableBorder.all(),
-          //   columnWidths: {for (int i = 0; i < matrix[0].length; i++) i: FlexColumnWidth()},
-          //   children: List.generate(matrix.length, (rowIndex) {
-          //     return TableRow(
-          //       children: List.generate(matrix[rowIndex].length, (colIndex) {
-          //         String cellKey = '$controllerKeyWithID-$rowIndex-$colIndex';
-          //         TextEditingController cellController = TextEditingController(text: matrix[rowIndex][colIndex].toString());
-          //         return Padding(
-          //           padding: const EdgeInsets.all(4.0),
-          //           child: TextFormField(
-          //             controller: cellController,
-          //             keyboardType: TextInputType.number,
-          //             decoration: InputDecoration(border: OutlineInputBorder()),
-          //             onChanged: (value) {
-          //               double? newValue = double.tryParse(value);
-          //               if (newValue != null) {
-          //                 matrix[rowIndex][colIndex] = newValue;
-          //               }
-          //             },
-          //             validator: (value) {
-          //               return FormUtil.validateDoubleRange(context, value, lower:lower, upper: upper);
-          //             },
-          //           ),
-          //         );
-          //       }),
-          //     );
-          //   }),
-          // ),
         ],
       ),
     )
         : Text(
-        '${Utils.getControllerKeyLabel(controllerKey)}: ${strategy.controllers[controllerKeyWithID]!.text}');
-  }
-
+        '${Utils.getControllerKeyLabel(controllerKey)}: ${widget.strategy.controllers[controllerKeyWithID]!.text}');
+  } 
 }

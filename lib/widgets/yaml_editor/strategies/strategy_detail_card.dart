@@ -117,7 +117,8 @@ class _StrategyDetailCardState extends ConsumerState<StrategyDetailCard> {
     startingDate ??= DateTime.now();
     endingDate ??= DateTime.now();
 
-    strategy.strategyForm = StrategyDetailCardForm(context, strategy, editable, widget.width);
+    strategy.formWidth = widget.width;
+    strategy.formEditable = editable;
 
     return Column(
       children: [strategy],

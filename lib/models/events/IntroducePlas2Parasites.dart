@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:uuid/uuid.dart';
 import '../../utils/utils.dart';
+import '../../widgets/yaml_editor/events/event_detail_card_form.dart';
 import 'event.dart';
 
 class Plas2ParasiteIntroduction {
@@ -124,7 +125,7 @@ class IntroducePlas2ParasitesState extends EventState<IntroducePlas2Parasites> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: widget.eventForm.width * 0.85,
+      width: widget.formWidth * 0.85,
       child: ShadForm(
         key: widget.formKey,
         child: Column(
@@ -138,11 +139,20 @@ class IntroducePlas2ParasitesState extends EventState<IntroducePlas2Parasites> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     SizedBox(
-                      width: widget.eventForm.width * 0.9 * 0.75,
-                      child: widget.eventForm.EventIntegerFormField('location_$i', lower: 0),
+                      width: widget.formWidth * 0.9 * 0.75,
+                      // child: widget.eventForm.EventIntegerFormField('location_$i', lower: 0),
+                      child: EventDetailCardForm(
+                        type: EventDetailCardFormType.integer,
+                        controllerKey: 'location_$i',
+                        editable: widget.formEditable,
+                        width: widget.formWidth * 0.9 * 0.75,
+                        event: widget,
+                        lower: 0.0,
+                        upper: -1.0,
+                      ),
                     ),
-                    (widget.eventForm.editable && i != 0 && i == widget.dates().length - 1) ? SizedBox(
-                      // width: widget.eventForm.width * 0.9 * 0.15,
+                    (widget.formEditable && i != 0 && i == widget.dates().length - 1) ? SizedBox(
+                      // width: widget.formWidth * 0.9 * 0.15,
                         child: ShadButton.ghost(
                           icon: const Icon(Icons.delete),
                           onPressed: () {
@@ -155,10 +165,27 @@ class IntroducePlas2ParasitesState extends EventState<IntroducePlas2Parasites> {
                     ) : SizedBox()
                   ],
                 ),
-                widget.eventForm.EventDateFormField('date_$i'),
-                widget.eventForm.EventDoubleFormField('fraction_$i', lower: 0.0, upper: 1.0),
+                // widget.eventForm.EventDateFormField('date_$i'),
+                // widget.eventForm.EventDoubleFormField('fraction_$i', lower: 0.0, upper: 1.0),
+                EventDetailCardForm(
+                  type: EventDetailCardFormType.date,
+                  controllerKey: 'date_$i',
+                  editable: widget.formEditable,
+                  width: widget.formWidth * 0.9 * 0.75,
+                  event: widget,
+                  dateID: '',
+                ),
+                EventDetailCardForm(
+                  type: EventDetailCardFormType.double,
+                  controllerKey: 'fraction_$i',
+                  editable: widget.formEditable,
+                  width: widget.formWidth * 0.9 * 0.75,
+                  event: widget,
+                  lower: 0.0,
+                  upper: 1.0,
+                ),
               ],
-            widget.eventForm.editable ? Column(
+            widget.formEditable ? Column(
               children: [
                 const Divider(),
                 ShadButton(

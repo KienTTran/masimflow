@@ -72,9 +72,25 @@ class ChangeWithinHostInducedRecombinationState extends EventState<ChangeWithinH
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          widget.eventForm.EventDateFormField('date'),
+          // widget.eventForm.EventDateFormField('date'),
+          EventDetailCardForm(
+            type: EventDetailCardFormType.date,
+            controllerKey: 'date',
+            editable: widget.formEditable,
+            width: widget.formWidth*0.9,
+            event: widget,
+            dateID: '',
+          ),
           const SizedBox(height: 12),
-          widget.eventForm.EventBoolFormField('value','True will enable Within Host Induced Recombination')
+          // widget.eventForm.EventBoolFormField('value','True will enable Within Host Induced Recombination'),
+          EventDetailCardForm(
+            type: EventDetailCardFormType.bool,
+            controllerKey: 'value',
+            editable: widget.formEditable,
+            width: widget.formWidth*0.9,
+            event: widget,
+            boolText: 'True will enable Within Host Induced Recombination',
+          ),
         ],
       ),
     );

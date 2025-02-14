@@ -8,6 +8,7 @@ import 'package:uuid/uuid.dart';
 import 'package:yaml/yaml.dart';
 
 import '../../utils/utils.dart';
+import '../../widgets/yaml_editor/strategies/strategy_detail_card_form.dart';
 
 class MFTStrategy extends Strategy {
   late List<int> therapyIds;
@@ -19,7 +20,7 @@ class MFTStrategy extends Strategy {
     required this.therapyIds,
     this.distribution,
     required Map<String, TextEditingController> controllers,
-  }) : super(id: id, name: name, type: 'MFT', controllers: controllers);
+  }) : super(id: id, name: name, type: StrategyType.MFT, controllers: controllers);
 
   factory MFTStrategy.fromYaml(dynamic yaml) {
     if (yaml is! Map) {
@@ -82,7 +83,7 @@ class MFTStrategy extends Strategy {
         .split(',')
         .map((e) => double.parse(e))
         .toList();
-    print('Updated MFTStrategy: $name, therapyIds: $therapyIds, distribution: $distribution');
+    // print('Updated MFTStrategy: $name, therapyIds: $therapyIds, distribution: $distribution');
   }
 
   @override
@@ -100,7 +101,7 @@ class MFTStrategyState extends StrategyState<MFTStrategy> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: widget.strategyForm.width * 0.85,
+      width: widget.formWidth * 0.85,
       child: ShadForm(
         key: widget.formKey,
         autovalidateMode: ShadAutovalidateMode.always,
@@ -109,9 +110,31 @@ class MFTStrategyState extends StrategyState<MFTStrategy> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Divider(),
-            widget.strategyForm.StrategyStringFormField('name'),
-            widget.strategyForm.StrategyMultipleTherapyFormField(ref,ref.read(therapyMapProvider.notifier).get(),'therapy_ids'),
-            widget.strategyForm.StrategyDoubleArrayFormField('distribution', typeKey: 'therapy_ids', lower: 0.0, upper: 1.0),
+            StrategyDetailCardForm(
+              type: StrategyDetailCardFormType.string,
+              strategy: widget,
+              width: widget.formWidth * 0.85,
+              editable: true,
+              controllerKey: 'name'
+            ),
+            StrategyDetailCardForm(
+              type: StrategyDetailCardFormType.multipleTherapy,
+              strategy: widget,
+              width: widget.formWidth * 0.85,
+              editable: true,
+              controllerKey: 'therapy_ids',
+              therapyMap: ref.read(therapyMapProvider.notifier).get()
+            ),
+            StrategyDetailCardForm(
+              type: StrategyDetailCardFormType.doubleArray,
+              strategy: widget,
+              width: widget.formWidth * 0.85,
+              editable: true,
+              controllerKey: 'distribution',
+              typeKey: 'therapy_ids',
+              lower: 0.0,
+              upper: 1.0
+            ),
           ],
         ),
       ),

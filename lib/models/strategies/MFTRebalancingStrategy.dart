@@ -3,7 +3,9 @@ import 'package:masimflow/models/strategies/strategy.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:uuid/uuid.dart';
 import 'package:yaml/yaml.dart';
+import '../../providers/data_providers.dart';
 import '../../utils/utils.dart';
+import '../../widgets/yaml_editor/strategies/strategy_detail_card_form.dart';
 
 class MFTRebalancingStrategy extends Strategy {
   late List<int> therapyIds;
@@ -19,7 +21,7 @@ class MFTRebalancingStrategy extends Strategy {
     required this.delayUntilActualTrigger,
     required this.updateDurationAfterRebalancing,
     required Map<String, TextEditingController> controllers,
-  }) : super(id: id, name: name, type: 'MFTRebalancing', controllers: controllers);
+  }) : super(id: id, name: name, type: StrategyType.MFTRebalancing, controllers: controllers);
 
   factory MFTRebalancingStrategy.fromYaml(dynamic yaml) {
     if (yaml is! Map) {
@@ -94,7 +96,7 @@ class MFTRebalancingStrategy extends Strategy {
         .toList();
     delayUntilActualTrigger = int.parse(controllers[Utils.getFormKeyID(id, 'delay_until_actual_trigger')]!.text);
     updateDurationAfterRebalancing = int.parse(controllers[Utils.getFormKeyID(id, 'update_duration_after_rebalancing')]!.text);
-    print('Updated MFTRebalancingStrategy: $name, therapyIds: $therapyIds, distribution: $distribution, delayUntilActualTrigger: $delayUntilActualTrigger, updateDurationAfterRebalancing: $updateDurationAfterRebalancing');
+    // print('Updated MFTRebalancingStrategy: $name, therapyIds: $therapyIds, distribution: $distribution, delayUntilActualTrigger: $delayUntilActualTrigger, updateDurationAfterRebalancing: $updateDurationAfterRebalancing');
   }
 
   @override
@@ -114,7 +116,7 @@ class MFTRebalancingStrategyState extends StrategyState<MFTRebalancingStrategy> 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: widget.strategyForm.width * 0.9,
+      width: widget.formWidth * 0.9,
       child: ShadForm(
         key: widget.formKey,
         autovalidateMode: ShadAutovalidateMode.always,
@@ -123,11 +125,49 @@ class MFTRebalancingStrategyState extends StrategyState<MFTRebalancingStrategy> 
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Divider(),
-            widget.strategyForm.StrategyStringFormField('name'),
-            widget.strategyForm.StrategyIntegerArrayFormField('therapy_ids', lower: 0),
-            widget.strategyForm.StrategyDoubleArrayFormField('distribution', typeKey: 'therapy_ids', lower: 0.0, upper: 1.0),
-            widget.strategyForm.StrategyIntegerFormField('delay_until_actual_trigger', lower: 0),
-            widget.strategyForm.StrategyIntegerFormField('update_duration_after_rebalancing', lower: 0),
+            StrategyDetailCardForm(
+                type: StrategyDetailCardFormType.string,
+                controllerKey: 'name',
+                editable: true,
+                width: widget.formWidth * 0.85,
+                strategy: widget
+            ),
+            StrategyDetailCardForm(
+                type: StrategyDetailCardFormType.multipleTherapy,
+                controllerKey: 'therapy_ids',
+                editable: true,
+                width: widget.formWidth * 0.85,
+                strategy: widget,
+                therapyMap: ref.read(therapyMapProvider.notifier).get()
+            ),
+            StrategyDetailCardForm(
+                type: StrategyDetailCardFormType.doubleArray,
+                controllerKey: 'distribution',
+                editable: true,
+                width: widget.formWidth * 0.85,
+                strategy: widget,
+                typeKey: 'therapy_ids',
+                lower: 0.0,
+                upper: 1.0
+            ),
+            StrategyDetailCardForm(
+                type: StrategyDetailCardFormType.integer,
+                controllerKey: 'delay_until_actual_trigger',
+                editable: true,
+                width: widget.formWidth * 0.85,
+                strategy: widget,
+                lower: 0.0,
+                upper: -1.0,
+            ),
+            StrategyDetailCardForm(
+                type: StrategyDetailCardFormType.integer,
+                controllerKey: 'update_duration_after_rebalancing',
+                editable: true,
+                width: widget.formWidth * 0.85,
+                strategy: widget,
+                lower: 0.0,
+                upper: -1.0,
+            ),
           ],
         ),
       ),

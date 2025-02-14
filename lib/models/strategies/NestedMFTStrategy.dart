@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import 'package:yaml/yaml.dart';
 
 import '../../utils/utils.dart';
+import '../../widgets/yaml_editor/strategies/strategy_detail_card_form.dart';
 
 class NestedMFTStrategy extends Strategy {
   late List<int> strategyIds;
@@ -22,7 +23,7 @@ class NestedMFTStrategy extends Strategy {
     required this.peakDistribution,
     required this.peakAfter,
     required Map<String, TextEditingController> controllers,
-  }) : super(id: id, name: name, type: 'NestedMFT', controllers: controllers);
+  }) : super(id: id, name: name, type: StrategyType.NestedMFT, controllers: controllers);
 
   factory NestedMFTStrategy.fromYaml(dynamic yaml) {
     if (yaml is! Map) {
@@ -104,7 +105,7 @@ class NestedMFTStrategy extends Strategy {
         .map((e) => double.parse(e.trim()))
         .toList();
     peakAfter = int.parse(controllers[Utils.getFormKeyID(id, 'peak_after')]!.text);
-    print('Updated NestedMFTStrategy: $name, strategyIds: $strategyIds, startDistribution: $startDistribution, peakDistribution: $peakDistribution, peakAfter: $peakAfter');
+    // print('Updated NestedMFTStrategy: $name, strategyIds: $strategyIds, startDistribution: $startDistribution, peakDistribution: $peakDistribution, peakAfter: $peakAfter');
   }
 
   @override
@@ -124,7 +125,7 @@ class NestedMFTStrategyState extends StrategyState<NestedMFTStrategy> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: widget.strategyForm.width * 0.85,
+      width: widget.formWidth * 0.85,
       child: ShadForm(
         key: widget.formKey,
         autovalidateMode: ShadAutovalidateMode.always,
@@ -133,12 +134,50 @@ class NestedMFTStrategyState extends StrategyState<NestedMFTStrategy> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Divider(),
-            widget.strategyForm.StrategyStringFormField('name'),
-            widget.strategyForm.StrategyMultipleStrategyFormField(
-                ref,ref.read(strategyParametersProvider.notifier).get(),'strategy_ids'),
-            widget.strategyForm.StrategyDoubleArrayFormField('start_distribution', typeKey: 'strategy_ids', lower: 0.0, upper: 1.0),
-            widget.strategyForm.StrategyDoubleArrayFormField('peak_distribution', typeKey: 'strategy_ids', lower: 0.0, upper: 1.0),
-            widget.strategyForm.StrategyIntegerFormField('peak_after', lower: 0),
+            StrategyDetailCardForm(
+                type: StrategyDetailCardFormType.string,
+                controllerKey: 'name',
+                editable: true,
+                width: widget.formWidth * 0.85,
+                strategy: widget
+            ),
+            StrategyDetailCardForm(
+                type: StrategyDetailCardFormType.multipleStrategy,
+                controllerKey: 'strategy_ids',
+                editable: true,
+                width: widget.formWidth * 0.85,
+                strategy: widget,
+                strategyParameters: ref.read(strategyParametersProvider.notifier).get()
+            ),
+            StrategyDetailCardForm(
+                type: StrategyDetailCardFormType.doubleArray,
+                controllerKey: 'start_distribution',
+                editable: true,
+                width: widget.formWidth * 0.85,
+                strategy: widget,
+                typeKey: 'strategy_ids',
+                lower: 0.0,
+                upper: 1.0
+            ),
+            StrategyDetailCardForm(
+                type: StrategyDetailCardFormType.doubleArray,
+                controllerKey: 'peak_distribution',
+                editable: true,
+                width: widget.formWidth * 0.85,
+                strategy: widget,
+                typeKey: 'strategy_ids',
+                lower: 0.0,
+                upper: 1.0
+            ),
+            StrategyDetailCardForm(
+                type: StrategyDetailCardFormType.integer,
+                controllerKey: 'peak_after',
+                editable: true,
+                width: widget.formWidth * 0.85,
+                strategy: widget,
+                lower: 0.0,
+                upper: -1.0,
+            ),
           ],
         ),
       ),

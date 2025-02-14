@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:masimflow/providers/data_providers.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
-import '../../widgets/yaml_editor/strategies/strategy_detail_card_form.dart';
 import 'AdaptiveCyclingStrategy.dart';
 import 'CyclingStrategy.dart';
 import 'MFTRebalancingStrategy.dart';
@@ -33,19 +32,78 @@ abstract class StrategyState<T extends Strategy> extends StrategyWidgetRenderSta
   Widget build(BuildContext context); // Force subclasses to implement build
 }
 
+enum StrategyType {
+  MFT,
+  SFT,
+  Cycling,
+  AdaptiveCycling,
+  MFTRebalancing,
+  NestedMFT,
+  NestedMFTMultiLocation;
+
+  String get typeAsString {
+    switch (this) {
+      case StrategyType.MFT:
+        return 'MFT';
+      case StrategyType.SFT:
+        return 'SFT';
+      case StrategyType.Cycling:
+        return 'Cycling';
+      case StrategyType.AdaptiveCycling:
+        return 'AdaptiveCycling';
+      case StrategyType.MFTRebalancing:
+        return 'MFTRebalancing';
+      case StrategyType.NestedMFT:
+        return 'NestedMFT';
+      case StrategyType.NestedMFTMultiLocation:
+        return 'NestedMFTMultiLocation';
+    }
+  }
+
+  String get label {
+    switch (this) {
+      case StrategyType.MFT:
+        return 'MFT';
+      case StrategyType.SFT:
+        return 'SFT';
+      case StrategyType.Cycling:
+        return 'Cycling';
+      case StrategyType.AdaptiveCycling:
+        return 'Adaptive Cycling';
+      case StrategyType.MFTRebalancing:
+        return 'MFT Rebalancing';
+      case StrategyType.NestedMFT:
+        return 'Nested MFT';
+      case StrategyType.NestedMFTMultiLocation:
+        return 'Nested MFT Multi Location';
+    }
+  }
+}
+
 abstract class Strategy extends StrategyWidgetRender {
   final String id;
   late String name;
-  final String type;
+  final StrategyType type;
   late Map<String, TextEditingController> controllers;
   GlobalKey<ShadFormState> formKey = GlobalKey<ShadFormState>();
-  late StrategyDetailCardForm strategyForm;
+  late double formWidth;
+  bool formEditable = false;
   late int initialIndex = 0;
   Map<String, dynamic> toYamlMap();
   Strategy copy();
   void update();
   List<String> getYamlKeyList(){
     return ['strategy_parameters', 'strategy_db', initialIndex.toString()];
+  }
+
+  List<DateTime> dates() {
+    List<DateTime> dates = [];
+    for (var key in controllers.keys) {
+      if (key.contains('date')) {
+        dates.add(DateFormat('yyyy/MM/dd').parse(controllers[key]!.text));
+      }
+    }
+    return dates;
   }
 
   Strategy({
@@ -58,24 +116,22 @@ abstract class Strategy extends StrategyWidgetRender {
   /// Factory constructor to choose the correct concrete subclass
   /// based on the YAML “type” field.
   factory Strategy.fromYaml(dynamic yaml) {
-    final String strategyType = yaml['type'];
+    final StrategyType strategyType = StrategyType.values.firstWhere((e) => e.typeAsString == yaml['type']);
     switch (strategyType) {
-      case 'MFT':
+      case StrategyType.MFT:
         return MFTStrategy.fromYaml(yaml);
-      case 'SFT':
+      case StrategyType.SFT:
         return SFTStrategy.fromYaml(yaml);
-      case 'Cycling':
+      case StrategyType.Cycling:
         return CyclingStrategy.fromYaml(yaml);
-      case 'AdaptiveCycling':
+      case StrategyType.AdaptiveCycling:
         return AdaptiveCyclingStrategy.fromYaml(yaml);
-      case 'MFTRebalancing':
+      case StrategyType.MFTRebalancing:
         return MFTRebalancingStrategy.fromYaml(yaml);
-      case 'NestedMFT':
+      case StrategyType.NestedMFT:
         return NestedMFTStrategy.fromYaml(yaml);
-      case 'NestedMFTMultiLocation':
+      case StrategyType.NestedMFTMultiLocation:
         return NestedMFTMultiLocationStrategy.fromYaml(yaml);
-      default:
-        throw Exception("Unknown strategy type: $strategyType");
     }
   }
 

@@ -143,18 +143,26 @@ class TurnOffMutationState extends EventWidgetRenderState<TurnOffMutation> {
                   children: [
                     const Divider(),
                     SizedBox(
-                      width: widget.eventForm.width,
+                      width: widget.formWidth,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           SizedBox(
-                            width: widget.eventForm.width*0.9*0.75,
-                            child: widget.eventForm.EventDateFormFieldWithRemoval('date', dateID: i.toString()),
+                            width: widget.formWidth*0.9*0.75,
+                            // child: widget.eventForm.EventDateFormFieldWithRemoval('date', dateID: i.toString()),
+                            child: EventDetailCardForm(
+                              type: EventDetailCardFormType.dateWithRemoval,
+                              controllerKey: 'date',
+                              editable: widget.formEditable,
+                              width: widget.formWidth*0.9*0.75,
+                              event: widget,
+                              dateID: i.toString(),
+                            ),
                           ),
                           SizedBox(
-                            width: widget.eventForm.width*0.9*0.2,
-                            child: (widget.eventForm.editable && i != 0 && i == widget.dates().length - 1) ? SizedBox(
+                            width: widget.formWidth*0.9*0.2,
+                            child: (widget.formEditable && i != 0 && i == widget.dates().length - 1) ? SizedBox(
                               // width: widget.width*0.9*0.25,
                               child: ShadButton.ghost(
                                 icon: Icon(Icons.delete),
@@ -174,7 +182,7 @@ class TurnOffMutationState extends EventWidgetRenderState<TurnOffMutation> {
             ],
           ),
         ),
-        widget.eventForm.editable ? Column(
+        widget.formEditable ? Column(
           children: [
             const Divider(),
             ShadButton(
@@ -302,18 +310,26 @@ class TurnOnMutationState extends EventWidgetRenderState<TurnOnMutation> {
                   children: [
                     const Divider(),
                     SizedBox(
-                      width: widget.eventForm.width,
+                      width: widget.formWidth,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           SizedBox(
-                            width: widget.eventForm.width*0.9*0.75,
-                            child: widget.eventForm.EventDateFormFieldWithRemoval('date', dateID: i.toString()),
+                            width: widget.formWidth*0.9*0.75,
+                            // child: widget.eventForm.EventDateFormFieldWithRemoval('date', dateID: i.toString()),
+                            child: EventDetailCardForm(
+                              type: EventDetailCardFormType.dateWithRemoval,
+                              controllerKey: 'date',
+                              editable: widget.formEditable,
+                              width: widget.formWidth*0.9*0.75,
+                              event: widget,
+                              dateID: i.toString(),
+                            ),
                           ),
                           SizedBox(
-                            width: widget.eventForm.width*0.9*0.2,
-                            child: (widget.eventForm.editable && i != 0 && i == widget.dates().length - 1) ? SizedBox(
+                            width: widget.formWidth*0.9*0.2,
+                            child: (widget.formEditable && i != 0 && i == widget.dates().length - 1) ? SizedBox(
                               // width: widget.width*0.9*0.25,
                               child: ShadButton.ghost(
                                 icon: Icon(Icons.delete),
@@ -333,7 +349,7 @@ class TurnOnMutationState extends EventWidgetRenderState<TurnOnMutation> {
             ],
           ),
         ),
-        widget.eventForm.editable ? Column(
+        widget.formEditable ? Column(
           children: [
             const Divider(),
             ShadButton(

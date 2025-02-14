@@ -8,6 +8,7 @@ import 'package:uuid/uuid.dart';
 import 'package:yaml/yaml.dart';
 
 import '../../utils/utils.dart';
+import '../../widgets/yaml_editor/strategies/strategy_detail_card_form.dart';
 
 class SFTStrategy extends Strategy {
   late List<int> therapyIds;
@@ -17,7 +18,7 @@ class SFTStrategy extends Strategy {
     required String name,
     required this.therapyIds,
     required Map<String, TextEditingController> controllers,
-  }) : super(id: id, name: name, type: 'SFT', controllers: controllers);
+  }) : super(id: id, name: name, type: StrategyType.SFT, controllers: controllers);
 
   factory SFTStrategy.fromYaml(dynamic yaml) {
     if (yaml is! Map) {
@@ -61,7 +62,7 @@ class SFTStrategy extends Strategy {
   void update() {
     name = controllers[Utils.getFormKeyID(id, 'name')]!.text;
     therapyIds = Utils.extractIntegerList(controllers[Utils.getFormKeyID(id, 'therapy_ids')]!.text);
-    print('Updated SFTStrategy: $name, therapyIds: $therapyIds');
+    // print('Updated SFTStrategy: $name, therapyIds: $therapyIds');
   }
 
   @override
@@ -78,7 +79,7 @@ class SFTStrategyState extends StrategyState<SFTStrategy> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: widget.strategyForm.width * 0.85,
+      width: widget.formWidth * 0.85,
       child: ShadForm(
         key: widget.formKey,
         autovalidateMode: ShadAutovalidateMode.always,
@@ -87,8 +88,21 @@ class SFTStrategyState extends StrategyState<SFTStrategy> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Divider(),
-            widget.strategyForm.StrategyStringFormField('name'),
-            widget.strategyForm.StrategySingleTherapyFormField(ref, ref.read(therapyMapProvider.notifier).get(), 'therapy_ids'),
+            StrategyDetailCardForm(
+                type: StrategyDetailCardFormType.string,
+                controllerKey: 'name',
+                editable: true,
+                width: widget.formWidth * 0.85,
+                strategy: widget
+            ),
+            StrategyDetailCardForm(
+                type: StrategyDetailCardFormType.singleTherapy,
+                controllerKey: 'therapy_ids',
+                editable: true,
+                width: widget.formWidth * 0.85,
+                strategy: widget,
+                therapyMap: ref.read(therapyMapProvider.notifier).get()
+            ),
           ],
         ),
       ),

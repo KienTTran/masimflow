@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:masimflow/widgets/yaml_editor/events/event_detail_card_form.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:uuid/uuid.dart';
 import '../../utils/utils.dart';
@@ -86,9 +87,24 @@ class ChangeMutationProbabilityPerLocusState extends EventState<ChangeMutationPr
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          widget.eventForm.EventDateFormField('date'),
+          EventDetailCardForm(
+            type: EventDetailCardFormType.date,
+            controllerKey: 'date',
+            editable: widget.formEditable,
+            width: widget.formWidth,
+            event: widget,
+            dateID: '',
+          ),
           const SizedBox(height: 12),
-          widget.eventForm.EventDoubleFormField('mutation_probability_per_locus', lower: 0.0, upper: 1.0),
+          EventDetailCardForm(
+            type: EventDetailCardFormType.double,
+            controllerKey: 'mutation_probability_per_locus',
+            editable: widget.formEditable,
+            width: widget.formWidth,
+            event: widget,
+            lower: 0.0,
+            upper: 1.0,
+          ),
         ],
       ),
     );

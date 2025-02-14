@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:uuid/uuid.dart';
 import '../../utils/utils.dart';
+import '../../widgets/yaml_editor/events/event_detail_card_form.dart';
 import 'event.dart';
 
 class MDADetail {
@@ -127,7 +128,7 @@ class SingleRoundMDAState extends EventState<SingleRoundMDA> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: widget.eventForm.width * 0.85,
+      width: widget.formWidth * 0.85,
       child: ShadForm(
         key: widget.formKey,
         child: Column(
@@ -141,11 +142,19 @@ class SingleRoundMDAState extends EventState<SingleRoundMDA> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     SizedBox(
-                      width: widget.eventForm.width * 0.9 * 0.75,
-                      child: widget.eventForm.EventDateFormField('date_$i'),
+                      width: widget.formWidth * 0.9 * 0.75,
+                      // child: widget.eventForm.EventDateFormField('date_$i'),
+                      child: EventDetailCardForm(
+                        type: EventDetailCardFormType.date,
+                        controllerKey: 'date_$i',
+                        editable: widget.formEditable,
+                        width: widget.formWidth*0.9*0.75,
+                        event: widget,
+                        dateID: '',
+                      ),
                     ),
-                    (widget.eventForm.editable && i != 0 && i == widget.dates().length - 1) ? SizedBox(
-                      // width: widget.eventForm.width * 0.9 * 0.15,
+                    (widget.formEditable && i != 0 && i == widget.dates().length - 1) ? SizedBox(
+                      // width: widget.formWidth * 0.9 * 0.15,
                         child: ShadButton.ghost(
                           icon: const Icon(Icons.delete),
                           onPressed: () {
@@ -158,10 +167,28 @@ class SingleRoundMDAState extends EventState<SingleRoundMDA> {
                     ) : SizedBox()
                   ],
                 ),
-                widget.eventForm.EventDoubleArrayFormField('fraction_population_targeted_$i', lower: 0.0, upper: 1.0),
-                widget.eventForm.EventIntegerFormField('days_to_complete_all_treatments_$i', lower: 0),
+                // widget.eventForm.EventDoubleArrayFormField('fraction_population_targeted_$i', lower: 0.0, upper: 1.0),
+                // widget.eventForm.EventIntegerFormField('days_to_complete_all_treatments_$i', lower: 0),
+                EventDetailCardForm(
+                  type: EventDetailCardFormType.doubleArray,
+                  controllerKey: 'fraction_population_targeted_$i',
+                  editable: widget.formEditable,
+                  width: widget.formWidth*0.9,
+                  event: widget,
+                  lower: 0.0,
+                  upper: -1.0,
+                ),
+                EventDetailCardForm(
+                  type: EventDetailCardFormType.integer,
+                  controllerKey: 'days_to_complete_all_treatments_$i',
+                  editable: widget.formEditable,
+                  width: widget.formWidth*0.9,
+                  event: widget,
+                  lower: 0.0,
+                  upper: -1.0,
+                ),
               ],
-            widget.eventForm.editable ? Column(
+            widget.formEditable ? Column(
               children: [
                 const Divider(),
                 ShadButton(

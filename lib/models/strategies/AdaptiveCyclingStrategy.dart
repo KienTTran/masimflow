@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:masimflow/models/strategies/strategy.dart';
 import 'package:masimflow/providers/data_providers.dart';
-import 'package:masimflow/providers/ui_providers.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:uuid/uuid.dart';
 import 'package:yaml/yaml.dart';
 
 import '../../utils/utils.dart';
+import '../../widgets/yaml_editor/strategies/strategy_detail_card_form.dart';
 
 class AdaptiveCyclingStrategy extends Strategy {
   late List<int> therapyIds;
@@ -22,7 +22,7 @@ class AdaptiveCyclingStrategy extends Strategy {
     required this.delayUntilActualTrigger,
     required this.turnOffDays,
     required Map<String, TextEditingController> controllers,
-  }) : super(id: id, name: name, type: 'AdaptiveCycling', controllers: controllers);
+  }) : super(id: id, name: name, type: StrategyType.AdaptiveCycling, controllers: controllers);
 
   factory AdaptiveCyclingStrategy.fromYaml(dynamic yaml) {
     if (yaml is! Map) {
@@ -92,7 +92,7 @@ class AdaptiveCyclingStrategy extends Strategy {
     triggerValue = double.parse(controllers[Utils.getFormKeyID(id, 'trigger_value')]!.text);
     delayUntilActualTrigger = int.parse(controllers[Utils.getFormKeyID(id, 'delay_until_actual_trigger')]!.text);
     turnOffDays = int.parse(controllers[Utils.getFormKeyID(id, 'turn_off_days')]!.text);
-    print('Updated AdaptiveCyclingStrategy: $name, therapyIds: $therapyIds, triggerValue: $triggerValue, delayUntilActualTrigger: $delayUntilActualTrigger, turnOffDays: $turnOffDays');
+    // print('Updated AdaptiveCyclingStrategy: $name, therapyIds: $therapyIds, triggerValue: $triggerValue, delayUntilActualTrigger: $delayUntilActualTrigger, turnOffDays: $turnOffDays');
   }
 
   @override
@@ -112,7 +112,7 @@ class AdaptiveCyclingStrategyState extends StrategyState<AdaptiveCyclingStrategy
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: widget.strategyForm.width * 0.85,
+      width: widget.formWidth * 0.85,
       child: ShadForm(
         key: widget.formKey,
         autovalidateMode: ShadAutovalidateMode.always,
@@ -121,11 +121,48 @@ class AdaptiveCyclingStrategyState extends StrategyState<AdaptiveCyclingStrategy
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Divider(),
-            widget.strategyForm.StrategyStringFormField('name'),
-            widget.strategyForm.StrategyMultipleTherapyFormField(ref, ref.read(therapyMapProvider.notifier).get(), 'therapy_ids'),
-            widget.strategyForm.StrategyDoubleFormField('trigger_value', lower: 0.0, upper: 1.0),
-            widget.strategyForm.StrategyIntegerFormField('delay_until_actual_trigger', lower: 0),
-            widget.strategyForm.StrategyIntegerFormField('turn_off_days', lower: 0),
+            StrategyDetailCardForm(
+              type: StrategyDetailCardFormType.string,
+              controllerKey: 'name',
+              editable: widget.formEditable,
+              width: widget.formWidth * 0.85,
+              strategy: widget
+            ),
+            StrategyDetailCardForm(
+              type: StrategyDetailCardFormType.multipleTherapy,
+              controllerKey: 'therapy_ids',
+              editable: widget.formEditable,
+              width: widget.formWidth * 0.85,
+              strategy: widget,
+              therapyMap: ref.read(therapyMapProvider.notifier).get()
+            ),
+            StrategyDetailCardForm(
+              type: StrategyDetailCardFormType.double,
+              controllerKey: 'trigger_value',
+              editable: widget.formEditable,
+              width: widget.formWidth * 0.85,
+              strategy: widget,
+              lower: 0.0,
+              upper: 1.0
+            ),
+            StrategyDetailCardForm(
+              type: StrategyDetailCardFormType.integer,
+              controllerKey: 'delay_until_actual_trigger',
+              editable: widget.formEditable,
+              width: widget.formWidth * 0.85,
+              strategy: widget,
+              lower: 0.0,
+              upper: -1.0,
+            ),
+            StrategyDetailCardForm(
+              type: StrategyDetailCardFormType.integer,
+              controllerKey: 'turn_off_days',
+              editable: widget.formEditable,
+              width: widget.formWidth * 0.85,
+              strategy: widget,
+              lower: 0.0,
+              upper: -1.0,
+            ),
           ],
         ),
       ),

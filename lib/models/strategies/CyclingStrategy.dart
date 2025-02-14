@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:masimflow/models/strategies/strategy.dart';
 import 'package:masimflow/providers/data_providers.dart';
 import 'package:masimflow/providers/ui_providers.dart';
+
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:uuid/uuid.dart';
 import 'package:yaml/yaml.dart';
 
 import '../../utils/utils.dart';
+import '../../widgets/yaml_editor/strategies/strategy_detail_card_form.dart';
 
 class CyclingStrategy extends Strategy {
   late List<int> therapyIds;
@@ -19,7 +21,7 @@ class CyclingStrategy extends Strategy {
     required this.therapyIds,
     required this.cyclingTime,
     required Map<String, TextEditingController> controllers,
-  }) : super(id: id, name: name, type: 'Cycling', controllers: controllers);
+  }) : super(id: id, name: name, type: StrategyType.Cycling, controllers: controllers);
 
   factory CyclingStrategy.fromYaml(dynamic yaml) {
     if (yaml is! Map) {
@@ -73,7 +75,7 @@ class CyclingStrategy extends Strategy {
         .map((e) => int.parse(e.trim()))
         .toList();
     cyclingTime = int.parse(controllers[Utils.getFormKeyID(id, 'cycling_time')]!.text);
-    print('Updated CyclingStrategy: $name, therapyIds: $therapyIds, cyclingTime: $cyclingTime');
+    // print('Updated CyclingStrategy: $name, therapyIds: $therapyIds, cyclingTime: $cyclingTime');
   }
 
   @override
@@ -91,7 +93,7 @@ class CyclingStrategyState extends StrategyState<CyclingStrategy> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: widget.strategyForm.width * 0.85,
+      width: widget.formWidth * 0.85,
       child: ShadForm(
         key: widget.formKey,
         autovalidateMode: ShadAutovalidateMode.always,
@@ -100,9 +102,30 @@ class CyclingStrategyState extends StrategyState<CyclingStrategy> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Divider(),
-            widget.strategyForm.StrategyStringFormField('name'),
-            widget.strategyForm.StrategyMultipleTherapyFormField(ref, ref.read(therapyMapProvider.notifier).get(), 'therapy_ids'),
-            widget.strategyForm.StrategyIntegerFormField('cycling_time', lower: 0),
+            StrategyDetailCardForm(
+                type: StrategyDetailCardFormType.string,
+                controllerKey: 'name',
+                editable: true,
+                width: widget.formWidth * 0.85,
+                strategy: widget
+            ),
+            StrategyDetailCardForm(
+                type: StrategyDetailCardFormType.multipleTherapy,
+                controllerKey: 'therapy_ids',
+                editable: true,
+                width: widget.formWidth * 0.85,
+                strategy: widget,
+                therapyMap: ref.read(therapyMapProvider.notifier).get(),
+            ),
+            StrategyDetailCardForm(
+                type: StrategyDetailCardFormType.integer,
+                controllerKey: 'cycling_time',
+                editable: true,
+                width: widget.formWidth * 0.85,
+                strategy: widget,
+                lower: 0.0,
+                upper: -1.0,
+            ),
           ],
         ),
       ),

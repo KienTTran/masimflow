@@ -5,8 +5,11 @@ import 'package:masimflow/providers/ui_providers.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import '../../../models/events/event.dart';
 import '../../../models/markers/event_marker.dart';
+import '../../../models/strategies/strategy.dart';
+import '../../../models/therapy.dart';
 import '../../../providers/data_providers.dart';
 import '../../../utils/form_validator.dart';
+import '../../../utils/utils.dart';
 import 'event_detail_card_form.dart';
 
 class EventDetailCard extends ConsumerStatefulWidget {
@@ -121,17 +124,7 @@ class _EventDetailCardState extends ConsumerState<EventDetailCard> {
                             if(eventMarkerList[i].event.id == defaultEventDetail.id){
                               eventMarkerList[i].event = defaultEventDetail;
                               eventMarkerList[i].setDates(defaultEventDetail.dates());
-                              if(eventMarkerList[i].event.name.contains('strategy')){
-                                List<DateTime> dates = eventMarkerList[i].event.dates();
-                                List<dynamic> strategyIds = eventMarkerList[i].event.valuesByKey('strategy_id');
-                                StrategyMarker newStrategyMarker = eventMarkerList[i].strategyMarker.copy();
-                                newStrategyMarker.strategyIdDateXMapList.clear();
-                                for(var i = 0; i < dates.length; i++){
-                                  newStrategyMarker.strategyIdDateXMapList.add((dates[i],int.parse(strategyIds[i]),0));
-                                }
-                                newStrategyMarker.updateX();
-                                eventMarkerList[i].strategyMarker = newStrategyMarker;
-                              }
+                              eventMarkerList[i].strategyMarker = Utils.getEventStrategyMarkers(ref,eventMarkerList[i].event);
                               break;
                             }
                           }
@@ -208,18 +201,7 @@ class _EventDetailCardState extends ConsumerState<EventDetailCard> {
                               -500,
                               false
                           );
-                          StrategyMarker newStrategyMarker = ref.read(strategyMarkerListProvider.notifier).get().first.copy();
-                          newStrategyMarker.strategyIdDateXMapList.clear();
-                          if(newEvent.name.contains('strategy')){
-                            List<DateTime> dates = newEvent.dates();
-                            List<dynamic> strategyIds = newEvent.valuesByKey('strategy_id');
-                            for(var i = 0; i < dates.length; i++){
-                              newStrategyMarker.strategyIdDateXMapList.add((dates[i],int.parse(strategyIds[i]),0));
-                            }
-                            newStrategyMarker.updateX();
-                          }
-                          newEventMarker.strategyMarker = newStrategyMarker;
-
+                          newEventMarker.strategyMarker = Utils.getEventStrategyMarkers(ref,newEvent);
                           ref.read(eventDisplayMapProvider.notifier).setEvent(newEvent.id,newEvent);
                           ref.read(eventMarkerListProvider.notifier).add(newEventMarker);
                           ref.read(updateUIProvider.notifier).update();
@@ -279,11 +261,8 @@ class _EventDetailCardState extends ConsumerState<EventDetailCard> {
     startingDate ??= DateTime.now();
     endingDate ??= DateTime.now();
 
-    event.eventForm = EventDetailCardForm(context, event, editable, widget.width, () {
-      setState(() {
-        defaultEventDetail.update();
-      });
-    });
+    event.formWidth = widget.width;
+    event.formEditable = editable;
 
     return Column(
       children: [event],

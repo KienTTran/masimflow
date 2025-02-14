@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:uuid/uuid.dart';
 import '../../utils/utils.dart';
+import '../../widgets/yaml_editor/events/event_detail_card_form.dart';
 import 'event.dart';
 
 class PeriodicParasiteInfo {
@@ -196,7 +197,7 @@ class IntroduceParasitesPeriodicallyState extends EventState<IntroduceParasitesP
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: widget.eventForm.width * 0.85,
+      width: widget.formWidth * 0.85,
       child: ShadForm(
         key: widget.formKey,
         child: Column(
@@ -210,11 +211,20 @@ class IntroduceParasitesPeriodicallyState extends EventState<IntroduceParasitesP
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     SizedBox(
-                      width: widget.eventForm.width * 0.9 * 0.75,
-                      child: widget.eventForm.EventIntegerFormField('location_$i', lower: 0),
+                      width: widget.formWidth * 0.9 * 0.75,
+                      // child: widget.eventForm.EventIntegerFormField('location_$i', lower: 0),
+                      child: EventDetailCardForm(
+                        type: EventDetailCardFormType.integer,
+                        controllerKey: 'location_$i',
+                        editable: widget.formEditable,
+                        width: widget.formWidth * 0.9 * 0.75,
+                        event: widget,
+                        lower: 0.0,
+                        upper: -1.0,
+                      ),
                     ),
-                    (widget.eventForm.editable && (i > 0)) ? SizedBox(
-                      // width: widget.eventForm.width * 0.9 * 0.15,
+                    (widget.formEditable && (i > 0)) ? SizedBox(
+                      // width: widget.formWidth * 0.9 * 0.15,
                         child: ShadButton.ghost(
                           icon: const Icon(Icons.delete),
                           onPressed: () {
@@ -239,10 +249,19 @@ class IntroduceParasitesPeriodicallyState extends EventState<IntroduceParasitesP
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             SizedBox(
-                              width: widget.eventForm.width * 0.9 * 0.75,
-                              child: widget.eventForm.EventIntegerFormField('duration_${i}_$j', lower: 0),
+                              width: widget.formWidth * 0.9 * 0.75,
+                              // child: widget.eventForm.EventIntegerFormField('duration_${i}_$j', lower: 0),
+                              child: EventDetailCardForm(
+                                type: EventDetailCardFormType.integer,
+                                controllerKey: 'duration_${i}_$j',
+                                editable: widget.formEditable,
+                                width: widget.formWidth * 0.9 * 0.75,
+                                event: widget,
+                                lower: 0.0,
+                                upper: -1.0,
+                              )
                             ),
-                            (widget.eventForm.editable && (j != 0) && (j == widget.introductions[i].parasiteInfo.length - 1)) ? SizedBox(
+                            (widget.formEditable && (j != 0) && (j == widget.introductions[i].parasiteInfo.length - 1)) ? SizedBox(
                                 child: ShadButton.ghost(
                                   icon: const Icon(Icons.delete),
                                   onPressed: () {
@@ -258,10 +277,34 @@ class IntroduceParasitesPeriodicallyState extends EventState<IntroduceParasitesP
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            widget.eventForm.EventGenotypeFormField('genotype_aa_sequence_${i}_$j'),
-                            widget.eventForm.EventIntegerFormField('number_of_cases_${i}_$j', lower: 0),
-                            widget.eventForm.EventDateFormField('start_date_${i}_$j'),
-                            (widget.eventForm.editable  && (j == widget.introductions[i].parasiteInfo.length - 1)) ? Column(
+                            // widget.eventForm.EventGenotypeFormField('genotype_aa_sequence_${i}_$j'),
+                            // widget.eventForm.EventIntegerFormField('number_of_cases_${i}_$j', lower: 0),
+                            // widget.eventForm.EventDateFormField('start_date_${i}_$j'),
+                            EventDetailCardForm(
+                              type: EventDetailCardFormType.genotype,
+                              controllerKey: 'genotype_aa_sequence_${i}_$j',
+                              editable: widget.formEditable,
+                              width: widget.formWidth * 0.9 * 0.75,
+                              event: widget,
+                            ),
+                            EventDetailCardForm(
+                              type: EventDetailCardFormType.integer,
+                              controllerKey: 'number_of_cases_${i}_$j',
+                              editable: widget.formEditable,
+                              width: widget.formWidth * 0.9 * 0.75,
+                              event: widget,
+                              lower: 0.0,
+                              upper: -1.0,
+                            ),
+                            EventDetailCardForm(
+                              type: EventDetailCardFormType.date,
+                              controllerKey: 'start_date_${i}_$j',
+                              editable: widget.formEditable,
+                              width: widget.formWidth * 0.9 * 0.75,
+                              event: widget,
+                              dateID: '',
+                            ),
+                            (widget.formEditable  && (j == widget.introductions[i].parasiteInfo.length - 1)) ? Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
@@ -281,7 +324,7 @@ class IntroduceParasitesPeriodicallyState extends EventState<IntroduceParasitesP
                     ),
                   )
               ],
-            widget.eventForm.editable ? Column(
+            widget.formEditable ? Column(
               children: [
                 const Divider(),
                 ShadButton(

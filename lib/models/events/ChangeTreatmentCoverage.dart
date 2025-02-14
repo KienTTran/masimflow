@@ -566,7 +566,7 @@ class ChangeTreatmentCoverageState extends EventState<ChangeTreatmentCoverage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           SizedBox(
-                            width: widget.eventForm.width*0.85,
+                            width: widget.formWidth*0.85,
                             child: Column(
                               mainAxisSize: MainAxisSize.max,
                               mainAxisAlignment: MainAxisAlignment.start,
@@ -576,7 +576,7 @@ class ChangeTreatmentCoverageState extends EventState<ChangeTreatmentCoverage> {
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(widget.coverages[index].type()),
-                                    ((widget.eventForm.editable && index == widget.coverages.length - 1))
+                                    ((widget.formEditable && index == widget.coverages.length - 1))
                                         ? SizedBox(
                                       child: Column(
                                         children: [
@@ -648,9 +648,35 @@ class ChangeTreatmentCoverageState extends EventState<ChangeTreatmentCoverage> {
                                       padding: const EdgeInsets.all(20.0),
                                       child: Column(
                                         children: [
-                                          widget.eventForm.EventDateFormField('${widget.coverages[index].id}#date', dateID: i.toString()),
-                                          widget.eventForm.EventDoubleArrayFormField('${widget.coverages[index].id}#p_treatment_under_5_by_location', lower: 0.0, upper: 1.0),
-                                          widget.eventForm.EventDoubleArrayFormField('${widget.coverages[index].id}#p_treatment_over_5_by_location', lower: 0.0, upper: 1.0),
+                                          // widget.eventForm.EventDateFormField('${widget.coverages[index].id}#date', dateID: i.toString()),
+                                          // widget.eventForm.EventDoubleArrayFormField('${widget.coverages[index].id}#p_treatment_under_5_by_location', lower: 0.0, upper: 1.0),
+                                          // widget.eventForm.EventDoubleArrayFormField('${widget.coverages[index].id}#p_treatment_over_5_by_location', lower: 0.0, upper: 1.0),
+                                          EventDetailCardForm(
+                                            type: EventDetailCardFormType.date,
+                                            controllerKey: '${widget.coverages[index].id}#date',
+                                            editable: widget.formEditable,
+                                            width: widget.formWidth*0.9*0.75,
+                                            event: widget,
+                                            dateID: i.toString(),
+                                          ),
+                                          EventDetailCardForm(
+                                            type: EventDetailCardFormType.doubleArray,
+                                            controllerKey: '${widget.coverages[index].id}#p_treatment_under_5_by_location',
+                                            editable: widget.formEditable,
+                                            width: widget.formWidth*0.9*0.75,
+                                            event: widget,
+                                            lower: 0.0,
+                                            upper: 1.0,
+                                          ),
+                                          EventDetailCardForm(
+                                            type: EventDetailCardFormType.doubleArray,
+                                            controllerKey: '${widget.coverages[index].id}#p_treatment_over_5_by_location',
+                                            editable: widget.formEditable,
+                                            width: widget.formWidth*0.9*0.75,
+                                            event: widget,
+                                            lower: 0.0,
+                                            upper: 1.0,
+                                          ),
                                         ],
                                       ),
                                     ),
@@ -660,8 +686,25 @@ class ChangeTreatmentCoverageState extends EventState<ChangeTreatmentCoverage> {
                                       padding: const EdgeInsets.all(20.0),
                                       child: Column(
                                         children: [
-                                          widget.eventForm.EventDateFormField('${widget.coverages[index].id}#date', dateID: i.toString()),
-                                          widget.eventForm.EventDoubleFormField('${widget.coverages[index].id}#annual_inflation_rate', lower: 0.0, upper: 1.0),
+                                          // widget.eventForm.EventDateFormField('${widget.coverages[index].id}#date', dateID: i.toString()),
+                                          // widget.eventForm.EventDoubleFormField('${widget.coverages[index].id}#annual_inflation_rate', lower: 0.0, upper: 1.0),
+                                          EventDetailCardForm(
+                                            type: EventDetailCardFormType.date,
+                                            controllerKey: '${widget.coverages[index].id}#date',
+                                            editable: widget.formEditable,
+                                            width: widget.formWidth*0.9*0.75,
+                                            event: widget,
+                                            dateID: i.toString(),
+                                          ),
+                                          EventDetailCardForm(
+                                            type: EventDetailCardFormType.double,
+                                            controllerKey: '${widget.coverages[index].id}#annual_inflation_rate',
+                                            editable: widget.formEditable,
+                                            width: widget.formWidth*0.9*0.75,
+                                            event: widget,
+                                            lower: 0.0,
+                                            upper: 1.0,
+                                          ),
                                         ],
                                       ),
                                     ),
@@ -670,10 +713,46 @@ class ChangeTreatmentCoverageState extends EventState<ChangeTreatmentCoverage> {
                                     padding: const EdgeInsets.all(20.0),
                                     child: Column(
                                       children: [
-                                        widget.eventForm.EventDateFormFieldCustomLabel('${widget.coverages[index].id}#date', 'date from', dateID: '0'),
-                                        widget.eventForm.EventDateFormFieldCustomLabel('${widget.coverages[index].id}#date', 'date to', dateID: '1'),
-                                        widget.eventForm.EventDoubleArrayFormField('${widget.coverages[index].id}#p_treatment_under_5_by_location_to', lower: 0.0, upper: 1.0),
-                                        widget.eventForm.EventDoubleArrayFormField('${widget.coverages[index].id}#p_treatment_over_5_by_location_to', lower: 0.0, upper: 1.0),
+                                        // widget.eventForm.EventDateFormFieldCustomLabel('${widget.coverages[index].id}#date', 'date from', dateID: '0'),
+                                        // widget.eventForm.EventDateFormFieldCustomLabel('${widget.coverages[index].id}#date', 'date to', dateID: '1'),
+                                        // widget.eventForm.EventDoubleArrayFormField('${widget.coverages[index].id}#p_treatment_under_5_by_location_to', lower: 0.0, upper: 1.0),
+                                        // widget.eventForm.EventDoubleArrayFormField('${widget.coverages[index].id}#p_treatment_over_5_by_location_to', lower: 0.0, upper: 1.0),
+                                        EventDetailCardForm(
+                                          type: EventDetailCardFormType.dateCustomLabel,
+                                          controllerKey: '${widget.coverages[index].id}#date',
+                                          editable: widget.formEditable,
+                                          width: widget.formWidth*0.9*0.75,
+                                          event: widget,
+                                          dateID: '0',
+                                          dateLabel: 'date from',
+                                        ),
+                                        EventDetailCardForm(
+                                          type: EventDetailCardFormType.dateCustomLabel,
+                                          controllerKey: '${widget.coverages[index].id}#date',
+                                          editable: widget.formEditable,
+                                          width: widget.formWidth*0.9*0.75,
+                                          event: widget,
+                                          dateID: '1',
+                                          dateLabel: 'date to',
+                                        ),
+                                        EventDetailCardForm(
+                                          type: EventDetailCardFormType.doubleArray,
+                                          controllerKey: '${widget.coverages[index].id}#p_treatment_under_5_by_location_to',
+                                          editable: widget.formEditable,
+                                          width: widget.formWidth*0.9*0.75,
+                                          event: widget,
+                                          lower: 0.0,
+                                          upper: 1.0,
+                                        ),
+                                        EventDetailCardForm(
+                                          type: EventDetailCardFormType.doubleArray,
+                                          controllerKey: '${widget.coverages[index].id}#p_treatment_over_5_by_location_to',
+                                          editable: widget.formEditable,
+                                          width: widget.formWidth*0.9*0.75,
+                                          event: widget,
+                                          lower: 0.0,
+                                          upper: 1.0,
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -688,7 +767,7 @@ class ChangeTreatmentCoverageState extends EventState<ChangeTreatmentCoverage> {
             ),
           ),
         ),
-        widget.eventForm.editable ? Column(
+        widget.formEditable ? Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [

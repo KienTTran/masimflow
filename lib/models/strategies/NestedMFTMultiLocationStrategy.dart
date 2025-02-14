@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import 'package:yaml/yaml.dart';
 
 import '../../utils/utils.dart';
+import '../../widgets/yaml_editor/strategies/strategy_detail_card_form.dart';
 
 class NestedMFTMultiLocationStrategy extends Strategy {
   late List<int> strategyIds;
@@ -22,7 +23,7 @@ class NestedMFTMultiLocationStrategy extends Strategy {
     required this.peakDistributionByLocation,
     required this.peakAfter,
     required Map<String, TextEditingController> controllers,
-  }) : super(id: id, name: name, type: 'NestedMFTMultiLocation', controllers: controllers);
+  }) : super(id: id, name: name, type: StrategyType.NestedMFTMultiLocation, controllers: controllers);
 
   factory NestedMFTMultiLocationStrategy.fromYaml(dynamic yaml) {
     if (yaml is! Map) {
@@ -104,7 +105,7 @@ class NestedMFTMultiLocationStrategy extends Strategy {
       peakDistributionByLocation.add(Utils.extractDoubleList(controllers[Utils.getFormKeyID(id, 'start_distribution_by_location_$i')]!.text));
     }
     peakAfter = int.parse(controllers[Utils.getFormKeyID(id, 'peak_after')]!.text);
-    print('Updated NestedMFTMultiLocationStrategy: $name, strategyIds: $strategyIds, startDistributionByLocation: $startDistributionByLocation, peakDistributionByLocation: $peakDistributionByLocation, peakAfter: $peakAfter');
+    // print('Updated NestedMFTMultiLocationStrategy: $name, strategyIds: $strategyIds, startDistributionByLocation: $startDistributionByLocation, peakDistributionByLocation: $peakDistributionByLocation, peakAfter: $peakAfter');
   }
 
   @override
@@ -130,7 +131,7 @@ class NestedMFTMultiLocationStrategyState extends StrategyState<NestedMFTMultiLo
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: widget.strategyForm.width * 0.85,
+      width: widget.formWidth * 0.85,
       child: ShadForm(
         key: widget.formKey,
         autovalidateMode: ShadAutovalidateMode.always,
@@ -139,8 +140,22 @@ class NestedMFTMultiLocationStrategyState extends StrategyState<NestedMFTMultiLo
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Divider(),
-            widget.strategyForm.StrategyStringFormField('name'),
-            widget.strategyForm.StrategyIntegerArrayFormField('strategy_ids', lower: 0),
+            StrategyDetailCardForm(
+                type: StrategyDetailCardFormType.string,
+                controllerKey: 'name',
+                editable: true,
+                width: widget.formWidth * 0.85,
+                strategy: widget
+            ),
+            StrategyDetailCardForm(
+                type: StrategyDetailCardFormType.integerArray,
+                controllerKey: 'strategy_ids',
+                editable: true,
+                width: widget.formWidth * 0.85,
+                strategy: widget,
+                lower: 0.0,
+                upper: -1.0,
+            ),
             for(int locationIndex = 0; locationIndex < 2; locationIndex++)
               Column(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -153,14 +168,38 @@ class NestedMFTMultiLocationStrategyState extends StrategyState<NestedMFTMultiLo
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          widget.strategyForm.StrategyDoubleMatrixFormField('start_distribution_by_location_$locationIndex', lower: 0.0, upper: 1.0),
-                          widget.strategyForm.StrategyDoubleMatrixFormField('peak_distribution_by_location_$locationIndex', lower: 0.0, upper: 1.0),
+                          StrategyDetailCardForm(
+                              type: StrategyDetailCardFormType.doubleMatrix,
+                              controllerKey: 'start_distribution_by_location_$locationIndex',
+                              editable: true,
+                              width: widget.formWidth * 0.85,
+                              strategy: widget,
+                              lower: 0.0,
+                              upper: 1.0
+                          ),
+                          StrategyDetailCardForm(
+                              type: StrategyDetailCardFormType.doubleMatrix,
+                              controllerKey: 'peak_distribution_by_location_$locationIndex',
+                              editable: true,
+                              width: widget.formWidth * 0.85,
+                              strategy: widget,
+                              lower: 0.0,
+                              upper: 1.0
+                          ),
                         ]
                       )
                   ),
+                  StrategyDetailCardForm(
+                      type: StrategyDetailCardFormType.integer,
+                      controllerKey: 'peak_after',
+                      editable: true,
+                      width: widget.formWidth * 0.85,
+                      strategy: widget,
+                      lower: 0.0,
+                      upper: -1.0,
+                  ),
                 ],
               ),
-            widget.strategyForm.StrategyIntegerFormField('peak_after', lower: 0),
           ],
         ),
       ),

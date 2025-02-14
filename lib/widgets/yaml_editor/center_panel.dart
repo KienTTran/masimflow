@@ -136,7 +136,7 @@ class ShapePainter extends CustomPainter {
     }
 
     for(final marker in EventMarkerList) {
-      if(marker.strategyMarker.strategyIdDateXMapList.isNotEmpty){
+      if(marker.strategyMarker.strategyIdDateXLabelMapList.isNotEmpty){
         marker.strategyMarker.lowerX = lowerX;
         marker.strategyMarker.upperX = upperX;
         marker.strategyMarker.defaultY = ConfigMarkerLineY;

@@ -24,6 +24,7 @@ import '../../models/therapy.dart';
 import '../../providers/data_providers.dart';
 import '../../providers/ui_providers.dart';
 import '../../models/markers/config_marker.dart';
+import '../../utils/utils.dart';
 import '../../utils/yaml_writer.dart';
 import '../yaml_editor.dart';
 import 'events/event_widget.dart';
@@ -223,7 +224,8 @@ class _YamlEditorRightPanelState extends ConsumerState<YamlEditorRightPanel> {
           strategyParameters,
           therapyMap,
           drugMap,
-          [(startingDate,-1,0)],
+          [(-1,startingDate,0,'')],
+          [('',startingDate,0)],
           'Initial Strategy',
           startingDate,endingDate,
           -1,
@@ -540,17 +542,7 @@ class _YamlEditorRightPanelState extends ConsumerState<YamlEditorRightPanel> {
           .get()
           .first
           .copy();
-      newStrategyMarker.strategyIdDateXMapList.clear();
-      if (event.name.contains('strategy')) {
-        List<DateTime> dates = event.dates();
-        List<dynamic> strategyIds = event.valuesByKey('strategy_id');
-        for (var i = 0; i < dates.length; i++) {
-          newStrategyMarker.strategyIdDateXMapList.add(
-              (dates[i], int.parse(strategyIds[i]), 0));
-        }
-        newStrategyMarker.updateX();
-      }
-      newEventMarker.strategyMarker = newStrategyMarker;
+      newEventMarker.strategyMarker = Utils.getEventStrategyMarkers(ref, event);
       ref.read(eventMarkerListProvider.notifier).add(newEventMarker);
     }
   }

@@ -60,7 +60,7 @@ class _StrategyCardState extends ConsumerState<StrategyCard> {
                           overflow: TextOverflow.visible,
                         ),
                         ShadBadge.outline(
-                          child: Text(widget.strategy.type),
+                          child: Text(widget.strategy.type.typeAsString),
                         )
                       ],
                     ),
@@ -131,7 +131,7 @@ class _StrategyCardState extends ConsumerState<StrategyCard> {
                         children: [
                           Text(Utils.getCapitalizedWords(widget.strategy.name),),
                           ShadBadge.outline(
-                            child: Text(widget.strategy.type),
+                            child: Text(widget.strategy.type.label),
                           )
                         ],
                       ),

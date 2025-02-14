@@ -343,7 +343,7 @@ class ConfigYamlFileNotifier extends Notifier<YamlMap> {
   /// Updates or inserts a value in the YAML map at the location specified by [keyList].
   /// If the target node is a list, it appends [value] instead of replacing it.
   void updateYamlValueByKeyList(List<String> keyList, dynamic value, {bool append = false}) {
-    print('updateYamlValueByKeyList: keyList = $keyList, value = $value, append = $append');
+    // print('updateYamlValueByKeyList: keyList = $keyList, value = $value, append = $append');
 
     if (keyList.isEmpty) {
       throw ArgumentError('The key list cannot be empty');
@@ -385,121 +385,7 @@ class ConfigYamlFileNotifier extends Notifier<YamlMap> {
     // Assign the updated map back to your global variable.
     mutYamlMap = mutableYamlMap;
 
-    print('Updated YAML map: ${currentMap[lastKey]}');
-  }
-
-
-  // /// Recursively converts an immutable [Map] (and any nested maps) into mutable ones.
-  // Map _toMutableMapUpdate(Map original) {
-  //   Map mutableMap = {};
-  //   original.forEach((key, value) {
-  //     // Ensure the key is treated as a string (YAML may store integer keys as strings)
-  //     var newKey = key.toString();
-  //
-  //     if (value is Map) {
-  //       mutableMap[newKey] = _toMutableMapUpdate(value);
-  //     } else if (value is List) {
-  //       mutableMap[newKey] = value.map((item) {
-  //         return (item is Map) ? _toMutableMapUpdate(item) : item;
-  //       }).toList();
-  //     } else {
-  //       mutableMap[newKey] = value;
-  //     }
-  //   });
-  //   return mutableMap;
-  // }
-  //
-  // /// Updates the YAML map at the location specified by [keyList] with [value].
-  // void updateYamlValueByKeyList(List<String> keyList, dynamic value) {
-  //   print('updateYamlValueByKeyList: keyList = $keyList, value = $value');
-  //
-  //   // Check that we have at least one key.
-  //   if (keyList.isEmpty) {
-  //     throw ArgumentError('The key list cannot be empty');
-  //   }
-  //
-  //   // Convert the top-level YAML map (and nested maps) into a mutable structure.
-  //   Map mutableYamlMap = _toMutableMapUpdate(mutYamlMap);
-  //
-  //   // Traverse the map using the keys, stopping one level before the final key.
-  //   Map currentMap = mutableYamlMap;
-  //   for (int i = 0; i < keyList.length - 1; i++) {
-  //     String key = keyList[i];
-  //
-  //     // Ensure the key is treated as a string to match YAML conventions
-  //     key = key.toString();
-  //
-  //     // If the key does not exist or is not a map, create a new empty map.
-  //     if (!currentMap.containsKey(key) || currentMap[key] is! Map) {
-  //       currentMap[key] = {};
-  //     }
-  //
-  //     // Move one level deeper.
-  //     currentMap = currentMap[key];
-  //   }
-  //
-  //   // Ensure last key is also treated as a string
-  //   String lastKey = keyList.last.toString();
-  //
-  //   // Remove the existing key completely to prevent duplicates
-  //   currentMap.remove(lastKey);
-  //
-  //   // Assign the new value
-  //   currentMap[lastKey] = value;
-  //
-  //   // Assign the updated map back to your global variable.
-  //   mutYamlMap = mutableYamlMap;
-  // }
-
-  /// Recursively converts an immutable [Map] (and any nested maps) into mutable ones.
-  Map _toMutableMapInsert(Map original) {
-    // Create a shallow mutable copy.
-    Map mutableMap = Map.from(original);
-    // Convert any nested maps or lists containing maps.
-    original.forEach((key, value) {
-      if (value is Map) {
-        mutableMap[key] = _toMutableMapInsert(value);
-      } else if (value is List) {
-        mutableMap[key] = value.map((item) {
-          return (item is Map) ? _toMutableMapInsert(item) : item;
-        }).toList();
-      }
-    });
-    return mutableMap;
-  }
-
-  /// Updates the YAML map at the location specified by [keyList] with [value].
-  void insertYamlValueByKeyList(List<String> keyList, dynamic value) {
-    print('updateYamlValueByKeyList: keyList = $keyList, value = $value');
-
-    // Check that we have at least one key.
-    if (keyList.isEmpty) {
-      throw ArgumentError('The key list cannot be empty');
-    }
-
-    // Convert the top-level YAML map (and nested maps) into a mutable structure.
-    Map mutableYamlMap = _toMutableMapInsert(mutYamlMap);
-
-    // Traverse the map using the keys, stopping one level before the final key.
-    Map currentMap = mutableYamlMap;
-    for (int i = 0; i < keyList.length - 1; i++) {
-      String key = keyList[i];
-
-      // If the key does not exist or is not a map, create a new empty map.
-      if (!currentMap.containsKey(key) || currentMap[key] is! Map) {
-        currentMap[key] = {};
-      }
-      // Move one level deeper.
-      currentMap = currentMap[key];
-    }
-
-    // Update the value at the last key.
-    String lastKey = keyList.last;
-    currentMap[lastKey] = value;
-
-    // Optionally, assign the updated mutableYamlMap back to your global variable.
-    mutYamlMap = mutableYamlMap;
-    print('Updated YAML map: ${currentMap[lastKey]}');
+    // print('Updated YAML map: ${currentMap[lastKey]}');
   }
 
   Map getStrategiesByType() {

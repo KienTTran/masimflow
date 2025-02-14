@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:uuid/uuid.dart';
 import '../../utils/utils.dart';
+import '../../widgets/yaml_editor/events/event_detail_card_form.dart';
 import 'event.dart';
 
 class ParasiteInfo {
@@ -187,7 +188,7 @@ class IntroduceParasitesState extends EventState<IntroduceParasites> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: widget.eventForm.width * 0.85,
+      width: widget.formWidth * 0.85,
       child: ShadForm(
         key: widget.formKey,
         child: Column(
@@ -201,11 +202,20 @@ class IntroduceParasitesState extends EventState<IntroduceParasites> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     SizedBox(
-                      width: widget.eventForm.width * 0.9 * 0.75,
-                      child: widget.eventForm.EventIntegerFormField('location_$i', lower: 0),
+                      width: widget.formWidth * 0.9 * 0.75,
+                      // child: widget.eventForm.EventIntegerFormField('location_$i', lower: 0),
+                      child: EventDetailCardForm(
+                        type: EventDetailCardFormType.integer,
+                        controllerKey: 'location_$i',
+                        editable: widget.formEditable,
+                        width: widget.formWidth * 0.9 * 0.75,
+                        event: widget,
+                        lower: 0.0,
+                        upper: -1.0,
+                      ),
                     ),
-                    (widget.eventForm.editable && i != 0 && i == widget.introductions.length - 1) ? SizedBox(
-                      // width: widget.eventForm.width * 0.9 * 0.15,
+                    (widget.formEditable && i != 0 && i == widget.introductions.length - 1) ? SizedBox(
+                      // width: widget.formWidth * 0.9 * 0.15,
                         child: ShadButton.ghost(
                           icon: const Icon(Icons.delete),
                           onPressed: () {
@@ -231,11 +241,19 @@ class IntroduceParasitesState extends EventState<IntroduceParasites> {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               SizedBox(
-                                width: widget.eventForm.width * 0.9 * 0.75,
-                                child: widget.eventForm.EventDateFormField('date_${i}_$j'),
+                                width: widget.formWidth * 0.9 * 0.75,
+                                // child: widget.eventForm.EventDateFormField('date_${i}_$j'),
+                                child: EventDetailCardForm(
+                                  type: EventDetailCardFormType.date,
+                                  controllerKey: 'date_${i}_$j',
+                                  editable: widget.formEditable,
+                                  width: widget.formWidth*0.9*0.75,
+                                  event: widget,
+                                  dateID: '',
+                                ),
                               ),
-                              (widget.eventForm.editable && j != 0 && j == widget.introductions[i].parasiteInfo.length - 1) ? SizedBox(
-                                // width: widget.eventForm.width * 0.9 * 0.15,
+                              (widget.formEditable && j != 0 && j == widget.introductions[i].parasiteInfo.length - 1) ? SizedBox(
+                                // width: widget.formWidth * 0.9 * 0.15,
                                   child: ShadButton.ghost(
                                     icon: const Icon(Icons.delete),
                                     onPressed: () {
@@ -252,9 +270,25 @@ class IntroduceParasitesState extends EventState<IntroduceParasites> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              widget.eventForm.EventIntegerFormField('number_of_cases_${i}_$j', lower: 0),
-                              widget.eventForm.EventGenotypeFormField('genotype_aa_sequence_${i}_$j'),
-                              (widget.eventForm.editable  && j == widget.introductions[i].parasiteInfo.length - 1 ) ? Column(
+                              // widget.eventForm.EventIntegerFormField('number_of_cases_${i}_$j', lower: 0),
+                              // widget.eventForm.EventGenotypeFormField('genotype_aa_sequence_${i}_$j'),
+                              EventDetailCardForm(
+                                type: EventDetailCardFormType.integer,
+                                controllerKey: 'number_of_cases_${i}_$j',
+                                editable: widget.formEditable,
+                                width: widget.formWidth*0.9*0.75,
+                                event: widget,
+                                lower: 0.0,
+                                upper: -1.0,
+                              ),
+                              EventDetailCardForm(
+                                type: EventDetailCardFormType.genotype,
+                                controllerKey: 'genotype_aa_sequence_${i}_$j',
+                                editable: widget.formEditable,
+                                width: widget.formWidth*0.9*0.75,
+                                event: widget,
+                              ),
+                              (widget.formEditable  && j == widget.introductions[i].parasiteInfo.length - 1 ) ? Column(
                                 children: [
                                   ShadButton(
                                     onPressed: () {
@@ -273,7 +307,7 @@ class IntroduceParasitesState extends EventState<IntroduceParasites> {
                     )
                   )
               ],
-            widget.eventForm.editable ? Column(
+            widget.formEditable ? Column(
               children: [
                 const Divider(),
                 ShadButton(

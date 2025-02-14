@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:masimflow/widgets/yaml_editor/events/event_detail_card_form.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:uuid/uuid.dart';
 import '../../utils/utils.dart';
@@ -124,7 +125,7 @@ class ChangeInterruptedFeedingRateState extends EventState<ChangeInterruptedFeed
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: widget.eventForm.width * 0.85,
+      width: widget.formWidth * 0.85,
       child: ShadForm(
         key: widget.formKey,
         child: Column(
@@ -138,11 +139,21 @@ class ChangeInterruptedFeedingRateState extends EventState<ChangeInterruptedFeed
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     SizedBox(
-                      width: widget.eventForm.width*0.9*0.75,
-                      child: widget.eventForm.EventIntegerFormField('location_$i', lower: 0),
+                      width: widget.formWidth*0.9*0.75,
+                      // child: widget.eventForm.EventIntegerFormField('location_$i', lower: 0),
+                      child: EventDetailCardForm(
+                        type: EventDetailCardFormType.integer,
+                        controllerKey: 'location_$i',
+                        editable: widget.formEditable,
+                        width: widget.formWidth*0.9*0.75,
+                        event: widget,
+                        lower: 0.0,
+                        upper: -1.0,
+                      ),
                     ),
                     SizedBox(
-                      child: (widget.eventForm.editable && i != 0 && i == widget.dates().length - 1) ? SizedBox(
+                      child: (
+                          widget.formEditable && i != 0 && i == widget.dates().length - 1) ? SizedBox(
                         // width: widget.width*0.9*0.25,
                         child: ShadButton.ghost(
                           icon: Icon(Icons.delete),
@@ -163,13 +174,28 @@ class ChangeInterruptedFeedingRateState extends EventState<ChangeInterruptedFeed
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      widget.eventForm.EventDateFormField('date_$i'),
-                      widget.eventForm.EventDoubleFormField('interrupted_feeding_rate_$i', lower: 0.0, upper: 1.0),
+                      EventDetailCardForm(
+                        type: EventDetailCardFormType.date,
+                        controllerKey: 'date_$i',
+                        editable: widget.formEditable,
+                        width: widget.formWidth*0.9*0.75,
+                        event: widget,
+                        dateID: '',
+                      ),
+                      EventDetailCardForm(
+                        type: EventDetailCardFormType.double,
+                        controllerKey: 'interrupted_feeding_rate_$i',
+                        editable: widget.formEditable,
+                        width: widget.formWidth*0.9*0.75,
+                        event: widget,
+                        lower: 0.0,
+                        upper: 1.0,
+                      ),
                     ],
                   ),
                 )
               ],
-            widget.eventForm.editable ? Column(
+            widget.formEditable ? Column(
               children: [
                 const Divider(),
                 ShadButton(
