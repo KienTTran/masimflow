@@ -62,6 +62,10 @@ abstract class Event extends EventWidgetRender {
   void addEntry();
   void deleteEntry();
 
+  List<String> getYamlKeyList(){
+    return ['population_events'];
+  }
+
   List<DateTime> dates() {
     List<DateTime> dates = [];
     for (var key in controllers.keys) {

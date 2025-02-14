@@ -133,6 +133,6 @@ class StrategyMarker extends Marker {
   }
 
   StrategyMarker copy(){
-    return StrategyMarker(strategyParameters, therapies, drugs, strategyIdDateXMapList, text, startingDate, endingDate, y, radius, dy, isStart, isEnd, selected);
+    return StrategyMarker(strategyParameters, therapies, drugs, strategyIdDateXMapList, Utils.getCapitalizedWords(text), startingDate, endingDate, y, radius, dy, isStart, isEnd, selected);
   }
 }

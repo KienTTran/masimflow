@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:masimflow/providers/data_providers.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import '../../widgets/yaml_editor/strategies/strategy_detail_card_form.dart';
 import 'AdaptiveCyclingStrategy.dart';
@@ -43,6 +44,9 @@ abstract class Strategy extends StrategyWidgetRender {
   Map<String, dynamic> toYamlMap();
   Strategy copy();
   void update();
+  List<String> getYamlKeyList(){
+    return ['strategy_parameters', 'strategy_db', initialIndex.toString()];
+  }
 
   Strategy({
     required this.id,

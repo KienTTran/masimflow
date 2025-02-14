@@ -18,6 +18,10 @@ class BoolResetProvider extends Notifier<bool> {
   bool get() {
     return state;
   }
+
+  void update() {
+    set(true);
+  }
 }
 
 final updateUIProvider = NotifierProvider<BoolResetProvider, bool>(() {

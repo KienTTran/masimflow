@@ -51,7 +51,6 @@ class _YamlEditorWidgetState extends ConsumerState<YamlEditorWidget> {
 
   @override
   Widget build(BuildContext context) {
-    var yamlFile = ref.watch(configYamlFileProvider);
     return Padding(
       padding: EdgeInsets.all(16.0),
       child:
@@ -60,23 +59,23 @@ class _YamlEditorWidgetState extends ConsumerState<YamlEditorWidget> {
           children: [
             ShadResizablePanel(
               defaultSize: 0.7,
-              maxSize: 0.7,
-              minSize: 0.7,
+              // maxSize: 0.7,
+              // minSize: 0.7,
               child: ShadResizablePanelGroup(
                 axis: Axis.vertical,
                 children: [
                   ShadResizablePanel(
                       defaultSize: 0.8,
-                      minSize: 0.8,
-                      maxSize: 0.8,
+                      // minSize: 0.8,
+                      // maxSize: 0.8,
                       child: YamlEditorCenterPanel(
                           width: MediaQuery.of(context).size.width * 0.7,
                       )
                   ),
                   ShadResizablePanel(
                       defaultSize: 0.2,
-                      maxSize: 0.2,
-                      minSize: 0.2,
+                      // maxSize: 0.2,
+                      // minSize: 0.2,
                       child: YamlEditorBottomPanel(
                           width: MediaQuery.of(context).size.width * 0.7,
                           height: MediaQuery.of(context).size.height * 0.2,
@@ -87,8 +86,8 @@ class _YamlEditorWidgetState extends ConsumerState<YamlEditorWidget> {
             ),
             ShadResizablePanel(
                 defaultSize: 0.3,
-                minSize: 0.3,
-                maxSize: 0.3,
+                // minSize: 0.3,
+                // maxSize: 0.3,
                 child: YamlEditorRightPanel(
                     width: MediaQuery.of(context).size.width * 0.3)
             ),

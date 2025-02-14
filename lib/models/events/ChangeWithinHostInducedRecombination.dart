@@ -44,9 +44,11 @@ class ChangeWithinHostInducedRecombination extends Event {
   @override
   Map<String, dynamic> toYamlMap() {
     return {
-      'id': id,
       'name': name,
-      'info': controllers.map((key, value) => MapEntry(key, value.text)),
+      'info': {
+        'date': controllers[Utils.getFormKeyID(id, 'date')]!.text,
+        'value': controllers[Utils.getFormKeyID(id, 'value')]!.text,
+      }
     };
   }
 

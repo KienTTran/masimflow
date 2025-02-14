@@ -72,7 +72,7 @@ class EventMarker extends Marker {
     canvasWidth = upperX - lowerX;
     for(int i = 0; i < xs.length; i++){
       Utils.drawMarker(lowerX + xs[i]*canvasWidth, y, dy, radius,
-          '${DateFormat('yyyy/MM/dd').format(event.dates()[i])}\n${event.name}',
+          '${DateFormat('yyyy/MM/dd').format(event.dates()[i])}\n${Utils.getCapitalizedWords(event.name)}',
           painter, canvas, size, color: color, maxLines: 2);
     }
   }

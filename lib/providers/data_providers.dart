@@ -181,26 +181,6 @@ final strategyMarkerListProvider = NotifierProvider<StrategyMarkerListNotifier, 
   return StrategyMarkerListNotifier();
 });
 
-class EventListNotifier extends Notifier<List<Event>> {
-
-  void set(List<Event> data) {
-    state = data;
-  }
-
-  List<Event> get() {
-    return state;
-  }
-
-  @override
-  build() {
-    return [];
-  }
-}
-
-final eventListProvider = NotifierProvider<EventListNotifier, List<Event>>(() {
-  return EventListNotifier();
-});
-
 class DrugMapNotifier extends Notifier<Map<int,Drug>> {
 
   void set(Map<int,Drug> data) {
@@ -343,16 +323,145 @@ class ConfigYamlFileNotifier extends Notifier<YamlMap> {
   }
 
   /// Recursively converts an immutable [Map] (and any nested maps) into mutable ones.
-  Map _toMutableMap(Map original) {
+  Map _toMutableMapUpdateOrAppend(Map original) {
+    Map mutableMap = {};
+    original.forEach((key, value) {
+      var newKey = key.toString(); // Ensure the key is treated as a string
+      if (value is Map) {
+        mutableMap[newKey] = _toMutableMapUpdateOrAppend(value);
+      } else if (value is List) {
+        mutableMap[newKey] = value.map((item) {
+          return (item is Map) ? _toMutableMapUpdateOrAppend(item) : item;
+        }).toList();
+      } else {
+        mutableMap[newKey] = value;
+      }
+    });
+    return mutableMap;
+  }
+
+  /// Updates or inserts a value in the YAML map at the location specified by [keyList].
+  /// If the target node is a list, it appends [value] instead of replacing it.
+  void updateYamlValueByKeyList(List<String> keyList, dynamic value, {bool append = false}) {
+    print('updateYamlValueByKeyList: keyList = $keyList, value = $value, append = $append');
+
+    if (keyList.isEmpty) {
+      throw ArgumentError('The key list cannot be empty');
+    }
+
+    // Convert the top-level YAML map into a mutable structure.
+    Map mutableYamlMap = _toMutableMapUpdateOrAppend(mutYamlMap);
+
+    // Traverse the map using the keys, stopping one level before the final key.
+    Map currentMap = mutableYamlMap;
+    for (int i = 0; i < keyList.length - 1; i++) {
+      String key = keyList[i].toString();
+
+      // If the key does not exist or is not a map, create a new empty map.
+      if (!currentMap.containsKey(key) || currentMap[key] is! Map) {
+        currentMap[key] = {};
+      }
+
+      // Move one level deeper.
+      currentMap = currentMap[key];
+    }
+
+    // Ensure the last key is treated as a string.
+    String lastKey = keyList.last.toString();
+
+    if (append) {
+      // If the key exists and is already a list, append the value.
+      if (currentMap.containsKey(lastKey) && currentMap[lastKey] is List) {
+        currentMap[lastKey].add(value);
+      } else {
+        // If the key does not exist or is not a list, create a new list.
+        currentMap[lastKey] = [value];
+      }
+    } else {
+      // Overwrite existing value if not appending.
+      currentMap[lastKey] = value;
+    }
+
+    // Assign the updated map back to your global variable.
+    mutYamlMap = mutableYamlMap;
+
+    print('Updated YAML map: ${currentMap[lastKey]}');
+  }
+
+
+  // /// Recursively converts an immutable [Map] (and any nested maps) into mutable ones.
+  // Map _toMutableMapUpdate(Map original) {
+  //   Map mutableMap = {};
+  //   original.forEach((key, value) {
+  //     // Ensure the key is treated as a string (YAML may store integer keys as strings)
+  //     var newKey = key.toString();
+  //
+  //     if (value is Map) {
+  //       mutableMap[newKey] = _toMutableMapUpdate(value);
+  //     } else if (value is List) {
+  //       mutableMap[newKey] = value.map((item) {
+  //         return (item is Map) ? _toMutableMapUpdate(item) : item;
+  //       }).toList();
+  //     } else {
+  //       mutableMap[newKey] = value;
+  //     }
+  //   });
+  //   return mutableMap;
+  // }
+  //
+  // /// Updates the YAML map at the location specified by [keyList] with [value].
+  // void updateYamlValueByKeyList(List<String> keyList, dynamic value) {
+  //   print('updateYamlValueByKeyList: keyList = $keyList, value = $value');
+  //
+  //   // Check that we have at least one key.
+  //   if (keyList.isEmpty) {
+  //     throw ArgumentError('The key list cannot be empty');
+  //   }
+  //
+  //   // Convert the top-level YAML map (and nested maps) into a mutable structure.
+  //   Map mutableYamlMap = _toMutableMapUpdate(mutYamlMap);
+  //
+  //   // Traverse the map using the keys, stopping one level before the final key.
+  //   Map currentMap = mutableYamlMap;
+  //   for (int i = 0; i < keyList.length - 1; i++) {
+  //     String key = keyList[i];
+  //
+  //     // Ensure the key is treated as a string to match YAML conventions
+  //     key = key.toString();
+  //
+  //     // If the key does not exist or is not a map, create a new empty map.
+  //     if (!currentMap.containsKey(key) || currentMap[key] is! Map) {
+  //       currentMap[key] = {};
+  //     }
+  //
+  //     // Move one level deeper.
+  //     currentMap = currentMap[key];
+  //   }
+  //
+  //   // Ensure last key is also treated as a string
+  //   String lastKey = keyList.last.toString();
+  //
+  //   // Remove the existing key completely to prevent duplicates
+  //   currentMap.remove(lastKey);
+  //
+  //   // Assign the new value
+  //   currentMap[lastKey] = value;
+  //
+  //   // Assign the updated map back to your global variable.
+  //   mutYamlMap = mutableYamlMap;
+  // }
+
+  /// Recursively converts an immutable [Map] (and any nested maps) into mutable ones.
+  Map _toMutableMapInsert(Map original) {
     // Create a shallow mutable copy.
     Map mutableMap = Map.from(original);
     // Convert any nested maps or lists containing maps.
     original.forEach((key, value) {
       if (value is Map) {
-        mutableMap[key] = _toMutableMap(value);
+        mutableMap[key] = _toMutableMapInsert(value);
       } else if (value is List) {
         mutableMap[key] = value.map((item) {
-          return (item is Map) ? _toMutableMap(item) : item;
+          return (item is Map) ? _toMutableMapInsert(item) : item;
         }).toList();
       }
     });
@@ -360,7 +469,7 @@ class ConfigYamlFileNotifier extends Notifier<YamlMap> {
   }
 
   /// Updates the YAML map at the location specified by [keyList] with [value].
-  void updateYamlValueByKeyList(List<String> keyList, dynamic value) {
+  void insertYamlValueByKeyList(List<String> keyList, dynamic value) {
     print('updateYamlValueByKeyList: keyList = $keyList, value = $value');
 
     // Check that we have at least one key.
@@ -369,7 +478,7 @@ class ConfigYamlFileNotifier extends Notifier<YamlMap> {
     }
 
     // Convert the top-level YAML map (and nested maps) into a mutable structure.
-    Map mutableYamlMap = _toMutableMap(mutYamlMap);
+    Map mutableYamlMap = _toMutableMapInsert(mutYamlMap);
 
     // Traverse the map using the keys, stopping one level before the final key.
     Map currentMap = mutableYamlMap;
@@ -390,7 +499,7 @@ class ConfigYamlFileNotifier extends Notifier<YamlMap> {
 
     // Optionally, assign the updated mutableYamlMap back to your global variable.
     mutYamlMap = mutableYamlMap;
-    // print('Updated YAML map: $mutYamlMap');
+    print('Updated YAML map: ${currentMap[lastKey]}');
   }
 
   Map getStrategiesByType() {
@@ -419,36 +528,4 @@ class ConfigYamlFileNotifier extends Notifier<YamlMap> {
 
 final configYamlFileProvider = NotifierProvider<ConfigYamlFileNotifier, YamlMap>(() {
   return ConfigYamlFileNotifier();
-});
-
-class FormKeyNotifier extends Notifier<GlobalKey<ShadFormState>> {
-
-  void setKey(String key, dynamic value) {
-    state.currentState?.fields.putIfAbsent(key, () => value);
-  }
-
-  dynamic getValue(String key) {
-    return state.currentState?.fields[key];
-  }
-
-  void updateKey(String key, dynamic value) {
-    state.currentState?.fields[key]?.didChange(value);
-  }
-
-  void set(GlobalKey<ShadFormState> data) {
-    state = data;
-  }
-
-  GlobalKey<ShadFormState> get() {
-    return state;
-  }
-
-  @override
-  build() {
-    return GlobalKey<ShadFormState>();
-  }
-}
-
-final eventDetailFormKeyProvider = NotifierProvider<FormKeyNotifier, GlobalKey<ShadFormState>>(() {
-  return FormKeyNotifier();
 });

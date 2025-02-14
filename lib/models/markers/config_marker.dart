@@ -75,6 +75,8 @@ class ConfigMarker extends Marker {
       y = defaultY;
     }
     canvasWidth = upperX - lowerX;
-   Utils.drawMarker(lowerX + xs.first*canvasWidth, y, dy, radius, config.name,painter,canvas,size);
+   Utils.drawMarker(lowerX + xs.first*canvasWidth, y, dy, radius,
+       '${DateFormat('yyyy/MM/dd').format(config.date)}\n${Utils.getCapitalizedWords(config.name)}',
+       painter,canvas,size, maxLines: 2);
   }
 }

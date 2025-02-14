@@ -137,7 +137,9 @@ class _EventDetailCardState extends ConsumerState<EventDetailCard> {
                           }
                           ref.read(eventDisplayMapProvider.notifier).setEvent(defaultEventDetail.id, defaultEventDetail);
                           ref.read(eventMarkerListProvider.notifier).set(eventMarkerList);
-                          ref.read(updateUIProvider.notifier).set(true);
+                          ref.read(updateUIProvider.notifier).update();
+                          ref.read(configYamlFileProvider.notifier).mutYamlMap['population_events'] =
+                              ref.read(eventDisplayMapProvider.notifier).get().values.map((e) => e.toYamlMap()).toList();
                           setState(() { });
                           widget.popBack();
                         }
@@ -220,7 +222,10 @@ class _EventDetailCardState extends ConsumerState<EventDetailCard> {
 
                           ref.read(eventDisplayMapProvider.notifier).setEvent(newEvent.id,newEvent);
                           ref.read(eventMarkerListProvider.notifier).add(newEventMarker);
-                          ref.read(updateUIProvider.notifier).set(true);
+                          ref.read(updateUIProvider.notifier).update();
+                          ref.read(configYamlFileProvider.notifier).updateYamlValueByKeyList(
+                              defaultEventDetail.getYamlKeyList(),
+                              defaultEventDetail.toYamlMap(), append: true);
 
                           // for(var event in ref.read(eventDisplayMapProvider.notifier).get().values){
                           //   print('all event ${event.id} ${event.controllers.keys} ${event.controllers.values} ${event.dates}');
@@ -238,7 +243,7 @@ class _EventDetailCardState extends ConsumerState<EventDetailCard> {
                         // print('Delete event ${defaultEventDetail.id}');
                         ref.read(eventMarkerListProvider.notifier).deleteEventID(defaultEventDetail.id);
                         ref.read(eventDisplayMapProvider.notifier).deleteEventID(defaultEventDetail.id);
-                        ref.read(updateUIProvider.notifier).set(true);
+                        ref.read(updateUIProvider.notifier).update();
                         setState(() {
                         });
                         widget.popBack();

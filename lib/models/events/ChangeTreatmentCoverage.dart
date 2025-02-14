@@ -455,20 +455,20 @@ class ChangeTreatmentCoverage extends Event {
       'info': coverages.map((coverage) {
         if (coverage is SteadyTreatmentCoverage) {
           return {
-            'type': 'steady_treatment_coverage',
+            'type': TreatmentCoverageType.SteadyTCM.label,
             'date': DateFormat('yyyy/MM/dd').format(coverage.date),
             'p_treatment_under_5_by_location': coverage.pTreatmentUnder5ByLocation,
             'p_treatment_over_5_by_location': coverage.pTreatmentOver5ByLocation,
           };
         } else if (coverage is InflatedTreatmentCoverage) {
           return {
-            'type': 'inflated_treatment_coverage',
+            'type': TreatmentCoverageType.InflatedTCM.label,
             'date': DateFormat('yyyy/MM/dd').format(coverage.date),
             'annual_inflation_rate': coverage.annualInflationRate,
           };
         } else if (coverage is LinearTreatmentCoverage) {
           return {
-            'type': 'linear_treatment_coverage',
+            'type': TreatmentCoverageType.LinearTCM.label,
             'from_date': DateFormat('yyyy/MM/dd').format(coverage.fromDate),
             'to_date': DateFormat('yyyy/MM/dd').format(coverage.toDate),
             'p_treatment_under_5_by_location_to': coverage.pTreatmentUnder5ByLocationTo,

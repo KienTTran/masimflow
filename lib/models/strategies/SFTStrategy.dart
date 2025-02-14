@@ -69,7 +69,7 @@ class SFTStrategy extends Strategy {
     return {
       'name': name,
       'type': type,
-      'therapy_ids': [therapyIds]
+      'therapy_ids': therapyIds
     };
   }
 }

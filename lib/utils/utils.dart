@@ -12,7 +12,7 @@ class Utils {
     canvas.drawLine(Offset(x, y), Offset(x, y - dy), paint);
     canvas.drawRect(Rect.fromCenter(center: Offset(x,y), width: radius, height: radius), paint);
     canvas.drawRect(Rect.fromCenter(center: Offset(x,y-dy), width: radius, height: radius), paint);
-    drawText(x, y - dy, dy < 0 ? -(radius*2) : radius*4, text, canvas, size, color: color, maxLines: maxLines);
+    drawText(x, y - dy, dy < 0 ? -(radius*2) : radius*5, text, canvas, size, color: color, maxLines: maxLines);
   }
 
   static void drawText(double x, double y, double dy, String text, Canvas canvas, Size size,{int maxLines = 1, color = Colors.black, maxWidth = 150}) {

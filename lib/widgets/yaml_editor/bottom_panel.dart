@@ -345,7 +345,7 @@ class _YamlEditorBottomPanelState extends ConsumerState<YamlEditorBottomPanel> {
                         m.setEndingDate(marker.endingDate);
                         m.updateXs();
                       }
-                      ref.read(updateUIProvider.notifier).set(true);
+                      ref.read(updateUIProvider.notifier).update();
                     }
                   },
                 ),

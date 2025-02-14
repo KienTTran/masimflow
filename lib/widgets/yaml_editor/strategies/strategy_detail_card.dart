@@ -75,13 +75,15 @@ class _StrategyDetailCardState extends ConsumerState<StrategyDetailCard> {
                           defaultStrategyDetail.update();
                           ref.read(strategyParametersProvider.notifier).get().strategyDb[defaultStrategyDetail.initialIndex] = defaultStrategyDetail;
                           ref.read(strategyTemplateMapProvider.notifier).setStrategy(defaultStrategyDetail.id, defaultStrategyDetail);
+                          ref.read(configYamlFileProvider.notifier).updateYamlValueByKeyList(defaultStrategyDetail.getYamlKeyList(),
+                              defaultStrategyDetail.toYamlMap());
                         }
                         catch(e){
                           print('Error updating strategy: $e');
                         }
                         if(formKey.currentState!.saveAndValidate()){
                           widget.popBack();
-                          ref.read(updateUIProvider.notifier).set(true);
+                          ref.read(updateUIProvider.notifier).update();
                         }
                       },
                       child: Text('Save changes')

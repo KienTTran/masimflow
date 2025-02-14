@@ -16,6 +16,7 @@ import "package:flutter/services.dart" as s;
 
 import '../../models/drug.dart';
 import '../../models/events/event.dart';
+import '../../models/markers/event_marker.dart';
 import '../../models/markers/strategy_marker.dart';
 import '../../models/strategies/strategy.dart';
 import '../../models/strategy_parameters.dart';
@@ -70,6 +71,21 @@ class _YamlEditorRightPanelState extends ConsumerState<YamlEditorRightPanel> {
       eventList = await EventParser.fromAssets(eventFilePath);
       eventList.forEach((event) {
         ref.read(eventTemplateMapProvider.notifier).setEvent(event.id, event);
+      });
+    }
+    catch (e) {
+      print('Error parsing Event yaml data: $e');
+    }
+  }
+
+  void parseEventDataFromYaml(YamlMap yamlMap) {
+    eventList.clear();
+    ref.read(eventTemplateMapProvider.notifier).clear();
+
+    try {
+      eventList = EventParser.fromYamlMap(yamlMap);
+      eventList.forEach((event) {
+        ref.read(eventDisplayMapProvider.notifier).setEvent(event.id, event);
       });
     }
     catch (e) {
@@ -135,7 +151,7 @@ class _YamlEditorRightPanelState extends ConsumerState<YamlEditorRightPanel> {
     }
   }
 
-  void parseYamlData(YamlMap yamlFile,double canvasWidth) {
+  void parseYamlData(YamlMap yamlFile) {
 
     if(yamlFile.isEmpty) {
       return;
@@ -251,8 +267,7 @@ class _YamlEditorRightPanelState extends ConsumerState<YamlEditorRightPanel> {
       var yamlFile = loadYaml(yamlRaw);
       ref.read(configYamlFileProvider.notifier).set(yamlFile);
       ref.read(configYamlFileProvider.notifier).setFileName('config_template.yaml');
-      var centerPanelWidth = ref.read(panelWidthMapProvider.notifier).getValue('center');
-      parseYamlData(yamlFile,centerPanelWidth * 0.8);
+      parseYamlData(yamlFile);
     }
     catch (e) {
       print('Error parsing Config Template yaml data: $e');
@@ -276,199 +291,267 @@ class _YamlEditorRightPanelState extends ConsumerState<YamlEditorRightPanel> {
     return ShadResizablePanelGroup(
           axis: Axis.vertical,
           children: [
-            ShadResizablePanel(
-                defaultSize: 0.1,
-                maxSize: 0.1,
-                minSize: 0.1,
-                child:
-                Wrap(
-                  direction: Axis.horizontal,
-                  // mainAxisSize: MainAxisSize.max,
-                  // mainAxisAlignment: MainAxisAlignment.center,
-                  // crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ShadButton(
-                      onPressed: () async {
-                        loadEventConfigData();
-                        loadConfigTemplateData();
-                      },
-                      icon: const Icon(Icons.file_open_sharp),
-                      child: const Flexible(child: Text('Load config template', overflow: TextOverflow.ellipsis,)),
-                    ),
-                    SizedBox(width: 10),
-                    ShadButton(
-                      onPressed: () async {
-                        // Select file based on web or mobile
-                        try{
-                          FilePickerResult? result = await FilePicker.platform.pickFiles(
-                            type: FileType.custom,
-                            allowedExtensions: ['yml','yaml'],
-                          );
-
-                          if (result != null && result.files.isNotEmpty) {
-                            var yamlRaw;
-                            if(kIsWeb){
-                              //read to yaml
-                              yamlRaw = loadYaml(utf8.decode(result.files.first.bytes!));
-                            }
-                            else {
-                              File file = File(result.files.single.path!);
-                              print(file.path);
-                              yamlRaw = loadYaml(file.path);
-                            }
-                            setState(() {
-                              ref.read(configYamlFileProvider.notifier).set(yamlRaw);
-                              ref.read(configYamlFileProvider.notifier).setFileName(result.files.single.name);
-                              var centerPanelWidth = ref.read(panelWidthMapProvider.notifier).getValue('center');
-                              parseYamlData(yamlRaw,centerPanelWidth * 0.8);
-                            });
-                          } else {
-                            // User canceled the picker
-                            ref.read(configYamlFileProvider.notifier).set(YamlMap.wrap({}));
-                          }
-                        } on PlatformException catch (e) {
-                          print('Unsupported operation $e');
-                        } catch (e) {
-                          print(e.toString());
-                        }
-                      },
-                      icon: const Icon(Icons.upload_file),
-                      child: const Flexible(child: Text('Upload YML file', overflow: TextOverflow.ellipsis,)),
-                    ),
-                    SizedBox(height: 10),
-                    ShadButton(
-                      onPressed: () async {
-                        // Select file based on web or mobile
-                        try{
-                          if (kIsWeb) {
-                            final writer = YamlWriter();
-                            final mutYamlFile = ref.read(configYamlFileProvider.notifier).getMutYamlMap();
-
-                            if(mutYamlFile.isEmpty){
-                              return;
-                            }
-
-                            String yamlTest = writer.write(mutYamlFile);
-
-                            List<String> file_contents = [yamlTest];
-                            var blob = webFile.Blob(file_contents, 'text/plain', 'native');
-
-                            var anchorElement = webFile.AnchorElement(
-                              href: webFile.Url.createObjectUrlFromBlob(blob).toString(),
-                            )..setAttribute("download", "download_yaml.yml")..click();
-                          }
-                        } on PlatformException catch (e) {
-                          print('Unsupported operation $e');
-                        } catch (e) {
-                          print(e.toString());
-                        }
-                      },
-                      icon: const Icon(Icons.save_alt),
-                      child: const Flexible(child: Text('Download YML file', overflow: TextOverflow.ellipsis,)),
-                    )
-                  ],
-                ),
-            ),
+            // ShadResizablePanel(
+            //     defaultSize: 0.1,
+            //     maxSize: 0.1,
+            //     minSize: 0.1,
+            //     child:,
+            // ),
             ShadResizablePanel(
                 defaultSize: 0.9,
                 maxSize: 0.9,
-                child: ref.read(configMarkerListProvider.notifier).get().isEmpty ?
-                SizedBox() :ShadTabs(
-                  value: currentTab,
-                  tabs: [
-                    ShadTab(
-                      value: 'events',
-                      onPressed: (){
-                        setState(() {
-                          currentTab = 'events';
-                        });
-                      },
-                      content: eventList.isNotEmpty ? Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: SizedBox(
-                          height: MediaQuery.of(context).size.height*0.7,
-                          child: SearchableList(
-                              initialList: eventList,
-                              filter: (value){
-                                return eventList.where((element) => element.name.contains(value)).toList();
-                              },
-                              displaySearchIcon: false,
-                              emptyWidget:  Container(),
-                              inputDecoration: const InputDecoration(
-                                labelText: "Search Events",
-                                fillColor: Colors.white,
-                                suffixIcon: Icon(Icons.search),
-                              ),
-                              itemBuilder: (Event event){
-                                return Padding(
-                                  padding: const EdgeInsets.only(top: 16),
-                                  child: EventCard(
-                                      width: widget.width*0.8,
-                                      height: MediaQuery.of(context).size.height*0.7,
-                                      event: event),
-                                );
-                              }
-                          ),
+                child: Column(
+                  children: [
+                    Wrap(
+                      direction: Axis.horizontal,
+                      // mainAxisSize: MainAxisSize.max,
+                      // mainAxisAlignment: MainAxisAlignment.center,
+                      // crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ShadButton(
+                          onPressed: () async {
+                            setState(() {
+                              resetAllData();
+                              loadEventConfigData();
+                              loadConfigTemplateData();
+                              ref.read(updateUIProvider.notifier).update();
+                            });
+                          },
+                          icon: const Icon(Icons.file_open_sharp),
+                          child: const Flexible(child: Text('Load template', overflow: TextOverflow.ellipsis,)),
                         ),
-                      ) : const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text('Events'),
-                      ),
-                      child: const Flexible(child: Text('Events', overflow: TextOverflow.ellipsis,))
-                    ),
-                    ShadTab(
-                        value: 'strategies',
-                        onPressed: (){
-                          setState(() {
-                            currentTab = 'strategies';
-                          });
-                        },
-                        content: ref.read(strategyParametersProvider.notifier).get().strategyDb.isNotEmpty ? Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: SizedBox(
-                            height: MediaQuery.of(context).size.height*0.7,
-                            child: SearchableList(
-                                initialList: ref.read(strategyParametersProvider.notifier).get().strategies,
-                                filter: (value){
-                                  return ref.read(strategyParametersProvider.notifier).get().strategies
-                                      .where((element) => element.name.contains(value)).toList();
-                                },
-                                displaySearchIcon: false,
-                                emptyWidget:  Container(),
-                                inputDecoration: const InputDecoration(
-                                  labelText: "Search Strategies",
-                                  fillColor: Colors.white,
-                                  suffixIcon: Icon(Icons.search),
-                                ),
-                                itemBuilder: (Strategy strategy){
-                                  return Padding(
-                                    padding: const EdgeInsets.only(top: 16),
-                                    child: StrategyCard(
-                                        width: widget.width*0.8,
-                                        height: MediaQuery.of(context).size.height*0.7,
-                                        strategy: strategy),
-                                  );
+                        SizedBox(width: 10),
+                        ShadButton(
+                          onPressed: () async {
+                            // Select file based on web or mobile
+                            try{
+                              FilePickerResult? result = await FilePicker.platform.pickFiles(
+                                type: FileType.custom,
+                                allowedExtensions: ['yml','yaml'],
+                              );
+                              if (result != null && result.files.isNotEmpty) {
+                                var yamlRaw;
+                                if(kIsWeb){
+                                  //read to yaml
+                                  yamlRaw = loadYaml(utf8.decode(result.files.first.bytes!));
                                 }
+                                else {
+                                  File file = File(result.files.single.path!);
+                                  print(file.path);
+                                  yamlRaw = loadYaml(file.path);
+                                }
+                                setState(() {
+                                  resetAllData();
+                                  ref.read(configYamlFileProvider.notifier).set(yamlRaw);
+                                  ref.read(configYamlFileProvider.notifier).setFileName(result.files.single.name);
+                                  parseYamlData(yamlRaw);
+                                  parseEventDataFromYaml(yamlRaw);
+                                  loadEventConfigData();
+                                  addEventMarkers();
+                                  ref.read(updateUIProvider.notifier).update();
+                                });
+                              } else {
+                                // User canceled the picker
+                                ref.read(configYamlFileProvider.notifier).set(YamlMap.wrap({}));
+                              }
+                            } on PlatformException catch (e) {
+                              print('Unsupported operation $e');
+                            } catch (e) {
+                              print(e.toString());
+                            }
+                          },
+                          icon: const Icon(Icons.upload_file),
+                          child: const Flexible(child: Text('Upload YML', overflow: TextOverflow.ellipsis,)),
+                        ),
+                        SizedBox(height: 10),
+                        ShadButton(
+                          onPressed: () async {
+                            // Select file based on web or mobile
+                            try{
+                              if (kIsWeb) {
+                                final writer = YamlWriter();
+                                final mutYamlFile = ref.read(configYamlFileProvider.notifier).getMutYamlMap();
+
+                                if(mutYamlFile.isEmpty){
+                                  return;
+                                }
+
+                                String yamlTest = writer.write(mutYamlFile);
+
+                                List<String> file_contents = [yamlTest];
+                                var blob = webFile.Blob(file_contents, 'text/plain', 'native');
+
+                                var anchorElement = webFile.AnchorElement(
+                                  href: webFile.Url.createObjectUrlFromBlob(blob).toString(),
+                                )..setAttribute("download", "download_yaml.yml")..click();
+                              }
+                            } on PlatformException catch (e) {
+                              print('Unsupported operation $e');
+                            } catch (e) {
+                              print(e.toString());
+                            }
+                          },
+                          icon: const Icon(Icons.save_alt),
+                          child: const Flexible(child: Text('Download YML', overflow: TextOverflow.ellipsis,)),
+                        )
+                      ],
+                    ),ref.read(configMarkerListProvider.notifier).get().isEmpty ?
+                    SizedBox() : ShadTabs(
+                      value: currentTab,
+                      tabs: [
+                        ShadTab(
+                          value: 'events',
+                          onPressed: (){
+                            setState(() {
+                              currentTab = 'events';
+                            });
+                          },
+                          content: eventList.isNotEmpty ? Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: SizedBox(
+                              height: MediaQuery.of(context).size.height*0.7,
+                              child: SearchableList(
+                                  initialList: eventList,
+                                  filter: (value){
+                                    return eventList.where((element) => element.name.contains(value)).toList();
+                                  },
+                                  displaySearchIcon: false,
+                                  emptyWidget:  Container(),
+                                  inputDecoration: const InputDecoration(
+                                    labelText: "Search Events",
+                                    fillColor: Colors.white,
+                                    suffixIcon: Icon(Icons.search),
+                                  ),
+                                  itemBuilder: (Event event){
+                                    return Padding(
+                                      padding: const EdgeInsets.only(top: 16),
+                                      child: EventCard(
+                                          width: widget.width*0.8,
+                                          height: MediaQuery.of(context).size.height*0.7,
+                                          event: event),
+                                    );
+                                  }
+                              ),
                             ),
+                          ) : const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text('Events'),
                           ),
-                        ) : const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text('Strategies'),
+                          child: const Flexible(child: Text('Events', overflow: TextOverflow.ellipsis,))
                         ),
-                        child: const Flexible(child: Text('Strategies', overflow: TextOverflow.ellipsis,))
+                        ShadTab(
+                            value: 'strategies',
+                            onPressed: (){
+                              setState(() {
+                                currentTab = 'strategies';
+                              });
+                            },
+                            content: ref.read(strategyParametersProvider.notifier).get().strategyDb.isNotEmpty ? Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: SizedBox(
+                                height: MediaQuery.of(context).size.height*0.7,
+                                child: SearchableList(
+                                    initialList: ref.read(strategyParametersProvider.notifier).get().strategies,
+                                    filter: (value){
+                                      return ref.read(strategyParametersProvider.notifier).get().strategies
+                                          .where((element) => element.name.contains(value)).toList();
+                                    },
+                                    displaySearchIcon: false,
+                                    emptyWidget:  Container(),
+                                    inputDecoration: const InputDecoration(
+                                      labelText: "Search Strategies",
+                                      fillColor: Colors.white,
+                                      suffixIcon: Icon(Icons.search),
+                                    ),
+                                    itemBuilder: (Strategy strategy){
+                                      return Padding(
+                                        padding: const EdgeInsets.only(top: 16),
+                                        child: StrategyCard(
+                                            width: widget.width*0.8,
+                                            height: MediaQuery.of(context).size.height*0.7,
+                                            strategy: strategy),
+                                      );
+                                    }
+                                ),
+                              ),
+                            ) : const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text('Strategies'),
+                            ),
+                            child: const Flexible(child: Text('Strategies', overflow: TextOverflow.ellipsis,))
+                        ),
+                        const ShadTab(
+                            value: 'setting',
+                            content: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: SizedBox(),
+                            ),
+                            child: Text('Settings', overflow: TextOverflow.ellipsis,),
+                        )
+                      ],
                     ),
-                    const ShadTab(
-                        value: 'setting',
-                        content: Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: SizedBox(),
-                        ),
-                        child: Text('Settings', overflow: TextOverflow.ellipsis,),
-                    )
                   ],
                 )
             ),
           ]
       );
+  }
+
+  void resetAllData() {
+    ref.read(eventDisplayMapProvider.notifier).set({});
+    ref.read(eventMarkerListProvider.notifier).set([]);
+    ref.read(strategyMarkerListProvider.notifier).set([]);
+    ref.read(configMarkerListProvider.notifier).set([]);
+    ref.read(strategyParametersProvider.notifier).set(StrategyParameters(
+      strategyDb: {},
+      initialStrategyId: 0,
+      recurrentTherapyId: 0,
+      massDrugAdministration: MassDrugAdministration(
+        ageBracketProbIndividualPresentAtMDA: [],
+        enable: false,
+        mdaTherapyId: 0,
+        meanProbIndividualPresentAtMDA: [],
+        sdProbIndividualPresentAtMDA: [],
+      ),
+    ));
+    ref.read(drugMapProvider.notifier).set({});
+    ref.read(therapyMapProvider.notifier).set({});
+    ref.read(dateMapProvider.notifier).set({});
+    ref.read(configYamlFileProvider.notifier).set(YamlMap.wrap({}));
+    ref.read(configYamlFileProvider.notifier).setFileName('');
+  }
+
+  void addEventMarkers() {
+    for (final event in ref
+        .read(eventDisplayMapProvider.notifier)
+        .get()
+        .values) {
+      EventMarker newEventMarker = EventMarker(
+          event,
+          startingDate,
+          endingDate,
+          -1,
+          10,
+          -500,
+          false
+      );
+      StrategyMarker newStrategyMarker = ref
+          .read(strategyMarkerListProvider.notifier)
+          .get()
+          .first
+          .copy();
+      newStrategyMarker.strategyIdDateXMapList.clear();
+      if (event.name.contains('strategy')) {
+        List<DateTime> dates = event.dates();
+        List<dynamic> strategyIds = event.valuesByKey('strategy_id');
+        for (var i = 0; i < dates.length; i++) {
+          newStrategyMarker.strategyIdDateXMapList.add(
+              (dates[i], int.parse(strategyIds[i]), 0));
+        }
+        newStrategyMarker.updateX();
+      }
+      newEventMarker.strategyMarker = newStrategyMarker;
+      ref.read(eventMarkerListProvider.notifier).add(newEventMarker);
+    }
   }
 }

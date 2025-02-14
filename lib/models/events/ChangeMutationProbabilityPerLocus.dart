@@ -47,7 +47,10 @@ class ChangeMutationProbabilityPerLocus extends Event {
   Map<String, dynamic> toYamlMap() {
     return {
       'name': name,
-      'info': controllers.map((key, controller) => MapEntry(key, controller.text)),
+      'info': {
+        'date': controllers[Utils.getFormKeyID(id, 'date')]!.text,
+        'mutation_probability_per_locus': controllers[Utils.getFormKeyID(id, 'mutation_probability_per_locus')]!.text,
+      }
     };
   }
 
