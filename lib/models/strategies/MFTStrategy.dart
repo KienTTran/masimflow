@@ -66,23 +66,26 @@ class MFTStrategy extends Strategy {
 
   @override
   Strategy copy() {
-    // TODO: implement copy
-    throw UnimplementedError();
+    String newId = Uuid().v4();
+    Map<String, TextEditingController> newControllers = {};
+    newControllers[Utils.getFormKeyID(newId, 'name')] = TextEditingController(text: controllers[Utils.getFormKeyID(id, 'name')]!.text);
+    newControllers[Utils.getFormKeyID(newId, 'therapy_ids')] = TextEditingController(text: controllers[Utils.getFormKeyID(id, 'therapy_ids')]!.text);
+    newControllers[Utils.getFormKeyID(newId, 'distribution')] = TextEditingController(text: controllers[Utils.getFormKeyID(id, 'distribution')]!.text);
+
+    return MFTStrategy(
+      id: newId,
+      name: controllers[Utils.getFormKeyID(id, 'name')]!.text,
+      therapyIds: Utils.extractIntegerList(controllers[Utils.getFormKeyID(id, 'therapy_ids')]!.text),
+      distribution: Utils.extractDoubleList(controllers[Utils.getFormKeyID(id, 'distribution')]!.text),
+      controllers: newControllers,
+    );
   }
 
   @override
   void update() {
     name = controllers[Utils.getFormKeyID(id, 'name')]!.text;
-    therapyIds = controllers[Utils.getFormKeyID(id, 'therapy_ids')]!.text
-        .replaceAll('[', '').replaceAll(']', '')
-        .split(',')
-        .map((e) => int.parse(e))
-        .toList();
-    distribution = controllers[Utils.getFormKeyID(id, 'distribution')]!.text
-        .replaceAll('[', '').replaceAll(']', '')
-        .split(',')
-        .map((e) => double.parse(e))
-        .toList();
+    therapyIds = Utils.extractIntegerList(controllers[Utils.getFormKeyID(id, 'therapy_ids')]!.text);
+    distribution = Utils.extractDoubleList(controllers[Utils.getFormKeyID(id, 'distribution')]!.text);
     // print('Updated MFTStrategy: $name, therapyIds: $therapyIds, distribution: $distribution');
   }
 
@@ -90,7 +93,7 @@ class MFTStrategy extends Strategy {
   Map<String, dynamic> toYamlMap() {
     return {
       'name': name,
-      'type': type,
+      'type': type.typeAsString,
       'therapy_ids': therapyIds,
       'distribution': distribution
     };
@@ -104,6 +107,7 @@ class MFTStrategyState extends StrategyState<MFTStrategy> {
       width: widget.formWidth * 0.85,
       child: ShadForm(
         key: widget.formKey,
+        enabled: widget.formEditable,
         autovalidateMode: ShadAutovalidateMode.always,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -114,14 +118,14 @@ class MFTStrategyState extends StrategyState<MFTStrategy> {
               type: StrategyDetailCardFormType.string,
               strategy: widget,
               width: widget.formWidth * 0.85,
-              editable: true,
+              editable: widget.formEditable,
               controllerKey: 'name'
             ),
             StrategyDetailCardForm(
               type: StrategyDetailCardFormType.multipleTherapy,
               strategy: widget,
               width: widget.formWidth * 0.85,
-              editable: true,
+              editable: widget.formEditable,
               controllerKey: 'therapy_ids',
               therapyMap: ref.read(therapyMapProvider.notifier).get()
             ),
@@ -129,7 +133,7 @@ class MFTStrategyState extends StrategyState<MFTStrategy> {
               type: StrategyDetailCardFormType.doubleArray,
               strategy: widget,
               width: widget.formWidth * 0.85,
-              editable: true,
+              editable: widget.formEditable,
               controllerKey: 'distribution',
               typeKey: 'therapy_ids',
               lower: 0.0,

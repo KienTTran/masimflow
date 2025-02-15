@@ -28,7 +28,6 @@ class StrategyDetailCard extends ConsumerStatefulWidget {
 
 /// This widget wraps the _builddefaultStrategyDetails function. It accepts an strategy and a flag [editable].
 class _StrategyDetailCardState extends ConsumerState<StrategyDetailCard> {
-  final GlobalKey<ShadFormState> formKey = GlobalKey<ShadFormState>();
   DateTime randomDate = DateTime.now();
   late Strategy defaultStrategyDetail;
 
@@ -36,7 +35,6 @@ class _StrategyDetailCardState extends ConsumerState<StrategyDetailCard> {
   void initState() {
     super.initState();
     defaultStrategyDetail = ref.read(strategyTemplateMapProvider.notifier).get()[widget.strategyID]!;
-    defaultStrategyDetail.formKey = formKey;
   }
 
   @override
@@ -44,7 +42,10 @@ class _StrategyDetailCardState extends ConsumerState<StrategyDetailCard> {
     var updateUI = ref.watch(updateUIProvider);
 
     if(updateUI){
-      setState(() {});
+      setState(() {
+        defaultStrategyDetail = ref.read(strategyTemplateMapProvider.notifier).get()[widget.strategyID]!;
+        defaultStrategyDetail.formKey = GlobalKey<ShadFormState>();
+      });
     }
     // print('StrategyDetailCard build: ${widget.strategyID}');
     return SizedBox(
@@ -66,7 +67,7 @@ class _StrategyDetailCardState extends ConsumerState<StrategyDetailCard> {
                 children: [
                   ShadButton(
                       onPressed: () {
-                        if(formKey.currentState!.validate(focusOnInvalid: true)){
+                        if(defaultStrategyDetail.formKey.currentState!.validate(focusOnInvalid: true)){
                         }
                         else{
                           return;
@@ -81,7 +82,7 @@ class _StrategyDetailCardState extends ConsumerState<StrategyDetailCard> {
                         catch(e){
                           print('Error updating strategy: $e');
                         }
-                        if(formKey.currentState!.saveAndValidate()){
+                        if(defaultStrategyDetail.formKey.currentState!.saveAndValidate()){
                           widget.popBack();
                           ref.read(updateUIProvider.notifier).update();
                         }
@@ -90,12 +91,13 @@ class _StrategyDetailCardState extends ConsumerState<StrategyDetailCard> {
                   ),
                   ShadButton(
                       onPressed: () {
-                        if(formKey.currentState!.saveAndValidate()){
-                          widget.popBack();
-                        }
-                        else{
-                          return;
-                        }
+                        // if(formKey.currentState!.validate()){
+                        //   widget.popBack();
+                        // }
+                        // else{
+                        //   return;
+                        // }
+                        widget.popBack();
                       },
                       child: Text('Cancel')
                   ),

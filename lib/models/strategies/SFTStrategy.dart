@@ -54,8 +54,11 @@ class SFTStrategy extends Strategy {
 
   @override
   Strategy copy() {
-    // TODO: implement copy
-    throw UnimplementedError();
+    String newId = Uuid().v4();
+    Map<String, TextEditingController> newControllers = {};
+    newControllers[Utils.getFormKeyID(newId, 'name')] = TextEditingController(text: name);
+    newControllers[Utils.getFormKeyID(newId, 'therapy_ids')] = TextEditingController(text: therapyIds.toString());
+    return SFTStrategy(id: newId, name: name, therapyIds: therapyIds, controllers: newControllers);
   }
 
   @override
@@ -69,7 +72,7 @@ class SFTStrategy extends Strategy {
   Map<String, dynamic> toYamlMap() {
     return {
       'name': name,
-      'type': type,
+      'type': type.typeAsString,
       'therapy_ids': therapyIds
     };
   }
@@ -82,6 +85,7 @@ class SFTStrategyState extends StrategyState<SFTStrategy> {
       width: widget.formWidth * 0.85,
       child: ShadForm(
         key: widget.formKey,
+        enabled: widget.formEditable,
         autovalidateMode: ShadAutovalidateMode.always,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -91,14 +95,14 @@ class SFTStrategyState extends StrategyState<SFTStrategy> {
             StrategyDetailCardForm(
                 type: StrategyDetailCardFormType.string,
                 controllerKey: 'name',
-                editable: true,
+                editable: widget.formEditable,
                 width: widget.formWidth * 0.85,
                 strategy: widget
             ),
             StrategyDetailCardForm(
                 type: StrategyDetailCardFormType.singleTherapy,
                 controllerKey: 'therapy_ids',
-                editable: true,
+                editable: widget.formEditable,
                 width: widget.formWidth * 0.85,
                 strategy: widget,
                 therapyMap: ref.read(therapyMapProvider.notifier).get()

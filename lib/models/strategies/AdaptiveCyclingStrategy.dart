@@ -77,18 +77,29 @@ class AdaptiveCyclingStrategy extends Strategy {
 
   @override
   Strategy copy() {
-    // TODO: implement copy
-    throw UnimplementedError();
+    String newId = Uuid().v4();
+    Map<String, TextEditingController> newControllers = {};
+    newControllers[Utils.getFormKeyID(newId, 'name')] = TextEditingController(text: controllers[Utils.getFormKeyID(id, 'name')]!.text);
+    newControllers[Utils.getFormKeyID(newId, 'therapy_ids')] = TextEditingController(text: controllers[Utils.getFormKeyID(id, 'therapy_ids')]!.text);
+    newControllers[Utils.getFormKeyID(newId, 'trigger_value')] = TextEditingController(text: controllers[Utils.getFormKeyID(id, 'trigger_value')]!.text);
+    newControllers[Utils.getFormKeyID(newId, 'delay_until_actual_trigger')] = TextEditingController(text: controllers[Utils.getFormKeyID(id, 'delay_until_actual_trigger')]!.text);
+    newControllers[Utils.getFormKeyID(newId, 'turn_off_days')] = TextEditingController(text: controllers[Utils.getFormKeyID(id, 'turn_off_days')]!.text);
+
+    return AdaptiveCyclingStrategy(
+      id: newId,
+      name: name,
+      therapyIds: List<int>.from(therapyIds),
+      triggerValue: triggerValue,
+      delayUntilActualTrigger: delayUntilActualTrigger,
+      turnOffDays: turnOffDays,
+      controllers: newControllers,
+    );
   }
 
   @override
   void update() {
     name = controllers[Utils.getFormKeyID(id, 'name')]!.text;
-    therapyIds = controllers[Utils.getFormKeyID(id, 'therapy_ids')]!.text
-        .replaceAll('[', '').replaceAll(']', '')
-        .split(',')
-        .map((e) => int.parse(e.trim()))
-        .toList();
+    therapyIds = Utils.extractIntegerList(controllers[Utils.getFormKeyID(id, 'therapy_ids')]!.text);
     triggerValue = double.parse(controllers[Utils.getFormKeyID(id, 'trigger_value')]!.text);
     delayUntilActualTrigger = int.parse(controllers[Utils.getFormKeyID(id, 'delay_until_actual_trigger')]!.text);
     turnOffDays = int.parse(controllers[Utils.getFormKeyID(id, 'turn_off_days')]!.text);
@@ -99,7 +110,7 @@ class AdaptiveCyclingStrategy extends Strategy {
   Map<String, dynamic> toYamlMap() {
     return {
       'name': name,
-      'type': type,
+      'type': type.typeAsString,
       'therapy_ids': therapyIds,
       'trigger_value': triggerValue,
       'delay_until_actual_trigger': delayUntilActualTrigger,
@@ -115,6 +126,7 @@ class AdaptiveCyclingStrategyState extends StrategyState<AdaptiveCyclingStrategy
       width: widget.formWidth * 0.85,
       child: ShadForm(
         key: widget.formKey,
+        enabled: widget.formEditable,
         autovalidateMode: ShadAutovalidateMode.always,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,

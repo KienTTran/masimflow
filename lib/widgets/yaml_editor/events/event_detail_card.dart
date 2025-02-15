@@ -36,7 +36,6 @@ class EventDetailCard extends ConsumerStatefulWidget {
 
 /// This widget wraps the _builddefaultEventDetails function. It accepts an event and a flag [editable].
 class _EventDetailCardState extends ConsumerState<EventDetailCard> {
-  final GlobalKey<ShadFormState> formKey = GlobalKey<ShadFormState>();
   DateTime randomDate = DateTime.now();
   late Event defaultEventDetail;
 
@@ -49,7 +48,7 @@ class _EventDetailCardState extends ConsumerState<EventDetailCard> {
     else{
       defaultEventDetail = ref.read(eventTemplateMapProvider.notifier).get()[widget.eventID]!;
     }
-    defaultEventDetail.formKey = formKey;
+    defaultEventDetail.formKey = GlobalKey<ShadFormState>();
   }
 
   @override
@@ -75,7 +74,7 @@ class _EventDetailCardState extends ConsumerState<EventDetailCard> {
                   widget.isUpdate ? ShadButton(
                       onPressed: () {
 
-                        if(formKey.currentState!.validate(focusOnInvalid: true)){
+                        if(defaultEventDetail.formKey.currentState!.validate(focusOnInvalid: true)){
                           // print('valid');
                         }
                         else{
@@ -118,7 +117,7 @@ class _EventDetailCardState extends ConsumerState<EventDetailCard> {
                             return;
                           }
                         }
-                        if(formKey.currentState!.saveAndValidate()){
+                        if(defaultEventDetail.formKey.currentState!.saveAndValidate()){
                           var eventMarkerList = ref.read(eventMarkerListProvider.notifier).get();
                           for(var i = 0; i < eventMarkerList.length; i++){
                             if(eventMarkerList[i].event.id == defaultEventDetail.id){
@@ -128,20 +127,21 @@ class _EventDetailCardState extends ConsumerState<EventDetailCard> {
                               break;
                             }
                           }
-                          ref.read(eventDisplayMapProvider.notifier).setEvent(defaultEventDetail.id, defaultEventDetail);
-                          ref.read(eventMarkerListProvider.notifier).set(eventMarkerList);
-                          ref.read(updateUIProvider.notifier).update();
-                          ref.read(configYamlFileProvider.notifier).mutYamlMap['population_events'] =
-                              ref.read(eventDisplayMapProvider.notifier).get().values.map((e) => e.toYamlMap()).toList();
-                          setState(() { });
-                          widget.popBack();
+                          setState(() {
+                            ref.read(eventDisplayMapProvider.notifier).setEvent(defaultEventDetail.id, defaultEventDetail);
+                            ref.read(eventMarkerListProvider.notifier).set(eventMarkerList);
+                            ref.read(updateUIProvider.notifier).update();
+                            ref.read(configYamlFileProvider.notifier).mutYamlMap['population_events'] =
+                                ref.read(eventDisplayMapProvider.notifier).get().values.map((e) => e.toYamlMap()).toList();
+                            widget.popBack();
+                          });
                         }
                       },
                       child: Text('Save changes')
                   ) : ShadButton(
                       onPressed: () {
 
-                        if(formKey.currentState!.validate(focusOnInvalid: true)){
+                        if(defaultEventDetail.formKey.currentState!.validate(focusOnInvalid: true)){
                           // print('valid');
                         }
                         else{
@@ -186,7 +186,7 @@ class _EventDetailCardState extends ConsumerState<EventDetailCard> {
                             return;
                           }
                         }
-                        if(formKey.currentState!.saveAndValidate()){
+                        if(defaultEventDetail.formKey.currentState!.saveAndValidate()){
 
                           // for(var event in ref.read(eventDisplayMapProvider.notifier).get().values){
                           //   print('added event ${event.id} ${event.controllers.keys} ${event.controllers.values} ${event.dates}');
@@ -201,19 +201,21 @@ class _EventDetailCardState extends ConsumerState<EventDetailCard> {
                               -500,
                               false
                           );
-                          newEventMarker.strategyMarker = Utils.getEventStrategyMarkers(ref,newEvent);
-                          ref.read(eventDisplayMapProvider.notifier).setEvent(newEvent.id,newEvent);
-                          ref.read(eventMarkerListProvider.notifier).add(newEventMarker);
-                          ref.read(updateUIProvider.notifier).update();
-                          ref.read(configYamlFileProvider.notifier).updateYamlValueByKeyList(
-                              defaultEventDetail.getYamlKeyList(),
-                              defaultEventDetail.toYamlMap(), append: true);
+                          setState(() {
+                            newEventMarker.strategyMarker = Utils.getEventStrategyMarkers(ref,newEvent);
+                            ref.read(eventDisplayMapProvider.notifier).setEvent(newEvent.id,newEvent);
+                            ref.read(eventMarkerListProvider.notifier).add(newEventMarker);
+                            ref.read(updateUIProvider.notifier).update();
+                            ref.read(configYamlFileProvider.notifier).updateYamlValueByKeyList(
+                                defaultEventDetail.getYamlKeyList(),
+                                defaultEventDetail.toYamlMap(), append: true);
 
-                          // for(var event in ref.read(eventDisplayMapProvider.notifier).get().values){
-                          //   print('all event ${event.id} ${event.controllers.keys} ${event.controllers.values} ${event.dates}');
-                          // }
+                            // for(var event in ref.read(eventDisplayMapProvider.notifier).get().values){
+                            //   print('all event ${event.id} ${event.controllers.keys} ${event.controllers.values} ${event.dates}');
+                            // }
 
-                          widget.popBack();
+                            widget.popBack();
+                          });
                         }
                       },
                       child: Text('Add event')
@@ -223,18 +225,20 @@ class _EventDetailCardState extends ConsumerState<EventDetailCard> {
                       onPressed: () {
                         //Delete event
                         // print('Delete event ${defaultEventDetail.id}');
-                        ref.read(eventMarkerListProvider.notifier).deleteEventID(defaultEventDetail.id);
-                        ref.read(eventDisplayMapProvider.notifier).deleteEventID(defaultEventDetail.id);
-                        ref.read(updateUIProvider.notifier).update();
                         setState(() {
+                          ref.read(eventMarkerListProvider.notifier).deleteEventID(defaultEventDetail.id);
+                          ref.read(eventDisplayMapProvider.notifier).deleteEventID(defaultEventDetail.id);
+                          ref.read(updateUIProvider.notifier).update();
+                          ref.read(configYamlFileProvider.notifier).mutYamlMap['population_events'] =
+                              ref.read(eventDisplayMapProvider.notifier).get().values.map((e) => e.toYamlMap()).toList();
+                          widget.popBack();
                         });
-                        widget.popBack();
                       },
                       child: Text('Delete')
                   ) : SizedBox(),
                   ShadButton(
                       onPressed: () {
-                        if(formKey.currentState!.saveAndValidate()){
+                        if(defaultEventDetail.formKey.currentState!.saveAndValidate()){
                           widget.popBack();
                         }
                         else{

@@ -85,18 +85,31 @@ class NestedMFTMultiLocationStrategy extends Strategy {
 
   @override
   Strategy copy() {
-    // TODO: implement copy
-    throw UnimplementedError();
+    String newId = Uuid().v4();
+    Map<String, TextEditingController> newControllers = {};
+    newControllers[Utils.getFormKeyID(newId, 'name')] = TextEditingController(text: controllers[Utils.getFormKeyID(id, 'name')]!.text);
+    newControllers[Utils.getFormKeyID(newId, 'strategy_ids')] = TextEditingController(text: controllers[Utils.getFormKeyID(id, 'strategy_ids')]!.text);
+    for(int i = 0; i < startDistributionByLocation.length; i++){
+      newControllers[Utils.getFormKeyID(newId, 'start_distribution_by_location_$i')] = TextEditingController(text: controllers[Utils.getFormKeyID(id, 'start_distribution_by_location_$i')]!.text);
+      newControllers[Utils.getFormKeyID(newId, 'peak_distribution_by_location_$i')] = TextEditingController(text: controllers[Utils.getFormKeyID(id, 'peak_distribution_by_location_$i')]!.text);
+    }
+    newControllers[Utils.getFormKeyID(newId, 'peak_after')] = TextEditingController(text: controllers[Utils.getFormKeyID(id, 'peak_after')]!.text);
+
+    return NestedMFTMultiLocationStrategy(
+      id: newId,
+      name: controllers[Utils.getFormKeyID(id, 'name')]!.text,
+      strategyIds: Utils.extractIntegerList(controllers[Utils.getFormKeyID(id, 'strategy_ids')]!.text),
+      startDistributionByLocation: List<List<double>>.from(startDistributionByLocation),
+      peakDistributionByLocation: List<List<double>>.from(peakDistributionByLocation),
+      peakAfter: int.parse(controllers[Utils.getFormKeyID(id, 'peak_after')]!.text),
+      controllers: newControllers,
+    );
   }
 
   @override
   void update() {
     name = controllers[Utils.getFormKeyID(id, 'name')]!.text;
-    strategyIds = controllers[Utils.getFormKeyID(id, 'strategy_ids')]!.text
-        .replaceAll('[', '').replaceAll(']', '')
-        .split(',')
-        .map((e) => int.parse(e.trim()))
-        .toList();
+    strategyIds = Utils.extractIntegerList(controllers[Utils.getFormKeyID(id, 'strategy_ids')]!.text);
     startDistributionByLocation.clear();
     peakDistributionByLocation.clear();
     final int locations = 2;
@@ -112,7 +125,7 @@ class NestedMFTMultiLocationStrategy extends Strategy {
   Map<String, dynamic> toYamlMap() {
     return {
       'name': name,
-      'type': type,
+      'type': type.typeAsString,
       'strategy_ids': strategyIds,
       'start_distribution_by_location': startDistributionByLocation,
       'peak_distribution_by_location': peakDistributionByLocation,
@@ -134,6 +147,7 @@ class NestedMFTMultiLocationStrategyState extends StrategyState<NestedMFTMultiLo
       width: widget.formWidth * 0.85,
       child: ShadForm(
         key: widget.formKey,
+        enabled: widget.formEditable,
         autovalidateMode: ShadAutovalidateMode.always,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -143,16 +157,17 @@ class NestedMFTMultiLocationStrategyState extends StrategyState<NestedMFTMultiLo
             StrategyDetailCardForm(
                 type: StrategyDetailCardFormType.string,
                 controllerKey: 'name',
-                editable: true,
+                editable: widget.formEditable,
                 width: widget.formWidth * 0.85,
                 strategy: widget
             ),
             StrategyDetailCardForm(
-                type: StrategyDetailCardFormType.integerArray,
+                type: StrategyDetailCardFormType.multipleStrategy,
                 controllerKey: 'strategy_ids',
-                editable: true,
+                editable: widget.formEditable,
                 width: widget.formWidth * 0.85,
                 strategy: widget,
+                strategyParameters: ref.read(strategyParametersProvider.notifier).get(),
                 lower: 0.0,
                 upper: -1.0,
             ),
@@ -171,7 +186,7 @@ class NestedMFTMultiLocationStrategyState extends StrategyState<NestedMFTMultiLo
                           StrategyDetailCardForm(
                               type: StrategyDetailCardFormType.doubleMatrix,
                               controllerKey: 'start_distribution_by_location_$locationIndex',
-                              editable: true,
+                              editable: widget.formEditable,
                               width: widget.formWidth * 0.85,
                               strategy: widget,
                               lower: 0.0,
@@ -180,7 +195,7 @@ class NestedMFTMultiLocationStrategyState extends StrategyState<NestedMFTMultiLo
                           StrategyDetailCardForm(
                               type: StrategyDetailCardFormType.doubleMatrix,
                               controllerKey: 'peak_distribution_by_location_$locationIndex',
-                              editable: true,
+                              editable: widget.formEditable,
                               width: widget.formWidth * 0.85,
                               strategy: widget,
                               lower: 0.0,
@@ -192,7 +207,7 @@ class NestedMFTMultiLocationStrategyState extends StrategyState<NestedMFTMultiLo
                   StrategyDetailCardForm(
                       type: StrategyDetailCardFormType.integer,
                       controllerKey: 'peak_after',
-                      editable: true,
+                      editable: widget.formEditable,
                       width: widget.formWidth * 0.85,
                       strategy: widget,
                       lower: 0.0,

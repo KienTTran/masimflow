@@ -62,18 +62,25 @@ class CyclingStrategy extends Strategy {
 
   @override
   Strategy copy() {
-    // TODO: implement copy
-    throw UnimplementedError();
+    String newId = Uuid().v4();
+    Map<String, TextEditingController> newControllers = {};
+    newControllers[Utils.getFormKeyID(newId, 'name')] = TextEditingController(text: controllers[Utils.getFormKeyID(id, 'name')]!.text);
+    newControllers[Utils.getFormKeyID(newId, 'therapy_ids')] = TextEditingController(text: controllers[Utils.getFormKeyID(id, 'therapy_ids')]!.text);
+    newControllers[Utils.getFormKeyID(newId, 'cycling_time')] = TextEditingController(text: controllers[Utils.getFormKeyID(id, 'cycling_time')]!.text);
+
+    return CyclingStrategy(
+      id: newId,
+      name: name,
+      therapyIds: List<int>.from(therapyIds),
+      cyclingTime: cyclingTime,
+      controllers: newControllers,
+    );
   }
 
   @override
   void update() {
     name = controllers[Utils.getFormKeyID(id, 'name')]!.text;
-    therapyIds = controllers[Utils.getFormKeyID(id, 'therapy_ids')]!.text
-        .replaceAll('[', '').replaceAll(']', '')
-        .split(',')
-        .map((e) => int.parse(e.trim()))
-        .toList();
+    therapyIds = Utils.extractIntegerList(controllers[Utils.getFormKeyID(id, 'therapy_ids')]!.text);
     cyclingTime = int.parse(controllers[Utils.getFormKeyID(id, 'cycling_time')]!.text);
     // print('Updated CyclingStrategy: $name, therapyIds: $therapyIds, cyclingTime: $cyclingTime');
   }
@@ -82,7 +89,7 @@ class CyclingStrategy extends Strategy {
   Map<String, dynamic> toYamlMap() {
     return {
       'name': name,
-      'type': type,
+      'type': type.typeAsString,
       'therapy_ids': therapyIds,
       'cycling_time': cyclingTime
     };
@@ -96,6 +103,7 @@ class CyclingStrategyState extends StrategyState<CyclingStrategy> {
       width: widget.formWidth * 0.85,
       child: ShadForm(
         key: widget.formKey,
+        enabled: widget.formEditable,
         autovalidateMode: ShadAutovalidateMode.always,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -105,14 +113,14 @@ class CyclingStrategyState extends StrategyState<CyclingStrategy> {
             StrategyDetailCardForm(
                 type: StrategyDetailCardFormType.string,
                 controllerKey: 'name',
-                editable: true,
+                editable: widget.formEditable,
                 width: widget.formWidth * 0.85,
                 strategy: widget
             ),
             StrategyDetailCardForm(
                 type: StrategyDetailCardFormType.multipleTherapy,
                 controllerKey: 'therapy_ids',
-                editable: true,
+                editable: widget.formEditable,
                 width: widget.formWidth * 0.85,
                 strategy: widget,
                 therapyMap: ref.read(therapyMapProvider.notifier).get(),
@@ -120,7 +128,7 @@ class CyclingStrategyState extends StrategyState<CyclingStrategy> {
             StrategyDetailCardForm(
                 type: StrategyDetailCardFormType.integer,
                 controllerKey: 'cycling_time',
-                editable: true,
+                editable: widget.formEditable,
                 width: widget.formWidth * 0.85,
                 strategy: widget,
                 lower: 0.0,

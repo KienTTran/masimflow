@@ -50,6 +50,11 @@ class StrategyDetailCardForm extends ConsumerStatefulWidget {
 }
 
 class StrategyDetailCardFormState extends ConsumerState<StrategyDetailCardForm> {
+
+  @override
+  void initState() {
+    super.initState();
+  }
   
   @override
   Widget build(BuildContext context) {
@@ -218,9 +223,10 @@ class StrategyDetailCardFormState extends ConsumerState<StrategyDetailCardForm> 
                 return FormUtil.validateIntArrayRange(context, value, lower: 0, upper: therapyMap.length - 1);
               },
             ),
-            ShadSelectFormField<String>(
+            ShadSelect<String>(
               controller: controller,
               minWidth: 340,
+              enabled: widget.editable,
               onChanged: (value){
                 selectedTherapyIndex.clear();selectedTherapyIndex.add(therapyMap.entries.firstWhere((element) => element.value.name == value).key);
                 selectedTherapies.clear();
@@ -256,7 +262,6 @@ class StrategyDetailCardFormState extends ConsumerState<StrategyDetailCardForm> 
               selectedOptionBuilder: (context, value) {
                 return Text(value);
               },
-
             ),
           ],
         ),
@@ -297,7 +302,7 @@ class StrategyDetailCardFormState extends ConsumerState<StrategyDetailCardForm> 
               initialValue: selectedTherapies.toString(),
               readOnly: true,
               controller: widget.strategy.controllers[controllerKeyWithID],
-              onSaved: (value) {
+              onSubmitted: (value) {
                 widget.strategy.controllers[controllerKeyWithID]!.text = value!;
                 widget.strategy.controllers[controllerKeyWithID]!.value = TextEditingValue(text: value);
               },
@@ -308,6 +313,7 @@ class StrategyDetailCardFormState extends ConsumerState<StrategyDetailCardForm> 
             ShadSelect<String>.multiple(
               controller: controller,
               minWidth: 340,
+              enabled: widget.editable,
               onChanged: (value){
                 selectedTherapyIndex.clear();
                 for (var i = 0; i < value.length; i++) {
@@ -346,7 +352,6 @@ class StrategyDetailCardFormState extends ConsumerState<StrategyDetailCardForm> 
               selectedOptionsBuilder: (context, values) {
                 return Text(values.map((v) => v).join(', '));
               },
-
             ),
           ],
         ),
@@ -398,6 +403,7 @@ class StrategyDetailCardFormState extends ConsumerState<StrategyDetailCardForm> 
             ShadSelect<String>.multiple(
               controller: controller,
               minWidth: 340,
+              enabled: widget.editable,
               onChanged: (value){
                 selectedStrategyIndex.clear();
                 for (var i = 0; i < value.length; i++) {
@@ -473,5 +479,6 @@ class StrategyDetailCardFormState extends ConsumerState<StrategyDetailCardForm> 
     )
         : Text(
         '${Utils.getControllerKeyLabel(controllerKey)}: ${widget.strategy.controllers[controllerKeyWithID]!.text}');
-  } 
+  }
+
 }

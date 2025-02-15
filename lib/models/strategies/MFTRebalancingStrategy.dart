@@ -77,23 +77,30 @@ class MFTRebalancingStrategy extends Strategy {
 
   @override
   Strategy copy() {
-    // TODO: implement copy
-    throw UnimplementedError();
+    String newId = Uuid().v4();
+    Map<String, TextEditingController> newControllers = {};
+    newControllers[Utils.getFormKeyID(newId, 'name')] = TextEditingController(text: controllers[Utils.getFormKeyID(id, 'name')]!.text);
+    newControllers[Utils.getFormKeyID(newId, 'therapy_ids')] = TextEditingController(text: controllers[Utils.getFormKeyID(id, 'therapy_ids')]!.text);
+    newControllers[Utils.getFormKeyID(newId, 'distribution')] = TextEditingController(text: controllers[Utils.getFormKeyID(id, 'distribution')]!.text);
+    newControllers[Utils.getFormKeyID(newId, 'delay_until_actual_trigger')] = TextEditingController(text: controllers[Utils.getFormKeyID(id, 'delay_until_actual_trigger')]!.text);
+    newControllers[Utils.getFormKeyID(newId, 'update_duration_after_rebalancing')] = TextEditingController(text: controllers[Utils.getFormKeyID(id, 'update_duration_after_rebalancing')]!.text);
+
+    return MFTRebalancingStrategy(
+      id: newId,
+      name: name,
+      therapyIds: List<int>.from(therapyIds),
+      distribution: List<double>.from(distribution),
+      delayUntilActualTrigger: delayUntilActualTrigger,
+      updateDurationAfterRebalancing: updateDurationAfterRebalancing,
+      controllers: newControllers,
+    );
   }
 
   @override
   void update() {
     name = controllers[Utils.getFormKeyID(id, 'name')]!.text;
-    therapyIds = controllers[Utils.getFormKeyID(id, 'therapy_ids')]!.text
-        .replaceAll('[', '').replaceAll(']', '')
-        .split(',')
-        .map((e) => int.parse(e.trim()))
-        .toList();
-    distribution = controllers[Utils.getFormKeyID(id, 'distribution')]!.text
-        .replaceAll('[', '').replaceAll(']', '')
-        .split(',')
-        .map((e) => double.parse(e.trim()))
-        .toList();
+    therapyIds = Utils.extractIntegerList(controllers[Utils.getFormKeyID(id, 'therapy_ids')]!.text);
+    distribution = Utils.extractDoubleList(controllers[Utils.getFormKeyID(id, 'distribution')]!.text);
     delayUntilActualTrigger = int.parse(controllers[Utils.getFormKeyID(id, 'delay_until_actual_trigger')]!.text);
     updateDurationAfterRebalancing = int.parse(controllers[Utils.getFormKeyID(id, 'update_duration_after_rebalancing')]!.text);
     // print('Updated MFTRebalancingStrategy: $name, therapyIds: $therapyIds, distribution: $distribution, delayUntilActualTrigger: $delayUntilActualTrigger, updateDurationAfterRebalancing: $updateDurationAfterRebalancing');
@@ -103,7 +110,7 @@ class MFTRebalancingStrategy extends Strategy {
   Map<String, dynamic> toYamlMap() {
     return {
       'name': name,
-      'type': type,
+      'type': type.typeAsString,
       'therapy_ids': therapyIds,
       'distribution': distribution,
       'delay_until_actual_trigger': delayUntilActualTrigger,
@@ -119,6 +126,7 @@ class MFTRebalancingStrategyState extends StrategyState<MFTRebalancingStrategy> 
       width: widget.formWidth * 0.9,
       child: ShadForm(
         key: widget.formKey,
+        enabled: widget.formEditable,
         autovalidateMode: ShadAutovalidateMode.always,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -128,14 +136,14 @@ class MFTRebalancingStrategyState extends StrategyState<MFTRebalancingStrategy> 
             StrategyDetailCardForm(
                 type: StrategyDetailCardFormType.string,
                 controllerKey: 'name',
-                editable: true,
+                editable: widget.formEditable,
                 width: widget.formWidth * 0.85,
                 strategy: widget
             ),
             StrategyDetailCardForm(
                 type: StrategyDetailCardFormType.multipleTherapy,
                 controllerKey: 'therapy_ids',
-                editable: true,
+                editable: widget.formEditable,
                 width: widget.formWidth * 0.85,
                 strategy: widget,
                 therapyMap: ref.read(therapyMapProvider.notifier).get()
@@ -143,7 +151,7 @@ class MFTRebalancingStrategyState extends StrategyState<MFTRebalancingStrategy> 
             StrategyDetailCardForm(
                 type: StrategyDetailCardFormType.doubleArray,
                 controllerKey: 'distribution',
-                editable: true,
+                editable: widget.formEditable,
                 width: widget.formWidth * 0.85,
                 strategy: widget,
                 typeKey: 'therapy_ids',
@@ -153,7 +161,7 @@ class MFTRebalancingStrategyState extends StrategyState<MFTRebalancingStrategy> 
             StrategyDetailCardForm(
                 type: StrategyDetailCardFormType.integer,
                 controllerKey: 'delay_until_actual_trigger',
-                editable: true,
+                editable: widget.formEditable,
                 width: widget.formWidth * 0.85,
                 strategy: widget,
                 lower: 0.0,
@@ -162,7 +170,7 @@ class MFTRebalancingStrategyState extends StrategyState<MFTRebalancingStrategy> 
             StrategyDetailCardForm(
                 type: StrategyDetailCardFormType.integer,
                 controllerKey: 'update_duration_after_rebalancing',
-                editable: true,
+                editable: widget.formEditable,
                 width: widget.formWidth * 0.85,
                 strategy: widget,
                 lower: 0.0,

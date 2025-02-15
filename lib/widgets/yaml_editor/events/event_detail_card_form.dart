@@ -287,6 +287,7 @@ class EventDetailCardFormState extends ConsumerState<EventDetailCardForm>{
             constraints: const BoxConstraints(minWidth: 180),
             child: ShadSelect<String>(
                 controller: controller,
+                enabled: widget.editable,
                 placeholder: const Text('Select a strategy'),
                 options: [
                   Padding(

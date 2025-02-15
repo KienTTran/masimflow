@@ -182,7 +182,6 @@ class Utils {
         .toList();
   }
 
-
   static List<List<int>> extractIntegerMatrix(String input) {
     return input
         .replaceAll('[[', '')
@@ -268,7 +267,7 @@ class Utils {
       List<DateTime> strategyDates = newEvent.dates();
       List<int> strategyIds = newEvent.valuesByKey('strategy_id').map((e) => int.parse(e)).toList();
 
-      print('add new event $strategyIds');
+      // print('add new event $strategyIds');
 
       List<(String,DateTime)> cyclingDates = [];
       for(int i = 0; i < strategyIds.length; i++){
@@ -299,7 +298,7 @@ class Utils {
               counter = 0;
             }
           }
-          print('Cycling ${strategyDates[i]} $cyclingDates');
+          // print('Cycling ${strategyDates[i]} $cyclingDates');
         }
         if(cyclingStrategy.type == StrategyType.AdaptiveCycling){
           cyclingDates.clear();
@@ -330,7 +329,7 @@ class Utils {
               break;
             }
           }
-          print('MFTRebalancing $cyclingDates');
+          // print('MFTRebalancing $cyclingDates');
         }
         if(cyclingStrategy.type == StrategyType.NestedMFT || cyclingStrategy.type == StrategyType.NestedMFTMultiLocation){
           cyclingDates.clear();
@@ -345,7 +344,7 @@ class Utils {
               break;
             }
           }
-          print('NestedMFT $cyclingDates');
+          // print('NestedMFT $cyclingDates');
         }
       }
 

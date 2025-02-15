@@ -465,6 +465,34 @@ class _YamlEditorRightPanelState extends ConsumerState<YamlEditorRightPanel> {
                                       fillColor: Colors.white,
                                       suffixIcon: Icon(Icons.search),
                                     ),
+                                    secondaryWidget: ShadButton.outline(
+                                      onPressed: (){
+                                        showShadSheet(
+                                            context: context,
+                                            side: ShadSheetSide.right,
+                                            isDismissible: false,
+                                            builder: (context) {
+                                              return ShadSheet(
+                                                constraints: const BoxConstraints(maxWidth: 512),
+                                                title: Text('New Strategy'),
+                                                // title: Text(widget.event.id),
+                                                closeIcon: SizedBox(),
+                                                child: Padding(
+                                                  padding: const EdgeInsets.only(bottom: 20),
+                                                  child: NewStrategyCard(
+                                                      width: 512,
+                                                      height: widget.width,
+                                                  ),
+                                                ),
+                                                // actions: [
+                                                // ],
+                                              );
+                                            }
+                                        );
+                                      },
+                                      icon: const Icon(Icons.add),
+                                      child: const Text('New Strategy'),
+                                    ),
                                     itemBuilder: (Strategy strategy){
                                       return Padding(
                                         padding: const EdgeInsets.only(top: 16),

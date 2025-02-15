@@ -47,7 +47,7 @@ class ChangeWithinHostInducedRecombination extends Event {
       'name': name,
       'info': {
         'date': controllers[Utils.getFormKeyID(id, 'date')]!.text,
-        'value': controllers[Utils.getFormKeyID(id, 'value')]!.text,
+        'value': controllers[Utils.getFormKeyID(id, 'value')]!.text == 'true',
       }
     };
   }

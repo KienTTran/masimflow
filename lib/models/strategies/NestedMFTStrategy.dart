@@ -82,28 +82,31 @@ class NestedMFTStrategy extends Strategy {
 
   @override
   Strategy copy() {
-    // TODO: implement copy
-    throw UnimplementedError();
+    String newId = Uuid().v4();
+    Map<String, TextEditingController> newControllers = {};
+    newControllers[Utils.getFormKeyID(newId, 'name')] = TextEditingController(text: controllers[Utils.getFormKeyID(id, 'name')]!.text);
+    newControllers[Utils.getFormKeyID(newId, 'strategy_ids')] = TextEditingController(text: controllers[Utils.getFormKeyID(id, 'strategy_ids')]!.text);
+    newControllers[Utils.getFormKeyID(newId, 'start_distribution')] = TextEditingController(text: controllers[Utils.getFormKeyID(id, 'start_distribution')]!.text);
+    newControllers[Utils.getFormKeyID(newId, 'peak_distribution')] = TextEditingController(text: controllers[Utils.getFormKeyID(id, 'peak_distribution')]!.text);
+    newControllers[Utils.getFormKeyID(newId, 'peak_after')] = TextEditingController(text: controllers[Utils.getFormKeyID(id, 'peak_after')]!.text);
+
+    return NestedMFTStrategy(
+      id: newId,
+      name: name,
+      strategyIds: List<int>.from(strategyIds),
+      startDistribution: List<double>.from(startDistribution),
+      peakDistribution: List<double>.from(peakDistribution),
+      peakAfter: peakAfter,
+      controllers: newControllers,
+    );
   }
 
   @override
   void update() {
     name = controllers[Utils.getFormKeyID(id, 'name')]!.text;
-    strategyIds = controllers[Utils.getFormKeyID(id, 'strategy_ids')]!.text
-        .replaceAll('[', '').replaceAll(']', '')
-        .split(',')
-        .map((e) => int.parse(e.trim()))
-        .toList();
-    startDistribution = controllers[Utils.getFormKeyID(id, 'start_distribution')]!.text
-        .replaceAll('[', '').replaceAll(']', '')
-        .split(',')
-        .map((e) => double.parse(e.trim()))
-        .toList();
-    peakDistribution = controllers[Utils.getFormKeyID(id, 'peak_distribution')]!.text
-        .replaceAll('[', '').replaceAll(']', '')
-        .split(',')
-        .map((e) => double.parse(e.trim()))
-        .toList();
+    strategyIds = Utils.extractIntegerList(controllers[Utils.getFormKeyID(id, 'strategy_ids')]!.text);
+    startDistribution = Utils.extractDoubleList(controllers[Utils.getFormKeyID(id, 'start_distribution')]!.text);
+    peakDistribution = Utils.extractDoubleList(controllers[Utils.getFormKeyID(id, 'peak_distribution')]!.text);
     peakAfter = int.parse(controllers[Utils.getFormKeyID(id, 'peak_after')]!.text);
     // print('Updated NestedMFTStrategy: $name, strategyIds: $strategyIds, startDistribution: $startDistribution, peakDistribution: $peakDistribution, peakAfter: $peakAfter');
   }
@@ -112,7 +115,7 @@ class NestedMFTStrategy extends Strategy {
   Map<String, dynamic> toYamlMap() {
     return {
       'name': name,
-      'type': type,
+      'type': type.typeAsString,
       'strategy_ids': strategyIds,
       'start_distribution': startDistribution,
       'peak_distribution': peakDistribution,
@@ -128,6 +131,7 @@ class NestedMFTStrategyState extends StrategyState<NestedMFTStrategy> {
       width: widget.formWidth * 0.85,
       child: ShadForm(
         key: widget.formKey,
+        enabled: widget.formEditable,
         autovalidateMode: ShadAutovalidateMode.always,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -137,14 +141,14 @@ class NestedMFTStrategyState extends StrategyState<NestedMFTStrategy> {
             StrategyDetailCardForm(
                 type: StrategyDetailCardFormType.string,
                 controllerKey: 'name',
-                editable: true,
+                editable: widget.formEditable,
                 width: widget.formWidth * 0.85,
                 strategy: widget
             ),
             StrategyDetailCardForm(
                 type: StrategyDetailCardFormType.multipleStrategy,
                 controllerKey: 'strategy_ids',
-                editable: true,
+                editable: widget.formEditable,
                 width: widget.formWidth * 0.85,
                 strategy: widget,
                 strategyParameters: ref.read(strategyParametersProvider.notifier).get()
@@ -152,7 +156,7 @@ class NestedMFTStrategyState extends StrategyState<NestedMFTStrategy> {
             StrategyDetailCardForm(
                 type: StrategyDetailCardFormType.doubleArray,
                 controllerKey: 'start_distribution',
-                editable: true,
+                editable: widget.formEditable,
                 width: widget.formWidth * 0.85,
                 strategy: widget,
                 typeKey: 'strategy_ids',
@@ -162,7 +166,7 @@ class NestedMFTStrategyState extends StrategyState<NestedMFTStrategy> {
             StrategyDetailCardForm(
                 type: StrategyDetailCardFormType.doubleArray,
                 controllerKey: 'peak_distribution',
-                editable: true,
+                editable: widget.formEditable,
                 width: widget.formWidth * 0.85,
                 strategy: widget,
                 typeKey: 'strategy_ids',
@@ -172,7 +176,7 @@ class NestedMFTStrategyState extends StrategyState<NestedMFTStrategy> {
             StrategyDetailCardForm(
                 type: StrategyDetailCardFormType.integer,
                 controllerKey: 'peak_after',
-                editable: true,
+                editable: widget.formEditable,
                 width: widget.formWidth * 0.85,
                 strategy: widget,
                 lower: 0.0,
