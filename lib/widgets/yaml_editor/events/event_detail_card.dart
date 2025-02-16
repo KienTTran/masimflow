@@ -53,7 +53,6 @@ class _EventDetailCardState extends ConsumerState<EventDetailCard> {
 
   @override
   Widget build(BuildContext context) {
-    // print('EventDetailCard build: ${widget.eventID}');
     return SizedBox(
       width: widget.width,
       child: Padding(
@@ -198,7 +197,7 @@ class _EventDetailCardState extends ConsumerState<EventDetailCard> {
                               startingDate!,endingDate!,
                               -1,
                               10,
-                              -500,
+                              -100,
                               false
                           );
                           setState(() {
@@ -238,12 +237,20 @@ class _EventDetailCardState extends ConsumerState<EventDetailCard> {
                   ) : SizedBox(),
                   ShadButton(
                       onPressed: () {
-                        if(defaultEventDetail.formKey.currentState!.saveAndValidate()){
+                        defaultEventDetail.formKey.currentState!.reset();
+                        setState(() {
+                          if(widget.isUpdate){
+                            defaultEventDetail = ref.read(eventDisplayMapProvider.notifier).getEvent(widget.eventID)!;
+                          }
+                          else {
+                            defaultEventDetail =
+                            ref.read(eventTemplateMapProvider.notifier)
+                                .get()[widget.eventID]!;
+                          }
+                          defaultEventDetail.formKey = GlobalKey<ShadFormState>();
+                          ref.read(updateUIProvider.notifier).update();
                           widget.popBack();
-                        }
-                        else{
-                          return;
-                        }
+                        });
                       },
                       child: Text('Cancel')
                   ),

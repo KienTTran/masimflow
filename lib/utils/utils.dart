@@ -60,7 +60,6 @@ class Utils {
     // textPainter.paint(canvas,
     //     Offset((size.width - textPainter.width) / 2,(size.height - textPainter.height) / 2));
     textPainter.paint(canvas, Offset(x-textPainter.width/2, y - dy));
-    // textPainter.paint(canvas, Offset(x, y - dy));
   }
 
   /// Returns a random date between [start] and [end] formatted as specified by [format].
@@ -260,7 +259,11 @@ class Utils {
   }
 
   static StrategyMarker getEventStrategyMarkers(WidgetRef ref,Event newEvent){
+    DateTime startingDates = ref.read(dateMapProvider.notifier).get()['starting_date']!;
+    DateTime endingDates = ref.read(dateMapProvider.notifier).get()['ending_date']!;
     StrategyMarker newStrategyMarker = ref.read(strategyMarkerListProvider.notifier).get().first.copy();
+    newStrategyMarker.startingDate = startingDates;
+    newStrategyMarker.endingDate = endingDates;
     newStrategyMarker.strategyIdDateXLabelMapList.clear();
     newStrategyMarker.labelDateXMapList.clear();
     if(newEvent.name.contains('strategy')){
@@ -270,89 +273,117 @@ class Utils {
       // print('add new event $strategyIds');
 
       List<(String,DateTime)> cyclingDates = [];
+      List<List<int>> cyclingTherapyIndex = [];
+      List<List<Therapy>> cyclingTherapies = [];
+      List<int> cyclingDays = [];
       for(int i = 0; i < strategyIds.length; i++){
         Strategy? cyclingStrategy = ref.read(strategyParametersProvider.notifier).get().strategyDb[strategyIds[i]];
-        List<int> cyclingTherapyIndex = getTherapyIndex(
-            ref.read(strategyParametersProvider.notifier).get(),
-            cyclingStrategy!);
-        List<Therapy> cyclingTherapies = cyclingTherapyIndex.map((e) => ref.read(therapyMapProvider.notifier).get()[e]!).toList();
-        if(cyclingStrategy.type == StrategyType.Cycling){
-          cyclingDates.clear();
+        if(cyclingStrategy!.type == StrategyType.Cycling){
           String cKey = getFormKeyID(cyclingStrategy.id, 'cycling_time');
           int cyclingDay = int.parse(cyclingStrategy.controllers[cKey]!.text);
-          List<int> cyclingTherapyIndex = getTherapyIndex(
-              ref.read(strategyParametersProvider.notifier).get(),
-              cyclingStrategy);
-          List<Therapy> cyclingTherapies = cyclingTherapyIndex.map((e) => ref.read(therapyMapProvider.notifier).get()[e]!).toList();
-          DateTime endingDates = ref.read(dateMapProvider.notifier).get()['ending_date']!;
-          DateTime startDate = strategyDates[i];
+          cyclingDays.add(cyclingDay);
+          cyclingTherapyIndex.add(getTherapyIndex(
+              ref.read(strategyParametersProvider.notifier).get(),cyclingStrategy));
+          cyclingDates.add(('start',strategyDates[i]));
+        }
+        // if(cyclingStrategy.type == StrategyType.AdaptiveCycling){
+        //   String cKeyDelay = getFormKeyID(cyclingStrategy.id, 'delay_until_actual_trigger');
+        //   String cKeyOff = getFormKeyID(cyclingStrategy.id, 'turn_off_days');
+        //   String cKey = getFormKeyID(cyclingStrategy.id, 'cycling_time');
+        //   int cyclingDay = int.parse(cyclingStrategy.controllers[cKey]!.text);
+        //   cyclingDays.add(cyclingDay);
+        //   cyclingTherapyIndex.add(getTherapyIndex(
+        //       ref.read(strategyParametersProvider.notifier).get(),cyclingStrategy));
+        //   cyclingDates.add(('start',strategyDates[i]));
+        // }
+        // if(cyclingStrategy.type == StrategyType.MFTRebalancing){
+        //   cyclingDates.clear();
+        //   String cKeyDelay = getFormKeyID(cyclingStrategy.id, 'delay_until_actual_trigger');
+        //   String cKeyOff = getFormKeyID(cyclingStrategy.id, 'update_duration_after_rebalancing');
+        //   int cyclingDelayDay = int.parse(cyclingStrategy.controllers[cKeyDelay]!.text);
+        //   int cyclingUpdateDay= int.parse(cyclingStrategy.controllers[cKeyOff]!.text);
+        //   DateTime endingDates = ref.read(dateMapProvider.notifier).get()['ending_date']!;
+        //   DateTime startDate = strategyDates[i];
+        //   while(startDate.isBefore(endingDates)){
+        //     cyclingDates.add(('delay',startDate));
+        //     startDate = startDate.add(Duration(days: cyclingDelayDay));
+        //     if(startDate.isAfter(endingDates)){
+        //       break;
+        //     }
+        //   }
+        //   while(startDate.isBefore(endingDates)){
+        //     cyclingDates.add(('update',startDate));
+        //     startDate = startDate.add(Duration(days: cyclingUpdateDay));
+        //     if(startDate.isAfter(endingDates)){
+        //       break;
+        //     }
+        //   }
+        //   // print('MFTRebalancing $cyclingDates');
+        // }
+        // if(cyclingStrategy.type == StrategyType.NestedMFT || cyclingStrategy.type == StrategyType.NestedMFTMultiLocation){
+        //   cyclingDates.clear();
+        //   String cKeyDelay = getFormKeyID(cyclingStrategy.id, 'peak_after');
+        //   int cyclingPeakDay = int.parse(cyclingStrategy.controllers[cKeyDelay]!.text);
+        //   DateTime endingDates = ref.read(dateMapProvider.notifier).get()['ending_date']!;
+        //   DateTime startDate = strategyDates[i];
+        //   while(startDate.isBefore(endingDates)){
+        //     startDate = startDate.add(Duration(days: cyclingPeakDay));
+        //     cyclingDates.add(('peak',startDate));
+        //     if(startDate.isAfter(endingDates)){
+        //       break;
+        //     }
+        //   }
+        //   // print('NestedMFT $cyclingDates');
+        // }
+      }
+      for(var cyclingTherapyIndex in cyclingTherapyIndex){
+        cyclingTherapies.add(cyclingTherapyIndex.map((e) => ref.read(therapyMapProvider.notifier).get()[e]!).toList());
+      }
+      List<List<(String,DateTime)>> finalCycleDates = [];
+      for(var i = 0; i < cyclingDates.length; i++){
+        List<(String,DateTime)> finalCycleDate = [];
+        DateTime startDate = cyclingDates[i].$2;
+        if(i == cyclingDates.length-1){
           int counter = 0;
           while(startDate.isBefore(endingDates)){
-            cyclingDates.add((cyclingTherapies[counter].name,startDate));
-            startDate = startDate.add(Duration(days: cyclingDay));
+            finalCycleDate.add((cyclingTherapies[i][counter].name,startDate));
+            startDate = startDate.add(Duration(days: cyclingDays[i]));
             if(startDate.isAfter(endingDates)){
               break;
             }
             counter++;
-            if(counter == cyclingTherapies.length){
+            if(counter == cyclingTherapies[i].length){
               counter = 0;
             }
           }
-          // print('Cycling ${strategyDates[i]} $cyclingDates');
         }
-        if(cyclingStrategy.type == StrategyType.AdaptiveCycling){
-          cyclingDates.clear();
-          String cKeyDelay = getFormKeyID(cyclingStrategy.id, 'delay_until_actual_trigger');
-          String cKeyOff = getFormKeyID(cyclingStrategy.id, 'turn_off_days');
-          int cyclingDelayDay = int.parse(cyclingStrategy.controllers[cKeyDelay]!.text);
-          int cyclingOffDay = int.parse(cyclingStrategy.controllers[cKeyOff]!.text);
-        }
-        if(cyclingStrategy.type == StrategyType.MFTRebalancing){
-          cyclingDates.clear();
-          String cKeyDelay = getFormKeyID(cyclingStrategy.id, 'delay_until_actual_trigger');
-          String cKeyOff = getFormKeyID(cyclingStrategy.id, 'update_duration_after_rebalancing');
-          int cyclingDelayDay = int.parse(cyclingStrategy.controllers[cKeyDelay]!.text);
-          int cyclingUpdateDay= int.parse(cyclingStrategy.controllers[cKeyOff]!.text);
-          DateTime endingDates = ref.read(dateMapProvider.notifier).get()['ending_date']!;
-          DateTime startDate = strategyDates[i];
-          while(startDate.isBefore(endingDates)){
-            cyclingDates.add(('delay',startDate));
-            startDate = startDate.add(Duration(days: cyclingDelayDay));
-            if(startDate.isAfter(endingDates)){
+        else{
+          int counter = 0;
+          while(startDate.isBefore(cyclingDates[i+1].$2)){
+            finalCycleDate.add((cyclingTherapies[i][counter].name,startDate));
+            startDate = startDate.add(Duration(days: cyclingDays[i]));
+            if(startDate.isAfter(cyclingDates[i+1].$2) || startDate.isAfter(endingDates)){
               break;
             }
-          }
-          while(startDate.isBefore(endingDates)){
-            cyclingDates.add(('update',startDate));
-            startDate = startDate.add(Duration(days: cyclingUpdateDay));
-            if(startDate.isAfter(endingDates)){
-              break;
+            counter++;
+            if(counter == cyclingTherapies[i].length){
+              counter = 0;
             }
           }
-          // print('MFTRebalancing $cyclingDates');
         }
-        if(cyclingStrategy.type == StrategyType.NestedMFT || cyclingStrategy.type == StrategyType.NestedMFTMultiLocation){
-          cyclingDates.clear();
-          String cKeyDelay = getFormKeyID(cyclingStrategy.id, 'peak_after');
-          int cyclingPeakDay = int.parse(cyclingStrategy.controllers[cKeyDelay]!.text);
-          DateTime endingDates = ref.read(dateMapProvider.notifier).get()['ending_date']!;
-          DateTime startDate = strategyDates[i];
-          while(startDate.isBefore(endingDates)){
-            startDate = startDate.add(Duration(days: cyclingPeakDay));
-            cyclingDates.add(('peak',startDate));
-            if(startDate.isAfter(endingDates)){
-              break;
-            }
-          }
-          // print('NestedMFT $cyclingDates');
-        }
+        finalCycleDates.add(finalCycleDate);
       }
+      // add ending date
+      finalCycleDates.last.add(('end',endingDates));
+      // print('FinalCycleDates $finalCycleDates');
 
       for(var i = 0; i < strategyDates.length; i++){
-        newStrategyMarker.strategyIdDateXLabelMapList.add((strategyIds[i],strategyDates[i],0.0,'start'));
+        newStrategyMarker.strategyIdDateXLabelMapList.add((strategyIds[i],strategyDates[i],0.0,'$i'));
       }
-      for(var i = 0; i < cyclingDates.length; i++){
-        newStrategyMarker.labelDateXMapList.add((cyclingDates[i].$1,cyclingDates[i].$2,0.0));
+      for(int i = 0; i < finalCycleDates.length; i++){
+        for(int j = 0; j < finalCycleDates[i].length; j++){
+          newStrategyMarker.labelDateXMapList.add(('${i}#${finalCycleDates[i][j].$1}',finalCycleDates[i][j].$2,0.0));
+        }
       }
       newStrategyMarker.updateX();
     }

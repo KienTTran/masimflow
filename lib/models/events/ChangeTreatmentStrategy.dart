@@ -128,6 +128,7 @@ class ChangeTreatmentStrategyState extends EventState<ChangeTreatmentStrategy> {
         key: widget.formKey,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -177,7 +178,6 @@ class ChangeTreatmentStrategyState extends EventState<ChangeTreatmentStrategy> {
                         editable: widget.formEditable,
                         width: widget.formWidth*0.9*0.75,
                         event: widget,
-                        strategyParameters: ref.read(strategyParametersProvider.notifier).get(),
                       ),
                     ),
                   ]

@@ -82,7 +82,7 @@ class EventDetailCardFormState extends ConsumerState<EventDetailCardForm>{
       case EventDetailCardFormType.doubleArray:
         return EventDoubleArrayFormField(widget.controllerKey, lower: widget.lower!, upper: widget.upper!);
       case EventDetailCardFormType.singleStrategy:
-        return EventSingleStrategyFormField(widget.strategyParameters!, widget.controllerKey);
+        return EventSingleStrategyFormField(widget.controllerKey);
       case EventDetailCardFormType.dateWithRemoval:
         return EventDateFormFieldWithRemoval(widget.controllerKey, dateID: widget.dateID!);
       case EventDetailCardFormType.dateCustomLabel:
@@ -269,10 +269,11 @@ class EventDetailCardFormState extends ConsumerState<EventDetailCardForm>{
     ) : Text('${Utils.getControllerKeyLabel(controllerKey)}: ${widget.event.controllers[controllerKeyWithID]!.text}');
   }
 
-  Widget EventSingleStrategyFormField(StrategyParameters strategyParameters,String controllerKey){
+  Widget EventSingleStrategyFormField(String controllerKey){
     String controllerKeyWithID = Utils.getFormKeyID(widget.event.id, controllerKey);
+    final strategyParameters = ref.read(strategyParametersProvider.notifier).get();
     final initialStrategyKeyIndex = strategyParameters.strategies
-        .indexWhere((strategy) => strategy.name == strategyParameters.strategyDb[int.parse(widget.event.controllers[controllerKeyWithID]!.text)]!.name);
+        .indexWhere((strategy) => strategy.id == strategyParameters.strategyDb[int.parse(widget.event.controllers[controllerKeyWithID]!.text)]!.id);
     final initialStrategy = strategyParameters.strategies[initialStrategyKeyIndex];
     ShadPopoverController controller = ShadPopoverController();
     currentStrategyTherapies = Utils.getTherapies(ref.read(therapyMapProvider.notifier).get(), strategyParameters, initialStrategy);
@@ -304,35 +305,32 @@ class EventDetailCardFormState extends ConsumerState<EventDetailCardForm>{
                   ...strategyParameters.strategies
                       .map((strategy){
                     final strategyKeyIndex = strategyParameters.strategies
-                        .indexWhere((element) => element.name == strategy.name);
+                        .indexWhere((element) => element.id == strategy.id);
                     return ShadOption(
-                        value: strategy.name.toString(),
+                        value: strategy.id,
                         child: Text('$strategyKeyIndex: ${strategy.name} (${strategy.type.typeAsString})'));
                   })
                 ],
-                initialValue: initialStrategy.name,
+                initialValue: initialStrategy.id,
                 onChanged: (value) {
                   final strategyKeyIndex = strategyParameters.strategies
-                      .indexWhere((element) => element.name == value);
+                      .indexWhere((element) => element.id == value);
                   setState(() {
                     widget.event.controllers[controllerKeyWithID]!.text = strategyKeyIndex.toString();
                     widget.event.controllers[controllerKeyWithID]!.value = TextEditingValue(text: strategyKeyIndex.toString());
                     currentStrategyTherapies = Utils.getTherapies(ref.read(therapyMapProvider.notifier).get(),
                         strategyParameters, strategyParameters.strategies[strategyKeyIndex]);
                     currentStrategy = strategyParameters.strategies[strategyKeyIndex];
+                    ref.read(updateUIProvider.notifier).update();
                   });
                 },
                 selectedOptionBuilder: (context, value){
-                  return strategyParameters.strategies
-                      .map((strategy) {
-                    final strategyKeyIndex = strategyParameters.strategies
-                        .indexWhere((element) => element.name == strategy.name);
-                    return ShadOption(
-                        value: strategy.name.toString(),
-                        child: Text('$strategyKeyIndex: ${strategy.name} (${strategy.type.typeAsString})'));})
-                      .toList()
-                      .firstWhere((option) => option.value == value);
-                }),
+                  final strategyKeyIndex = strategyParameters.strategies
+                      .indexWhere((element) => element.id == value);
+                  final selectStrategy = strategyParameters.strategies[strategyKeyIndex];
+                  return Text('${strategyKeyIndex}: ${selectStrategy.name} (${selectStrategy.type.typeAsString})');
+                }
+            ),
           ),
           SizedBox(height: 8),
           Row(

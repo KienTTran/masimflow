@@ -12,6 +12,7 @@ class StrategyDetailCard extends ConsumerStatefulWidget {
   final double height;
   final bool editable;
   final VoidCallback popBack;
+  final bool isUpdate;
 
   const StrategyDetailCard({
     super.key,
@@ -20,6 +21,7 @@ class StrategyDetailCard extends ConsumerStatefulWidget {
     required this.height,
     required this.popBack,
     this.editable = false,
+    this.isUpdate = true,
   });
 
   @override
@@ -59,7 +61,7 @@ class _StrategyDetailCardState extends ConsumerState<StrategyDetailCard> {
           children: [
             buildStrategyDetails(defaultStrategyDetail, editable: widget.editable),
             const SizedBox(height: 32),
-            (widget.editable) ? SizedBox(
+            (widget.editable && widget.isUpdate!) ? SizedBox(
               width: widget.width*0.85,
               child: Row(
                 mainAxisSize: MainAxisSize.max,
@@ -74,6 +76,12 @@ class _StrategyDetailCardState extends ConsumerState<StrategyDetailCard> {
                         }
                         try{
                           defaultStrategyDetail.update();
+                          if(defaultStrategyDetail.isInitial){
+                            ref.read(strategyParametersProvider.notifier).get().initialStrategyId = defaultStrategyDetail.initialIndex;
+                            ref.read(configYamlFileProvider.notifier).updateYamlValueByKeyList(
+                                defaultStrategyDetail.getInitialYamlKeyList(), defaultStrategyDetail.initialIndex);
+                            ref.read(initialStrategyProvider.notifier).set(defaultStrategyDetail);
+                          }
                           ref.read(strategyParametersProvider.notifier).get().strategyDb[defaultStrategyDetail.initialIndex] = defaultStrategyDetail;
                           ref.read(strategyTemplateMapProvider.notifier).setStrategy(defaultStrategyDetail.id, defaultStrategyDetail);
                           ref.read(configYamlFileProvider.notifier).updateYamlValueByKeyList(defaultStrategyDetail.getYamlKeyList(),
@@ -91,13 +99,13 @@ class _StrategyDetailCardState extends ConsumerState<StrategyDetailCard> {
                   ),
                   ShadButton(
                       onPressed: () {
-                        // if(formKey.currentState!.validate()){
-                        //   widget.popBack();
-                        // }
-                        // else{
-                        //   return;
-                        // }
-                        widget.popBack();
+                        defaultStrategyDetail.formKey.currentState!.reset();
+                        setState(() {
+                          defaultStrategyDetail = ref.read(strategyTemplateMapProvider.notifier).get()[widget.strategyID]!;
+                          defaultStrategyDetail.formKey = GlobalKey<ShadFormState>();
+                          ref.read(updateUIProvider.notifier).update();
+                          widget.popBack();
+                        });
                       },
                       child: Text('Cancel')
                   ),

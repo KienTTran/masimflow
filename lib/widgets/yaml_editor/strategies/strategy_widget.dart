@@ -55,7 +55,7 @@ class _StrategyCardState extends ConsumerState<StrategyCard> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          Utils.getCapitalizedWords(widget.strategy.name),
+                          Utils.getCapitalizedWords('${widget.strategy.initialIndex} | ${widget.strategy.name}'),
                           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                           overflow: TextOverflow.visible,
                         ),

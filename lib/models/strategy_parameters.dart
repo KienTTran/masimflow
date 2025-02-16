@@ -10,7 +10,7 @@ StrategyParameters parseYamlString(String yamlString) {
 /// Holds all strategy parameters from the YAML.
 class StrategyParameters {
   final Map<int, Strategy> strategyDb;
-  final int initialStrategyId;
+  late int initialStrategyId;
   final int recurrentTherapyId;
   final MassDrugAdministration massDrugAdministration;
 

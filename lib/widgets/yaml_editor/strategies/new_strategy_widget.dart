@@ -52,6 +52,8 @@ class _NewStrategyCardState extends ConsumerState<NewStrategyCard> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const Text('Create a new strategy from current strategy', style: TextStyle(fontSize: 16)),
+            const SizedBox(height: 8),
             ShadSelect<String>(
               controller: controller,
               placeholder: const Text('Select a strategy'),
@@ -70,7 +72,7 @@ class _NewStrategyCardState extends ConsumerState<NewStrategyCard> {
                 ...templateStrategies
                     .map((strategy){
                   final strategyKeyIndex = templateStrategies
-                      .indexWhere((element) => element.name == strategy.name);
+                      .indexWhere((element) => element.id == strategy.id);
                   return ShadOption(
                       value: strategy.name.toString(),
                       child: Text('$strategyKeyIndex: ${strategy.name} (${strategy.type.typeAsString})'));
@@ -78,16 +80,18 @@ class _NewStrategyCardState extends ConsumerState<NewStrategyCard> {
               ],
               initialValue: templateStrategies.first.name,
               onChanged: (value) {
+                int valueIdx = templateStrategies.indexWhere((element) => element.name == value);
+                String valueId = templateStrategies[valueIdx].id;
+                selectedTemplateStrategy = templateStrategies
+                    .firstWhere((element) => element.id == valueId);
                 setState(() {
-                  selectedTemplateStrategy = templateStrategies
-                      .firstWhere((element) => element.name == value);
                   ref.read(updateUIProvider.notifier).update();
                 });
               },
               selectedOptionBuilder: (context, value){
                 return templateStrategies.map((strategy) {
                   final strategyKeyIndex = templateStrategies
-                      .indexWhere((element) => element.name == strategy.name);
+                      .indexWhere((element) => element.id == strategy.id);
                   return ShadOption(
                       value: strategy.name.toString(),
                       child: Text('$strategyKeyIndex: ${strategy.name} (${strategy.type.typeAsString})'));})
@@ -98,6 +102,8 @@ class _NewStrategyCardState extends ConsumerState<NewStrategyCard> {
                 strategyID: selectedTemplateStrategy.id,
                 width: widget.width,
                 height: widget.height,
+                editable: true,
+                isUpdate: false,
                 popBack: (){}
             ),
             SizedBox(
@@ -130,7 +136,13 @@ class _NewStrategyCardState extends ConsumerState<NewStrategyCard> {
                   ),
                   ShadButton(
                       onPressed: () {
-                        Navigator.of(context).pop();
+                        selectedTemplateStrategy.formKey.currentState!.reset();
+                        setState(() {
+                          selectedTemplateStrategy = ref.read(strategyTemplateMapProvider.notifier).get()[selectedTemplateStrategy.id]!;
+                          selectedTemplateStrategy.formKey = GlobalKey<ShadFormState>();
+                          ref.read(updateUIProvider.notifier).update();
+                          Navigator.of(context).pop();
+                        });
                       },
                       child: Text('Cancel')
                   ),

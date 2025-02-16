@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:masimflow/providers/data_providers.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:uuid/uuid.dart';
 import 'AdaptiveCyclingStrategy.dart';
 import 'CyclingStrategy.dart';
 import 'MFTRebalancingStrategy.dart';
@@ -33,6 +34,7 @@ abstract class StrategyState<T extends Strategy> extends StrategyWidgetRenderSta
 }
 
 enum StrategyType {
+  Base,
   MFT,
   SFT,
   Cycling,
@@ -43,6 +45,8 @@ enum StrategyType {
 
   String get typeAsString {
     switch (this) {
+      case StrategyType.Base:
+        return 'Base';
       case StrategyType.MFT:
         return 'MFT';
       case StrategyType.SFT:
@@ -62,6 +66,8 @@ enum StrategyType {
 
   String get label {
     switch (this) {
+      case StrategyType.Base:
+        return 'Base';
       case StrategyType.MFT:
         return 'MFT';
       case StrategyType.SFT:
@@ -84,16 +90,21 @@ abstract class Strategy extends StrategyWidgetRender {
   final String id;
   late String name;
   final StrategyType type;
-  late Map<String, TextEditingController> controllers;
+  final Map<String, TextEditingController> controllers;
   GlobalKey<ShadFormState> formKey = GlobalKey<ShadFormState>();
   late double formWidth;
   bool formEditable = false;
+  bool isInitial = false;
   late int initialIndex = 0;
   Map<String, dynamic> toYamlMap();
   Strategy copy();
   void update();
   List<String> getYamlKeyList(){
     return ['strategy_parameters', 'strategy_db', initialIndex.toString()];
+  }
+
+  List<String> getInitialYamlKeyList(){
+    return ['strategy_parameters', 'initial_strategy_id'];
   }
 
   List<DateTime> dates() {
@@ -118,6 +129,8 @@ abstract class Strategy extends StrategyWidgetRender {
   factory Strategy.fromYaml(dynamic yaml) {
     final StrategyType strategyType = StrategyType.values.firstWhere((e) => e.typeAsString == yaml['type']);
     switch (strategyType) {
+      case StrategyType.Base:
+        return BaseStrategy(id: Uuid().v4(), name: 'Base Strategy', type: StrategyType.Base, controllers: {});
       case StrategyType.MFT:
         return MFTStrategy.fromYaml(yaml);
       case StrategyType.SFT:
@@ -136,4 +149,36 @@ abstract class Strategy extends StrategyWidgetRender {
   }
 
   String string() => 'Strategy(name: $name, type: $type)';
+}
+
+class BaseStrategy extends Strategy {
+  BaseStrategy({
+    required String id,
+    required String name,
+    required StrategyType type,
+    required Map<String, TextEditingController> controllers
+  }) : super(id: id, name: name, type: type, controllers: controllers);
+
+  @override
+  Map<String, dynamic> toYamlMap() {
+    return {
+      'type': type.typeAsString,
+      'name': name,
+    };
+  }
+
+  @override
+  Strategy copy() {
+    return BaseStrategy(
+      id: id,
+      name: name,
+      type: type,
+      controllers: controllers
+    );
+  }
+
+  @override
+  void update() {
+    // Do nothing
+  }
 }

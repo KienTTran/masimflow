@@ -647,6 +647,8 @@ class ChangeTreatmentCoverageState extends EventState<ChangeTreatmentCoverage> {
                                     Padding(
                                       padding: const EdgeInsets.all(20.0),
                                       child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           // widget.eventForm.EventDateFormField('${widget.coverages[index].id}#date', dateID: i.toString()),
                                           // widget.eventForm.EventDoubleArrayFormField('${widget.coverages[index].id}#p_treatment_under_5_by_location', lower: 0.0, upper: 1.0),

@@ -8,9 +8,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:masimflow/models/config.dart';
 import 'package:masimflow/widgets/yaml_editor/strategies/new_strategy_widget.dart';
+import 'package:masimflow/widgets/yaml_editor/strategies/strategy_detail_card_form.dart';
 import 'package:masimflow/widgets/yaml_editor/strategies/strategy_widget.dart';
 import 'package:searchable_listview/searchable_listview.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:uuid/uuid.dart';
 import 'package:yaml/yaml.dart';
 import "package:flutter/services.dart" as s;
 
@@ -226,15 +228,17 @@ class _YamlEditorRightPanelState extends ConsumerState<YamlEditorRightPanel> {
           drugMap,
           [(-1,startingDate,0,'')],
           [('',startingDate,0)],
-          'Initial Strategy',
+          strategyParameters.strategies[strategyParameters.initialStrategyId].name,
           startingDate,endingDate,
           -1,
           10,
-          -50,
+          30,
           false,
           false,
           false
       );
+      Strategy initialStrategy = strategyParameters.strategies[strategyParameters.initialStrategyId];
+      ref.read(initialStrategyProvider.notifier).set(initialStrategy);
       strategyMarkerList.add(initialStrategyMarker);
       ref.read(strategyMarkerListProvider.notifier).set(strategyMarkerList);
 
@@ -450,59 +454,76 @@ class _YamlEditorRightPanelState extends ConsumerState<YamlEditorRightPanel> {
                             },
                             content: ref.read(strategyParametersProvider.notifier).get().strategyDb.isNotEmpty ? Padding(
                               padding: const EdgeInsets.all(8.0),
-                              child: SizedBox(
-                                height: MediaQuery.of(context).size.height*0.7,
-                                child: SearchableList(
-                                    initialList: ref.read(strategyParametersProvider.notifier).get().strategies,
-                                    filter: (value){
-                                      return ref.read(strategyParametersProvider.notifier).get().strategies
-                                          .where((element) => element.name.contains(value)).toList();
-                                    },
-                                    displaySearchIcon: false,
-                                    emptyWidget:  Container(),
-                                    inputDecoration: const InputDecoration(
-                                      labelText: "Search Strategies",
-                                      fillColor: Colors.white,
-                                      suffixIcon: Icon(Icons.search),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Initial Strategy', style: TextStyle(fontSize: 16)),
+                                  StrategyDetailCardForm(
+                                      type: StrategyDetailCardFormType.initialStrategy,
+                                      width: widget.width,
+                                      editable: true,
+                                      controllerKey: '',
+                                      strategy: ref.read(initialStrategyProvider.notifier).get(),
+                                    strategyParameters: ref.read(strategyParametersProvider.notifier).get(),
+                                  ),
+                                  const Divider(),
+                                  SizedBox(
+                                    height: MediaQuery.of(context).size.height*0.6,
+                                    child: SearchableList(
+                                        initialList: ref.read(strategyParametersProvider.notifier).get().strategies,
+                                        filter: (value){
+                                          return ref.read(strategyParametersProvider.notifier).get().strategies
+                                              .where((element) => element.name.contains(value)).toList();
+                                        },
+                                        displaySearchIcon: false,
+                                        emptyWidget:  Container(),
+                                        inputDecoration: const InputDecoration(
+                                          labelText: "Search Strategies",
+                                          fillColor: Colors.white,
+                                          suffixIcon: Icon(Icons.search),
+                                        ),
+                                        secondaryWidget: ShadButton.outline(
+                                          onPressed: (){
+                                            showShadSheet(
+                                                context: context,
+                                                side: ShadSheetSide.right,
+                                                isDismissible: false,
+                                                builder: (context) {
+                                                  return ShadSheet(
+                                                    constraints: const BoxConstraints(maxWidth: 512),
+                                                    title: Text('New Strategy'),
+                                                    // title: Text(widget.event.id),
+                                                    closeIcon: SizedBox(),
+                                                    child: Padding(
+                                                      padding: const EdgeInsets.only(bottom: 20),
+                                                      child: NewStrategyCard(
+                                                        width: 512,
+                                                        height: widget.width,
+                                                      ),
+                                                    ),
+                                                    // actions: [
+                                                    // ],
+                                                  );
+                                                }
+                                            );
+                                          },
+                                          icon: const Icon(Icons.add),
+                                          child: const Text('New Strategy'),
+                                        ),
+                                        itemBuilder: (Strategy strategy){
+                                          return Padding(
+                                            padding: const EdgeInsets.only(top: 16),
+                                            child: StrategyCard(
+                                                width: widget.width*0.8,
+                                                height: MediaQuery.of(context).size.height*0.7,
+                                                strategy: strategy),
+                                          );
+                                        }
                                     ),
-                                    secondaryWidget: ShadButton.outline(
-                                      onPressed: (){
-                                        showShadSheet(
-                                            context: context,
-                                            side: ShadSheetSide.right,
-                                            isDismissible: false,
-                                            builder: (context) {
-                                              return ShadSheet(
-                                                constraints: const BoxConstraints(maxWidth: 512),
-                                                title: Text('New Strategy'),
-                                                // title: Text(widget.event.id),
-                                                closeIcon: SizedBox(),
-                                                child: Padding(
-                                                  padding: const EdgeInsets.only(bottom: 20),
-                                                  child: NewStrategyCard(
-                                                      width: 512,
-                                                      height: widget.width,
-                                                  ),
-                                                ),
-                                                // actions: [
-                                                // ],
-                                              );
-                                            }
-                                        );
-                                      },
-                                      icon: const Icon(Icons.add),
-                                      child: const Text('New Strategy'),
-                                    ),
-                                    itemBuilder: (Strategy strategy){
-                                      return Padding(
-                                        padding: const EdgeInsets.only(top: 16),
-                                        child: StrategyCard(
-                                            width: widget.width*0.8,
-                                            height: MediaQuery.of(context).size.height*0.7,
-                                            strategy: strategy),
-                                      );
-                                    }
-                                ),
+                                  ),
+                                ],
                               ),
                             ) : const Padding(
                               padding: EdgeInsets.all(8.0),
@@ -565,11 +586,6 @@ class _YamlEditorRightPanelState extends ConsumerState<YamlEditorRightPanel> {
           -500,
           false
       );
-      StrategyMarker newStrategyMarker = ref
-          .read(strategyMarkerListProvider.notifier)
-          .get()
-          .first
-          .copy();
       newEventMarker.strategyMarker = Utils.getEventStrategyMarkers(ref, event);
       ref.read(eventMarkerListProvider.notifier).add(newEventMarker);
     }

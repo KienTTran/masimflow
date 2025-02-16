@@ -99,8 +99,8 @@ class NestedMFTMultiLocationStrategy extends Strategy {
       id: newId,
       name: controllers[Utils.getFormKeyID(id, 'name')]!.text,
       strategyIds: Utils.extractIntegerList(controllers[Utils.getFormKeyID(id, 'strategy_ids')]!.text),
-      startDistributionByLocation: List<List<double>>.from(startDistributionByLocation),
-      peakDistributionByLocation: List<List<double>>.from(peakDistributionByLocation),
+      startDistributionByLocation: Utils.extractDoubleMatrix(controllers[Utils.getFormKeyID(id, 'start_distribution_by_location')]!.text),
+      peakDistributionByLocation: Utils.extractDoubleMatrix(controllers[Utils.getFormKeyID(id, 'peak_distribution_by_location')]!.text),
       peakAfter: int.parse(controllers[Utils.getFormKeyID(id, 'peak_after')]!.text),
       controllers: newControllers,
     );

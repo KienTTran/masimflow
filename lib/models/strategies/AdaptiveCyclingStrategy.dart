@@ -87,11 +87,11 @@ class AdaptiveCyclingStrategy extends Strategy {
 
     return AdaptiveCyclingStrategy(
       id: newId,
-      name: name,
-      therapyIds: List<int>.from(therapyIds),
-      triggerValue: triggerValue,
-      delayUntilActualTrigger: delayUntilActualTrigger,
-      turnOffDays: turnOffDays,
+      name: controllers[Utils.getFormKeyID(id, 'name')]!.text,
+      therapyIds: Utils.extractIntegerList(controllers[Utils.getFormKeyID(id, 'therapy_ids')]!.text),
+      triggerValue: double.parse(controllers[Utils.getFormKeyID(id, 'trigger_value')]!.text),
+      delayUntilActualTrigger: int.parse(controllers[Utils.getFormKeyID(id, 'delay_until_actual_trigger')]!.text),
+      turnOffDays: int.parse(controllers[Utils.getFormKeyID(id, 'turn_off_days')]!.text),
       controllers: newControllers,
     );
   }

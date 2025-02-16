@@ -70,9 +70,9 @@ class CyclingStrategy extends Strategy {
 
     return CyclingStrategy(
       id: newId,
-      name: name,
-      therapyIds: List<int>.from(therapyIds),
-      cyclingTime: cyclingTime,
+      name: controllers[Utils.getFormKeyID(id, 'name')]!.text,
+      therapyIds: Utils.extractIntegerList(controllers[Utils.getFormKeyID(id, 'therapy_ids')]!.text),
+      cyclingTime: int.parse(controllers[Utils.getFormKeyID(id, 'cycling_time')]!.text),
       controllers: newControllers,
     );
   }

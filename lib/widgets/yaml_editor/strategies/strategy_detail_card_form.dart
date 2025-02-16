@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:masimflow/models/strategy_parameters.dart';
 import 'package:masimflow/models/therapy.dart';
+import 'package:masimflow/providers/data_providers.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import '../../../models/strategies/strategy.dart';
+import '../../../providers/ui_providers.dart';
 import '../../../utils/form_validator.dart';
 import '../../../utils/utils.dart';
 
@@ -17,7 +19,9 @@ enum StrategyDetailCardFormType{
   doubleMatrix,
   singleTherapy,
   multipleTherapy,
+  // singleStrategy,
   multipleStrategy,
+  initialStrategy,
 }
 
 class StrategyDetailCardForm extends ConsumerStatefulWidget {
@@ -31,6 +35,7 @@ class StrategyDetailCardForm extends ConsumerStatefulWidget {
   String? typeKey = '';
   Map<int,Therapy>? therapyMap;
   StrategyParameters? strategyParameters;
+  VoidCallback? onSaved;
 
   StrategyDetailCardForm({
     required this.type,
@@ -43,6 +48,7 @@ class StrategyDetailCardForm extends ConsumerStatefulWidget {
     this.upper,
     this.therapyMap,
     this.strategyParameters,
+    this.onSaved,
   });
 
   @override
@@ -75,8 +81,12 @@ class StrategyDetailCardFormState extends ConsumerState<StrategyDetailCardForm> 
         return StrategySingleTherapyFormField(widget.therapyMap!, widget.controllerKey);
       case StrategyDetailCardFormType.multipleTherapy:
         return StrategyMultipleTherapyFormField(widget.therapyMap!, widget.controllerKey);
+      // case StrategyDetailCardFormType.singleStrategy:
+      //   return StrategySingleStrategyFormField();
       case StrategyDetailCardFormType.multipleStrategy:
         return StrategyMultipleStrategyFormField(widget.strategyParameters!,widget.controllerKey);
+      case StrategyDetailCardFormType.initialStrategy:
+        return StrategyInitialStrategyFormField(widget.strategyParameters!);
     }
   }
   
@@ -187,11 +197,7 @@ class StrategyDetailCardFormState extends ConsumerState<StrategyDetailCardForm> 
     List<int> selectedTherapyIndex = [];
     List<Therapy> selectedTherapies = [];
     try{
-      selectedTherapyIndex = widget.strategy.controllers[controllerKeyWithID]!.text
-          .replaceAll('[', '').replaceAll(']', '')
-          .split(',')
-          .map((e) => int.parse(e))
-          .toList();
+      selectedTherapyIndex = Utils.extractIntegerList(widget.strategy.controllers[controllerKeyWithID]!.text);
     }
     catch(e){
       print('Error parsing therapy ids: $e');
@@ -215,8 +221,8 @@ class StrategyDetailCardFormState extends ConsumerState<StrategyDetailCardForm> 
               initialValue: selectedTherapies.toString(),
               readOnly: true,
               controller: widget.strategy.controllers[controllerKeyWithID],
-              onSaved: (value) {
-                widget.strategy.controllers[controllerKeyWithID]!.text = value!;
+              onSubmitted: (value) {
+                widget.strategy.controllers[controllerKeyWithID]!.text = value;
                 widget.strategy.controllers[controllerKeyWithID]!.value = TextEditingValue(text: value);
               },
               validator: (value) {
@@ -228,7 +234,13 @@ class StrategyDetailCardFormState extends ConsumerState<StrategyDetailCardForm> 
               minWidth: 340,
               enabled: widget.editable,
               onChanged: (value){
-                selectedTherapyIndex.clear();selectedTherapyIndex.add(therapyMap.entries.firstWhere((element) => element.value.name == value).key);
+                if(value == null){
+                  widget.strategy.controllers[controllerKeyWithID]!.text = '[]';
+                  widget.strategy.controllers[controllerKeyWithID]!.value = TextEditingValue(text: '[]');
+                  return;
+                }
+                selectedTherapyIndex.clear();
+                selectedTherapyIndex.add(therapyMap.entries.firstWhere((element) => element.value.name == value).key);
                 selectedTherapies.clear();
                 for (var i = 0; i < selectedTherapyIndex.length; i++) {
                   selectedTherapies.add(therapyMap[selectedTherapyIndex[i]]!);
@@ -274,11 +286,7 @@ class StrategyDetailCardFormState extends ConsumerState<StrategyDetailCardForm> 
     List<int> selectedTherapyIndex = [];
     List<Therapy> selectedTherapies = [];
     try{
-      selectedTherapyIndex = widget.strategy.controllers[controllerKeyWithID]!.text
-          .replaceAll('[', '').replaceAll(']', '')
-          .split(',')
-          .map((e) => int.parse(e))
-          .toList();
+      selectedTherapyIndex = Utils.extractIntegerList(widget.strategy.controllers[controllerKeyWithID]!.text);
     }
     catch(e){
       print('Error parsing therapy ids: $e');
@@ -364,11 +372,7 @@ class StrategyDetailCardFormState extends ConsumerState<StrategyDetailCardForm> 
     List<int> selectedStrategyIndex = [];
     List<Strategy> selectedStrategies = [];
     try{
-      selectedStrategyIndex = widget.strategy.controllers[controllerKeyWithID]!.text
-          .replaceAll('[', '').replaceAll(']', '')
-          .split(',')
-          .map((e) => int.parse(e))
-          .toList();
+      selectedStrategyIndex = Utils.extractIntegerList(widget.strategy.controllers[controllerKeyWithID]!.text);
     }
     catch(e){
       print('Error parsing strategy ids: $e');
@@ -481,4 +485,114 @@ class StrategyDetailCardFormState extends ConsumerState<StrategyDetailCardForm> 
         '${Utils.getControllerKeyLabel(controllerKey)}: ${widget.strategy.controllers[controllerKeyWithID]!.text}');
   }
 
+  Widget StrategySingleStrategyFormField(){
+    ShadPopoverController controller = ShadPopoverController();
+    final templateStrategies = ref.read(strategyParametersProvider.notifier).get().strategies;
+    Strategy selectedTemplateStrategy = templateStrategies.first;
+    return SizedBox(
+      width: widget.width*0.9,
+      child: ShadSelect<String>(
+          controller: controller,
+          placeholder: const Text('Select a strategy'),
+          options: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(32, 6, 6, 6),
+              child: Text(
+                'Strategy',
+                style: ShadTheme.of(context).textTheme.muted.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: ShadTheme.of(context).colorScheme.popoverForeground,
+                ),
+                textAlign: TextAlign.start,
+              ),
+            ),
+            ...templateStrategies
+                .map((strategy){
+              final strategyKeyIndex = templateStrategies
+                  .indexWhere((element) => element.id == strategy.id);
+              return ShadOption(
+                  value: strategy.name.toString(),
+                  child: Text('$strategyKeyIndex: ${strategy.name} (${strategy.type.typeAsString})'));
+            })
+          ],
+          initialValue: templateStrategies.first.name,
+          onChanged: (value) {
+            int valueIdx = templateStrategies.indexWhere((element) => element.name == value);
+            String valueId = templateStrategies[valueIdx].id;
+            selectedTemplateStrategy = templateStrategies
+                .firstWhere((element) => element.id == valueId);
+            setState(() {
+              ref.read(updateUIProvider.notifier).update();
+            });
+          },
+          selectedOptionBuilder: (context, value){
+            return templateStrategies.map((strategy) {
+              final strategyKeyIndex = templateStrategies
+                  .indexWhere((element) => element.id == strategy.id);
+              return ShadOption(
+                  value: strategy.name.toString(),
+                  child: Text('$strategyKeyIndex: ${strategy.name} (${strategy.type.typeAsString})'));})
+                .toList()
+                .firstWhere((option) => option.value == value);
+          }),
+    );
+  }
+
+  Widget StrategyInitialStrategyFormField(StrategyParameters strategyParameter){
+    ShadPopoverController controller = ShadPopoverController();
+    final templateStrategies = ref.read(strategyParametersProvider.notifier).get().strategies;
+    Strategy selectedTemplateStrategy = templateStrategies.first;
+    return SizedBox(
+      width: widget.width,
+      child: ShadSelect<String>(
+          controller: controller,
+          placeholder: const Text('Select a strategy'),
+          options: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(32, 6, 6, 6),
+              child: Text(
+                'Strategy',
+                style: ShadTheme.of(context).textTheme.muted.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: ShadTheme.of(context).colorScheme.popoverForeground,
+                ),
+                textAlign: TextAlign.start,
+              ),
+            ),
+            ...templateStrategies
+                .map((strategy){
+              final strategyKeyIndex = templateStrategies
+                  .indexWhere((element) => element.id == strategy.id);
+              return ShadOption(
+                  value: strategy.name.toString(),
+                  child: Text('$strategyKeyIndex: ${strategy.name} (${strategy.type.typeAsString})'));
+            })
+          ],
+          initialValue: templateStrategies.first.name,
+          onChanged: (value) {
+            int valueIdx = templateStrategies.indexWhere((element) => element.name == value);
+            String valueId = templateStrategies[valueIdx].id;
+            selectedTemplateStrategy = templateStrategies
+                .firstWhere((element) => element.id == valueId);
+            setState(() {
+              strategyParameter.initialStrategyId = valueIdx;
+              ref.read(strategyParametersProvider.notifier).set(strategyParameter);
+              ref.read(configYamlFileProvider.notifier).updateYamlValueByKeyList(
+                  selectedTemplateStrategy.getInitialYamlKeyList(), valueIdx);
+              ref.read(initialStrategyProvider.notifier).set(selectedTemplateStrategy);
+              ref.read(updateUIProvider.notifier).update();
+            });
+          },
+          selectedOptionBuilder: (context, value){
+            return templateStrategies.map((strategy) {
+              final strategyKeyIndex = templateStrategies
+                  .indexWhere((element) => element.id == strategy.id);
+              return ShadOption(
+                  value: strategy.name.toString(),
+                  child: Text('$strategyKeyIndex: ${strategy.name} (${strategy.type.typeAsString})'));})
+                .toList()
+                .firstWhere((option) => option.value == value);
+          }),
+    );
+  }
 }

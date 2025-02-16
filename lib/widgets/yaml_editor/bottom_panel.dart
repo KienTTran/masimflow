@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/markers/event_marker.dart';
 import '../../models/markers/marker.dart';
+import '../../models/markers/strategy_marker.dart';
 import '../../providers/ui_providers.dart';
 import '../../models/markers/config_marker.dart';
 import '../../utils/scrollable_widget.dart';
@@ -36,7 +37,7 @@ class _YamlEditorBottomPanelState extends ConsumerState<YamlEditorBottomPanel> {
   final formKey = GlobalKey<ShadFormState>();
   bool isMarkerEditing = false;
   List<String> errorMarkerId = [];
-  var allMarkers = [];
+  List<Marker> allMarkers = [];
 
   @override
   void initState() {
@@ -47,16 +48,24 @@ class _YamlEditorBottomPanelState extends ConsumerState<YamlEditorBottomPanel> {
   @override
   Widget build(BuildContext context) {
     final updateUI = ref.watch(updateUIProvider);
-    var configMarkers = ref.watch(configMarkerListProvider);
-    var eventMarkers = ref.watch(eventMarkerListProvider);
+    List<ConfigMarker> configMarkers = ref.watch(configMarkerListProvider);
+    List<EventMarker> eventMarkers = ref.watch(eventMarkerListProvider);
+    List<StrategyMarker> strategyMarkers = ref.watch(strategyMarkerListProvider);
+    DateTime? startingDate = ref.read(dateMapProvider.notifier).getDate('starting_date');
+    DateTime? endingDate = ref.read(dateMapProvider.notifier).getDate('ending_date');
 
     allMarkers.clear();
     allMarkers.addAll(configMarkers);
     allMarkers.addAll(eventMarkers);
+    if(strategyMarkers.isNotEmpty){
+      StrategyMarker initialStrategyMarker = strategyMarkers.first;
+      allMarkers.add(initialStrategyMarker);
+    }
     for(Marker marker in allMarkers){
-      marker.setStartingDate(marker.startingDate);
-      marker.setEndingDate(marker.endingDate);
+      marker.setStartingDate(startingDate!);
+      marker.setEndingDate(endingDate!);
       if(marker is ConfigMarker){
+        // print('configMarker date: ${marker.config.date}');
         marker.setDate(marker.config.date);
         marker.updateX();
       }
@@ -77,8 +86,8 @@ class _YamlEditorBottomPanelState extends ConsumerState<YamlEditorBottomPanel> {
       allMarkers.addAll(configMarkers);
       allMarkers.addAll(eventMarkers);
       for(Marker marker in allMarkers){
-        marker.setStartingDate(marker.startingDate);
-        marker.setEndingDate(marker.endingDate);
+        marker.setStartingDate(startingDate!);
+        marker.setEndingDate(endingDate!);
         if(marker is ConfigMarker){
           marker.setDate(marker.config.date);
           marker.updateX();
@@ -87,36 +96,12 @@ class _YamlEditorBottomPanelState extends ConsumerState<YamlEditorBottomPanel> {
           marker.setDates(marker.event.dates());
           marker.updateXs();
         }
-        // if(marker is ConfigMarker){
-        //   print('configMarker ${marker.id} ${marker.config.name} ${marker.x}');
-        // }
-        // if(marker is EventMarker){
-        //   print('before sort eventMarker ${marker.event.id} ${marker.event.name} ${marker.event.controllers.keys} ${marker.event.dates} ${marker.x}');
-        // }
       }
       allMarkers.sort((a, b) => a.getSmallestX().compareTo(b.getSmallestX()));
       allMarkers.asMap().forEach((index, marker) {
         marker.updateIndex(allMarkers.length,index);
       });
-      // for(Marker marker in allMarkers){
-      //   if(marker is EventMarker){
-      //     print('after sort eventMarker ${marker.event.id} ${marker.event.name} ${marker.event.controllers.values} ${marker.x}');
-      //   }
-      // }
     }
-
-    // for(Marker marker in allMarkers){
-    //   // if(marker is ConfigMarker){
-    //   //   for(final key in marker.config.controllers.keys){
-    //   //     print('Config ${marker.config.id} ${marker.config.yamlKeyList} $key ${marker.config.controllers[key]!.text}');
-    //   //   }
-    //   // }
-    //   if(marker is EventMarker){
-    //     for(final key in marker.event.controllers.keys){
-    //       print('Bottom Event ${marker.event.id} ${marker.event.name} $key ${marker.event.controllers[key]!.text}');
-    //     }
-    //   }
-    // }
 
     return SizedBox(
       width: widget.width,
@@ -261,7 +246,7 @@ class _YamlEditorBottomPanelState extends ConsumerState<YamlEditorBottomPanel> {
     );
   }
 
-  Widget ConfigCard(ConfigMarker marker, {bool detail = false}){
+  Widget ConfigCard(ConfigMarker configMarker, {bool detail = false}){
     double cardWidth = widget.width*0.2;
     return ShadCard(
       width: cardWidth,
@@ -280,9 +265,9 @@ class _YamlEditorBottomPanelState extends ConsumerState<YamlEditorBottomPanel> {
               SizedBox(
                 width: cardWidth*0.6,
                 child: ShadInputFormField(
-                  id: marker.config.id,
-                  controller: marker.config.controllers['date'],
-                  initialValue: DateFormat('yyyy/MM/dd').format(marker.config.date),
+                  id: configMarker.config.id,
+                  controller: configMarker.config.controllers['date'],
+                  initialValue: DateFormat('yyyy/MM/dd').format(configMarker.config.date),
                   validator: (value){
                     return FormUtil.validateDate(context,value);
                   },
@@ -296,9 +281,9 @@ class _YamlEditorBottomPanelState extends ConsumerState<YamlEditorBottomPanel> {
                   onPressed: () {
                     DateTime uDate = DateTime.now();
                     try{
-                      uDate = marker.config.controllers['date']!.text.isEmpty
+                      uDate = configMarker.config.controllers['date']!.text.isEmpty
                           ? DateTime.now()
-                          : DateFormat('yyyy/MM/dd').parse(marker.config.controllers['date']!.text);
+                          : DateFormat('yyyy/MM/dd').parse(configMarker.config.controllers['date']!.text);
                     }
                     catch(e){
                       showShadDialog(context: context, builder: (context){
@@ -313,38 +298,52 @@ class _YamlEditorBottomPanelState extends ConsumerState<YamlEditorBottomPanel> {
                           ],
                         );
                       });
-                      marker.config.controllers['date']!.text = DateFormat('yyyy/MM/dd').format(marker.config.date);
+                      configMarker.config.controllers['date']!.text = DateFormat('yyyy/MM/dd').format(configMarker.config.date);
                       return;
                     }
                     final startingDate = ref.read(dateMapProvider.notifier).getDate('starting_date');
                     final endingDate = ref.read(dateMapProvider.notifier).getDate('ending_date');
-                    if(!FormUtil.checkValidDate(context, uDate, startingDate!, endingDate!, isStart: marker.isStart, isEnd: marker.isEnd)){
-                      marker.config.controllers['date']!.text = DateFormat('yyyy/MM/dd').format(marker.config.date);
+                    if(!FormUtil.checkValidDate(context, uDate, startingDate!, endingDate!, isStart: configMarker.isStart, isEnd: configMarker.isEnd)){
+                      configMarker.config.controllers['date']!.text = DateFormat('yyyy/MM/dd').format(configMarker.config.date);
                       return;
                     }
 
                     if(formKey.currentState!.validate(focusOnInvalid: true)) {
                       formKey.currentState!.save();
-                      marker.config.updateDate(uDate);
-                      marker.config.updateValue(marker.config.controllers['date']!.text);
+                      configMarker.config.updateDate(uDate);
+                      configMarker.config.updateValue(configMarker.config.controllers['date']!.text);
                       ref.read(configYamlFileProvider.notifier).updateYamlValueByKeyList(
-                          marker.config.yamlKeyList,
+                          configMarker.config.yamlKeyList,
                           DateFormat('yyyy/MM/dd').format(uDate));
-                      if(marker.isStart){
-                        marker.setStartingDate(uDate);
+                      if(configMarker.isStart){
+                        // print('starting_date $uDate');
+                        configMarker.setStartingDate(uDate);
                         ref.read(dateMapProvider.notifier).setDate('starting_date', uDate);
                       }
-                      if(marker.isEnd){
-                        marker.setEndingDate(uDate);
+                      if(configMarker.isEnd){
+                        // print('ending_date $uDate');
+                        configMarker.setEndingDate(uDate);
                         ref.read(dateMapProvider.notifier).setDate('ending_date', uDate);
                       }
-                      marker.setDate(uDate);
-                      marker.updateX();
-                      for(Marker m in allMarkers){
-                        m.setStartingDate(marker.startingDate);
-                        m.setEndingDate(marker.endingDate);
+                      configMarker.setStartingDate(startingDate);
+                      configMarker.setEndingDate(endingDate);
+                      configMarker.setDate(uDate);
+                      configMarker.updateX();
+                      for(ConfigMarker marker in ref.read(configMarkerListProvider.notifier).get()){
+                        marker.setStartingDate(configMarker.startingDate);
+                        marker.setEndingDate(configMarker.endingDate);
+                        marker.setDate(marker.config.date);
+                        marker.updateX();
+                        ref.read(configMarkerListProvider.notifier).update(marker);
+                      }
+                      var eventMarkerList = ref.read(eventMarkerListProvider.notifier).get();
+                      for(EventMarker m in eventMarkerList){
+                        m.setStartingDate(configMarker.startingDate);
+                        m.setEndingDate(configMarker.endingDate);
+                        m.strategyMarker = Utils.getEventStrategyMarkers(ref,m.event);
                         m.updateXs();
                       }
+                      ref.read(eventMarkerListProvider.notifier).set(eventMarkerList);
                       ref.read(updateUIProvider.notifier).update();
                     }
                   },
@@ -353,7 +352,7 @@ class _YamlEditorBottomPanelState extends ConsumerState<YamlEditorBottomPanel> {
             ],
           ),
           Text(
-            Utils.getCapitalizedWords(marker.config.name),
+            Utils.getCapitalizedWords(configMarker.config.name),
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 14

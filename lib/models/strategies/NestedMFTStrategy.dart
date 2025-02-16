@@ -92,11 +92,11 @@ class NestedMFTStrategy extends Strategy {
 
     return NestedMFTStrategy(
       id: newId,
-      name: name,
-      strategyIds: List<int>.from(strategyIds),
-      startDistribution: List<double>.from(startDistribution),
-      peakDistribution: List<double>.from(peakDistribution),
-      peakAfter: peakAfter,
+      name: controllers[Utils.getFormKeyID(id, 'name')]!.text,
+      strategyIds: Utils.extractIntegerList(controllers[Utils.getFormKeyID(id, 'strategy_ids')]!.text),
+      startDistribution: Utils.extractDoubleList(controllers[Utils.getFormKeyID(id, 'start_distribution')]!.text),
+      peakDistribution: Utils.extractDoubleList(controllers[Utils.getFormKeyID(id, 'peak_distribution')]!.text),
+      peakAfter: int.parse(controllers[Utils.getFormKeyID(id, 'peak_after')]!.text),
       controllers: newControllers,
     );
   }

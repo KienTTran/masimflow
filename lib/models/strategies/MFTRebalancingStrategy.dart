@@ -87,11 +87,11 @@ class MFTRebalancingStrategy extends Strategy {
 
     return MFTRebalancingStrategy(
       id: newId,
-      name: name,
-      therapyIds: List<int>.from(therapyIds),
-      distribution: List<double>.from(distribution),
-      delayUntilActualTrigger: delayUntilActualTrigger,
-      updateDurationAfterRebalancing: updateDurationAfterRebalancing,
+      name: controllers[Utils.getFormKeyID(id, 'name')]!.text,
+      therapyIds: Utils.extractIntegerList(controllers[Utils.getFormKeyID(id, 'therapy_ids')]!.text),
+      distribution: Utils.extractDoubleList(controllers[Utils.getFormKeyID(id, 'distribution')]!.text),
+      delayUntilActualTrigger: int.parse(controllers[Utils.getFormKeyID(id, 'delay_until_actual_trigger')]!.text),
+      updateDurationAfterRebalancing: int.parse(controllers[Utils.getFormKeyID(id, 'update_duration_after_rebalancing')]!.text),
       controllers: newControllers,
     );
   }

@@ -86,7 +86,7 @@ abstract class Marker extends CustomPainter {
     xs.clear();
     for(int i = 0; i < dates.length; i++){
       double totalDays = endingDate.difference(startingDate).inDays.toDouble();
-      double daysSinceStart = this.dates[i].difference(startingDate).inDays.toDouble();
+      double daysSinceStart = dates[i].difference(startingDate).inDays.toDouble();
       xs.add(daysSinceStart / totalDays);
     }
   }

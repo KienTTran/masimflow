@@ -57,15 +57,19 @@ class ConfigMarker extends Marker {
   void setDate(DateTime date) {
     checkDate(date);
     double totalDays = endingDate.difference(startingDate).inDays.toDouble();
-    double daysSinceStart = date.difference(startingDate).inDays.toDouble();
+    double daysSinceStart = this.date.difference(startingDate).inDays.toDouble();
     xs.add(daysSinceStart / totalDays);
   }
 
   void updateX() {
+    // print('updateX name: ${config.name}');
+    // print('updateXs startingDate: $startingDate');
+    // print('updateXs endingDate: $endingDate');
     xs.clear();
     double totalDays = endingDate.difference(startingDate).inDays.toDouble();
     double daysSinceStart = date.difference(startingDate).inDays.toDouble();
     xs.add(daysSinceStart / totalDays);
+    // print('xs: $xs');
   }
 
   @override

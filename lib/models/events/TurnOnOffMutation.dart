@@ -294,6 +294,7 @@ class TurnOnMutationState extends EventWidgetRenderState<TurnOnMutation> {
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ShadForm(
           key: widget.formKey,

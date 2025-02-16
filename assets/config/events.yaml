@@ -37,11 +37,9 @@ population_events:
   - name: change_treatment_strategy
     info:
       - date: 2007/3/2
-        strategy_id: 0
+        strategy_id: 3
       - date: 2017/6/2
         strategy_id: 3
-      - date: 2027/9/2
-        strategy_id: 4
 
   - name: single_round_MDA
     info:

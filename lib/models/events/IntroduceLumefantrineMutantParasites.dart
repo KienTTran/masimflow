@@ -130,6 +130,7 @@ class IntroduceLumefantrineMutantParasitesState extends EventState<IntroduceLume
         key: widget.formKey,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             for (int i = 0; i < widget.parasiteInfo.length; i++)
               ...[

@@ -133,6 +133,7 @@ class SingleRoundMDAState extends EventState<SingleRoundMDA> {
         key: widget.formKey,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             for (int i = 0; i < widget.mdaDetails.length; i++)
               ...[

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:uuid/uuid.dart';
 import 'package:yaml/yaml.dart';
 import 'package:flutter/material.dart';
 
@@ -53,7 +54,6 @@ final eventDisplayMapProvider = NotifierProvider<EventMapProvider, Map<String,Ev
 });
 
 class StrategyMapProvider extends Notifier<Map<String,Strategy>> {
-
   void set(Map<String,Strategy> data) {
     state = data;
   }
@@ -108,6 +108,10 @@ class ConfigMarkerListNotifier extends Notifier<List<ConfigMarker>> {
 
   void delete(ConfigMarker marker) {
     state.remove(marker);
+  }
+
+  void update(ConfigMarker marker) {
+    state[state.indexWhere((element) => element.id == marker.id)] = marker;
   }
 
   @override
@@ -414,4 +418,28 @@ class ConfigYamlFileNotifier extends Notifier<YamlMap> {
 
 final configYamlFileProvider = NotifierProvider<ConfigYamlFileNotifier, YamlMap>(() {
   return ConfigYamlFileNotifier();
+});
+
+class StrategyProvider extends Notifier<Strategy> {
+
+  void set(Strategy strategy) {
+    state = strategy;
+  }
+
+  Strategy get() {
+    return state;
+  }
+
+  @override
+  build() {
+    return BaseStrategy(
+        id: Uuid().v4(),
+        name: 'Base Strategy',
+        type: StrategyType.Base,
+        controllers: {});
+  }
+}
+
+final initialStrategyProvider = NotifierProvider<StrategyProvider, Strategy>(() {
+  return StrategyProvider();
 });

@@ -26,8 +26,6 @@ class _YamlEditorCenterPanelState extends ConsumerState<YamlEditorCenterPanel> {
   double endingTimeX = 0.0;
   double compareTimeX = 0.0;
   var mutYamlMap;
-
-  bool isDown = false;
   double x = 0.0;
   double y = 0.0;
 
@@ -48,6 +46,15 @@ class _YamlEditorCenterPanelState extends ConsumerState<YamlEditorCenterPanel> {
     var configMarkerList = ref.watch(configMarkerListProvider);
     var strategyMarkerList = ref.watch(strategyMarkerListProvider);
     var eventMarkerList = ref.watch(eventMarkerListProvider);
+
+    bool updateUI = ref.read(updateUIProvider.notifier).get();
+    if(updateUI){
+      setState(() {
+        lowerX = widget.width * 0.1;
+        upperX = widget.width * 0.9;
+        eventMarkerList = ref.read(eventMarkerListProvider.notifier).get();
+      });
+    }
 
     if(configMarkerList.isEmpty){
       return Container();
@@ -121,11 +128,22 @@ class ShapePainter extends CustomPainter {
       marker.paint(canvas, size);
     }
 
-    final strategyMarkerLineY = size.height * 0.75;
+    final strategyMarkerLineY = size.height * 0.65;
 
     canvas.drawLine(
         Offset(lowerX,strategyMarkerLineY),
         Offset(upperX,strategyMarkerLineY),
+        Paint()..color = Colors.black);
+    // canvas.drawCircle(
+    //     Offset(lowerX,strategyMarkerLineY),
+    //     10,
+    //     Paint()..color = Colors.red);
+    // canvas.drawCircle(
+    //     Offset(upperX,strategyMarkerLineY),
+    //     10,
+    //     Paint()..color = Colors.red);
+    canvas.drawRect(
+        Rect.fromCenter(center: Offset(upperX,strategyMarkerLineY), width: 10, height: 10),
         Paint()..color = Colors.black);
 
     for(final marker in strategyMarkerList) {
