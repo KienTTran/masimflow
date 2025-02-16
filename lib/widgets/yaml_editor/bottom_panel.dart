@@ -329,13 +329,13 @@ class _YamlEditorBottomPanelState extends ConsumerState<YamlEditorBottomPanel> {
                       configMarker.setEndingDate(endingDate);
                       configMarker.setDate(uDate);
                       configMarker.updateX();
-                      for(ConfigMarker marker in ref.read(configMarkerListProvider.notifier).get()){
-                        marker.setStartingDate(configMarker.startingDate);
-                        marker.setEndingDate(configMarker.endingDate);
-                        marker.setDate(marker.config.date);
-                        marker.updateX();
-                        ref.read(configMarkerListProvider.notifier).update(marker);
-                      }
+                      // for(ConfigMarker marker in ref.read(configMarkerListProvider.notifier).get()){
+                      //   marker.setStartingDate(configMarker.startingDate);
+                      //   marker.setEndingDate(configMarker.endingDate);
+                      //   marker.setDate(marker.config.date);
+                      //   marker.updateX();
+                      //   ref.read(configMarkerListProvider.notifier).update(marker);
+                      // }
                       var eventMarkerList = ref.read(eventMarkerListProvider.notifier).get();
                       for(EventMarker m in eventMarkerList){
                         m.setStartingDate(configMarker.startingDate);
