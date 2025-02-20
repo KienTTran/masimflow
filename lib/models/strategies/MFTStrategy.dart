@@ -127,7 +127,7 @@ class MFTStrategyState extends StrategyState<MFTStrategy> {
               width: widget.formWidth * 0.85,
               editable: widget.formEditable,
               controllerKey: 'therapy_ids',
-              therapyMap: ref.read(therapyMapProvider.notifier).get()
+              therapyMap: ref.read(therapyTemplateMapProvider.notifier).get()
             ),
             StrategyDetailCardForm(
               type: StrategyDetailCardFormType.doubleArray,

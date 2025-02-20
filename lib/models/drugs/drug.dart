@@ -1,7 +1,9 @@
+import 'package:uuid/uuid.dart';
 import 'package:yaml/yaml.dart';
 
 /// Represents a drug with various parameters parsed from YAML.
 class Drug {
+  final String id;
   final String name;
   final double halfLife;
   final double maximumParasiteKillingRate;
@@ -10,8 +12,10 @@ class Drug {
   final List<double>? ageSpecificDrugAbsorption;
   final int k;
   final double baseEC50;
+  late int initialIndex = 0;
 
   Drug({
+    required this.id,
     required this.name,
     required this.halfLife,
     required this.maximumParasiteKillingRate,
@@ -27,6 +31,7 @@ class Drug {
   /// The [yaml] parameter should be a map representing a single drug's data.
   factory Drug.fromYaml(Map<dynamic, dynamic> yaml) {
     return Drug(
+      id: Uuid().v4(),
       name: yaml['name'] as String,
       halfLife: (yaml['half_life'] as num).toDouble(),
       maximumParasiteKillingRate:
@@ -53,24 +58,26 @@ class Drug {
 
 class DrugParser {
   /// Throws a [FormatException] if the expected nodes are missing.
-  static Map<int, Drug> parseFromYamlMap(YamlMap yaml) {
+  static Map<String, Drug> parseFromYamlMap(YamlMap yaml) {
     // Parse each drug entry.
-    final Map<int, Drug> drugs = {};
+    final Map<String, Drug> drugs = {};
     yaml.forEach((key, value) {
       // The key should be convertible to an int.
-      final int id = int.tryParse(key.toString()) ??
+      final int initialIndex = int.tryParse(key.toString()) ??
           (throw FormatException('Invalid drug id: $key'));
       // Parse each drug using the Drug.fromYaml factory constructor.
+      final id = Uuid().v4();
       drugs[id] = Drug.fromYaml(value);
+      drugs[id]!.initialIndex = initialIndex;
     });
 
     return drugs;
   }
 
-  /// Parses a YAML string into a [Map<int, Drug>].
+  /// Parses a YAML string into a [Map<String,Drug>].
   ///
   /// The [yamlString] should contain the YAML data with the expected structure.
-  static Map<int, Drug> parseFromString(String yamlString) {
+  static Map<String, Drug> parseFromString(String yamlString) {
     // Load the YAML string into a YamlMap.
     final dynamic yaml = loadYaml(yamlString);
     if (yaml is! YamlMap) {

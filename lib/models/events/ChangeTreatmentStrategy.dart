@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:masimflow/models/strategy_parameters.dart';
+import 'package:masimflow/models/strategies/strategy_parameters.dart';
 import 'package:masimflow/providers/data_providers.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:uuid/uuid.dart';

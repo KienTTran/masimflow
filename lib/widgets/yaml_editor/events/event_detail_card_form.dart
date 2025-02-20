@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:masimflow/models/strategies/strategy.dart';
-import 'package:masimflow/models/strategy_parameters.dart';
-import 'package:masimflow/models/therapy.dart';
+import 'package:masimflow/models/strategies/strategy_parameters.dart';
+import 'package:masimflow/models/therapies/therapy.dart';
 import 'package:masimflow/widgets/yaml_editor/strategies/strategy_detail_card_form.dart';
 import 'package:searchable_listview/searchable_listview.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
@@ -276,7 +276,7 @@ class EventDetailCardFormState extends ConsumerState<EventDetailCardForm>{
         .indexWhere((strategy) => strategy.id == strategyParameters.strategyDb[int.parse(widget.event.controllers[controllerKeyWithID]!.text)]!.id);
     final initialStrategy = strategyParameters.strategies[initialStrategyKeyIndex];
     ShadPopoverController controller = ShadPopoverController();
-    currentStrategyTherapies = Utils.getTherapies(ref.read(therapyMapProvider.notifier).get(), strategyParameters, initialStrategy);
+    currentStrategyTherapies = Utils.getTherapies(ref.read(therapyTemplateMapProvider.notifier).get(), strategyParameters, initialStrategy);
     return widget.editable ? SizedBox(
       width: widget.width*0.9,
       child: Column(
@@ -318,7 +318,7 @@ class EventDetailCardFormState extends ConsumerState<EventDetailCardForm>{
                   setState(() {
                     widget.event.controllers[controllerKeyWithID]!.text = strategyKeyIndex.toString();
                     widget.event.controllers[controllerKeyWithID]!.value = TextEditingValue(text: strategyKeyIndex.toString());
-                    currentStrategyTherapies = Utils.getTherapies(ref.read(therapyMapProvider.notifier).get(),
+                    currentStrategyTherapies = Utils.getTherapies(ref.read(therapyTemplateMapProvider.notifier).get(),
                         strategyParameters, strategyParameters.strategies[strategyKeyIndex]);
                     currentStrategy = strategyParameters.strategies[strategyKeyIndex];
                     ref.read(updateUIProvider.notifier).update();

@@ -6,7 +6,7 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 import '../../../models/events/event.dart';
 import '../../../models/markers/event_marker.dart';
 import '../../../models/strategies/strategy.dart';
-import '../../../models/therapy.dart';
+import '../../../models/therapies/therapy.dart';
 import '../../../providers/data_providers.dart';
 import '../../../utils/form_validator.dart';
 import '../../../utils/utils.dart';

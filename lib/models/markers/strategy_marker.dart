@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:masimflow/models/markers/marker.dart';
 import 'package:masimflow/models/strategies/strategy.dart';
-import 'package:masimflow/models/strategy_parameters.dart';
-import 'package:masimflow/models/therapy.dart';
+import 'package:masimflow/models/strategies/strategy_parameters.dart';
+import 'package:masimflow/models/therapies/therapy.dart';
 import '../../utils/utils.dart';
-import '../drug.dart';
+import '../drugs/drug.dart';
 
 class StrategyMarker extends Marker {
   final bool isStart;
   final bool isEnd;
   final StrategyParameters strategyParameters;
-  final Map<int, Therapy> therapies;
-  final Map<int, Drug> drugs;
+  final Map<String,Therapy> therapies;
+  final Map<String,Drug> drugs;
   final String text;
   late List<(int, DateTime,double,String)> strategyIdDateXLabelMapList;
   late List<(String, DateTime,double)> labelDateXMapList;
@@ -121,7 +121,7 @@ class StrategyMarker extends Marker {
       strategyName = strategyParameters.strategyDb[strategyId]!.name;
     }
     for(int therapyId in therapyIds){
-      therapyNames.add('${therapies[therapyId]!.name}');
+      therapyNames.add('${therapies.values.elementAt(therapyId).name}');
     }
     int strategyIndex = 1;
     if(strategyIdDateXLabelMap.$4.isNotEmpty){

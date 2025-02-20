@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:masimflow/models/strategy_parameters.dart';
+import 'package:masimflow/models/strategies/strategy_parameters.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:uuid/uuid.dart';
 
@@ -15,7 +15,7 @@ import '../models/strategies/NestedMFTMultiLocationStrategy.dart';
 import '../models/strategies/NestedMFTStrategy.dart';
 import '../models/strategies/SFTStrategy.dart';
 import '../models/strategies/strategy.dart';
-import '../models/therapy.dart';
+import '../models/therapies/therapy.dart';
 import '../providers/data_providers.dart';
 
 class Utils {
@@ -253,9 +253,9 @@ class Utils {
     return [];
   }
 
-  static List<Therapy> getTherapies(Map<int,Therapy> therapyMap,StrategyParameters strategyParameters,Strategy strategy) {
+  static List<Therapy> getTherapies(Map<String,Therapy> therapyMap,StrategyParameters strategyParameters,Strategy strategy) {
     List<int> therapyIndex = getTherapyIndex(strategyParameters,strategy);
-    return therapyIndex.map((e) => therapyMap[e]!).toList();
+    return therapyIndex.map((e) => therapyMap.values.firstWhere((element) => element.initialIndex == e)).toList();
   }
 
   static StrategyMarker getEventStrategyMarkers(WidgetRef ref,Event newEvent){
@@ -337,7 +337,7 @@ class Utils {
         // }
       }
       for(var cyclingTherapyIndex in cyclingTherapyIndex){
-        cyclingTherapies.add(cyclingTherapyIndex.map((e) => ref.read(therapyMapProvider.notifier).get()[e]!).toList());
+        cyclingTherapies.add(cyclingTherapyIndex.map((e) => ref.read(therapyTemplateMapProvider.notifier).getTherapyByIndex(e)!).toList());
       }
       List<List<(String,DateTime)>> finalCycleDates = [];
       for(var i = 0; i < cyclingDates.length; i++){

@@ -4,14 +4,14 @@ import 'package:uuid/uuid.dart';
 import 'package:yaml/yaml.dart';
 import 'package:flutter/material.dart';
 
-import '../models/drug.dart';
+import '../models/drugs/drug.dart';
 import '../models/events/event.dart';
 import '../models/markers/config_marker.dart';
 import '../models/markers/event_marker.dart';
 import '../models/markers/strategy_marker.dart';
 import '../models/strategies/strategy.dart';
-import '../models/strategy_parameters.dart';
-import '../models/therapy.dart';
+import '../models/strategies/strategy_parameters.dart';
+import '../models/therapies/therapy.dart';
 
 class EventMapProvider extends Notifier<Map<String,Event>> {
 
@@ -185,14 +185,22 @@ final strategyMarkerListProvider = NotifierProvider<StrategyMarkerListNotifier, 
   return StrategyMarkerListNotifier();
 });
 
-class DrugMapNotifier extends Notifier<Map<int,Drug>> {
+class DrugMapNotifier extends Notifier<Map<String,Drug>> {
 
-  void set(Map<int,Drug> data) {
+  void set(Map<String,Drug> data) {
     state = data;
   }
 
-  Map<int,Drug> get() {
+  Map<String,Drug> get() {
     return state;
+  }
+
+  void setDrug(String id, Drug drug) {
+    state[id] = drug;
+  }
+
+  Drug? getDrug(String id) {
+    return state[id];
   }
 
   @override
@@ -201,18 +209,38 @@ class DrugMapNotifier extends Notifier<Map<int,Drug>> {
   }
 }
 
-final drugMapProvider = NotifierProvider<DrugMapNotifier, Map<int,Drug>>(() {
+final drugMapProvider = NotifierProvider<DrugMapNotifier, Map<String,Drug>>(() {
   return DrugMapNotifier();
 });
 
-class TherapyMapNotifier extends Notifier<Map<int,Therapy>> {
 
-  void set(Map<int,Therapy> data) {
+class TherapyMapProvider extends Notifier<Map<String,Therapy>> {
+  void set(Map<String,Therapy> data) {
     state = data;
   }
 
-  Map<int,Therapy> get() {
+  Map<String,Therapy> get() {
     return state;
+  }
+
+  void setTherapy(String id, Therapy therapy) {
+    state[id] = therapy;
+  }
+
+  Therapy? getTherapy(String id) {
+    return state[id];
+  }
+
+  Therapy? getTherapyByIndex(int index) {
+    return state.values.elementAt(index);
+  }
+
+  void clear() {
+    state.clear();
+  }
+
+  void deleteTherapyID(String id) {
+    state.remove(id);
   }
 
   @override
@@ -221,8 +249,12 @@ class TherapyMapNotifier extends Notifier<Map<int,Therapy>> {
   }
 }
 
-final therapyMapProvider = NotifierProvider<TherapyMapNotifier, Map<int,Therapy>>(() {
-  return TherapyMapNotifier();
+final therapyTemplateMapProvider = NotifierProvider<TherapyMapProvider, Map<String,Therapy>>(() {
+  return TherapyMapProvider();
+});
+
+final therapyDisplayMapProvider = NotifierProvider<TherapyMapProvider, Map<String,Therapy>>(() {
+  return TherapyMapProvider();
 });
 
 

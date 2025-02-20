@@ -1,8 +1,8 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:masimflow/models/strategy_parameters.dart';
-import 'package:masimflow/models/therapy.dart';
+import 'package:masimflow/models/strategies/strategy_parameters.dart';
+import 'package:masimflow/models/therapies/therapy.dart';
 import 'package:masimflow/providers/data_providers.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import '../../../models/strategies/strategy.dart';
@@ -33,7 +33,7 @@ class StrategyDetailCardForm extends ConsumerStatefulWidget {
   double? lower = -1.0;
   double? upper = -1.0;
   String? typeKey = '';
-  Map<int,Therapy>? therapyMap;
+  Map<String,Therapy>? therapyMap;
   StrategyParameters? strategyParameters;
   VoidCallback? onSaved;
 
@@ -192,7 +192,7 @@ class StrategyDetailCardFormState extends ConsumerState<StrategyDetailCardForm> 
     ) : Text('${Utils.getControllerKeyLabel(controllerKey)}: ${widget.strategy.controllers[controllerKeyWithID]!.text}');
   }
 
-  Widget StrategySingleTherapyFormField(Map<int,Therapy> therapyMap,String controllerKey){
+  Widget StrategySingleTherapyFormField(Map<String,Therapy> therapyMap,String controllerKey){
     String controllerKeyWithID = Utils.getFormKeyID(widget.strategy.id, controllerKey);
     List<int> selectedTherapyIndex = [];
     List<Therapy> selectedTherapies = [];
@@ -203,7 +203,8 @@ class StrategyDetailCardFormState extends ConsumerState<StrategyDetailCardForm> 
       print('Error parsing therapy ids: $e');
     }
     for (var i = 0; i < selectedTherapyIndex.length; i++) {
-      selectedTherapies.add(therapyMap[selectedTherapyIndex[i]]!);
+      Therapy therapy = therapyMap.values.firstWhere((element) => element.initialIndex == selectedTherapyIndex[i]);
+      selectedTherapies.add(therapy);
     }
     ShadPopoverController controller = ShadPopoverController();
     return widget.editable ? SizedBox(
@@ -240,10 +241,12 @@ class StrategyDetailCardFormState extends ConsumerState<StrategyDetailCardForm> 
                   return;
                 }
                 selectedTherapyIndex.clear();
-                selectedTherapyIndex.add(therapyMap.entries.firstWhere((element) => element.value.name == value).key);
+                int therapyIndex = therapyMap.values.firstWhere((element) => element.name == value).initialIndex;
+                selectedTherapyIndex.add(therapyIndex);
                 selectedTherapies.clear();
                 for (var i = 0; i < selectedTherapyIndex.length; i++) {
-                  selectedTherapies.add(therapyMap[selectedTherapyIndex[i]]!);
+                  Therapy therapy = therapyMap.values.firstWhere((element) => element.initialIndex == selectedTherapyIndex[i]);
+                  selectedTherapies.add(therapy);
                 }
                 widget.strategy.controllers[controllerKeyWithID]!.text = selectedTherapyIndex.toString();
                 widget.strategy.controllers[controllerKeyWithID]!.value = TextEditingValue(text: selectedTherapyIndex.toString());
@@ -281,7 +284,7 @@ class StrategyDetailCardFormState extends ConsumerState<StrategyDetailCardForm> 
     ) : Text('${Utils.getControllerKeyLabel(controllerKey)}: ${widget.strategy.controllers[controllerKeyWithID]!.text}');
   }
 
-  Widget StrategyMultipleTherapyFormField(Map<int,Therapy> therapyMap,String controllerKey){
+  Widget StrategyMultipleTherapyFormField(Map<String,Therapy> therapyMap,String controllerKey){
     String controllerKeyWithID = Utils.getFormKeyID(widget.strategy.id, controllerKey);
     List<int> selectedTherapyIndex = [];
     List<Therapy> selectedTherapies = [];
@@ -292,7 +295,8 @@ class StrategyDetailCardFormState extends ConsumerState<StrategyDetailCardForm> 
       print('Error parsing therapy ids: $e');
     }
     for (var i = 0; i < selectedTherapyIndex.length; i++) {
-      selectedTherapies.add(therapyMap[selectedTherapyIndex[i]]!);
+      Therapy therapy = therapyMap.values.firstWhere((element) => element.initialIndex == selectedTherapyIndex[i]);
+      selectedTherapies.add(therapy);
     }
     ShadPopoverController controller = ShadPopoverController();
     return widget.editable ? SizedBox(
@@ -325,11 +329,12 @@ class StrategyDetailCardFormState extends ConsumerState<StrategyDetailCardForm> 
               onChanged: (value){
                 selectedTherapyIndex.clear();
                 for (var i = 0; i < value.length; i++) {
-                  selectedTherapyIndex.add(therapyMap.entries.firstWhere((element) => element.value.name == value[i]).key);
+                  selectedTherapyIndex.add(therapyMap.values.firstWhere((element) => element.name == value[i]).initialIndex);
                 }
                 selectedTherapies.clear();
                 for (var i = 0; i < selectedTherapyIndex.length; i++) {
-                  selectedTherapies.add(therapyMap[selectedTherapyIndex[i]]!);
+                  Therapy therapy = therapyMap.values.firstWhere((element) => element.initialIndex == selectedTherapyIndex[i]);
+                  selectedTherapies.add(therapy);
                 }
                 widget.strategy.controllers[controllerKeyWithID]!.text = selectedTherapyIndex.toString();
                 widget.strategy.controllers[controllerKeyWithID]!.value = TextEditingValue(text: selectedTherapyIndex.toString());

@@ -146,7 +146,7 @@ class AdaptiveCyclingStrategyState extends StrategyState<AdaptiveCyclingStrategy
               editable: widget.formEditable,
               width: widget.formWidth * 0.85,
               strategy: widget,
-              therapyMap: ref.read(therapyMapProvider.notifier).get()
+              therapyMap: ref.read(therapyTemplateMapProvider.notifier).get()
             ),
             StrategyDetailCardForm(
               type: StrategyDetailCardFormType.double,

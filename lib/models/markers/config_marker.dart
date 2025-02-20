@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:masimflow/models/config.dart';
+import 'package:masimflow/models/configs/config.dart';
 import 'package:masimflow/models/markers/marker.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:uuid/uuid.dart';
